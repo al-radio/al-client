@@ -3,3 +3,4 @@ pydub
 python-vlc
 spotdl
 openai
+flask

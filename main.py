@@ -9,11 +9,9 @@ from google.cloud import texttospeech
 
 from pydub import AudioSegment
 from datetime import datetime
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 
 from keys import *
-
-
 
 class MediaGatherer:
 
@@ -79,17 +77,18 @@ class HostPrompt:
         self.max_tokens = 110
 
     def get_completion(self, song_info: dict[str, str]) -> str:
-        prompt = f"A Toronto radio station called AL Radio is about to play the song \"{song_info['track']}\" by \"{song_info['artist']}\". The song came out in {song_info['release_year']} on an album titled \"{song_info['album']}\". The song's genre is {song_info['genre']}. This is what a radio host for AL Radio would say to the audience, speaking to the tone of {song_info['genre']}, before playing this song."
-        response = openai.Completion.create(engine=self.engine, prompt=prompt, temperature=self.temperature, max_tokens=self.max_tokens)
+        # prompt = f"A Toronto radio station called AL Radio is about to play the song \"{song_info['track']}\" by \"{song_info['artist']}\". The song came out in {song_info['release_year']} on an album titled \"{song_info['album']}\". The song's genre is {song_info['genre']}. This is what a radio host for AL Radio would say to the audience, speaking to the tone of {song_info['genre']}, before playing this song."
+        # response = openai.Completion.create(engine=self.engine, prompt=prompt, temperature=self.temperature, max_tokens=self.max_tokens)
 
-        if song_info["track"] and song_info["artist"] not in response['choices'][0]['text']:
-            response['choices'][0]['text'] = response['choices'][0]['text'][:-1] + f" {song_info['track']} by {song_info['artist']}, right now.\""
+        # if song_info["track"] and song_info["artist"] not in response['choices'][0]['text']:
+        #     response['choices'][0]['text'] = response['choices'][0]['text'][:-1] + f" {song_info['track']} by {song_info['artist']}, right now.\""
         
-        global TOKENS_USED
-        TOKENS_USED += response['usage']['total_tokens']
-        print(f"{Fore.LIGHTBLUE_EX}Tokens used:{Style.RESET_ALL} {TOKENS_USED} ::: {Fore.LIGHTRED_EX}Estimated Cost: {Style.RESET_ALL}${round(TOKENS_USED / 1000 * 0.002, 4)}")
+        # global TOKENS_USED
+        # TOKENS_USED += response['usage']['total_tokens']
+        # print(f"{Fore.LIGHTBLUE_EX}Tokens used:{Style.RESET_ALL} {TOKENS_USED} ::: {Fore.LIGHTRED_EX}Estimated Cost: {Style.RESET_ALL}${round(TOKENS_USED / 1000 * 0.002, 4)}")
         
-        return response['choices'][0]['text']
+        # return response['choices'][0]['text']
+        return "This is a test"
 
 class TTS:
 
@@ -155,14 +154,14 @@ class SongDownloader:
         tts = AudioSegment.from_mp3(date + "tts.mp3")
         combined = tts + song
         filename = "./media/" + date + f"$delim${self.track} - {self.artist}.mp3"
-        combined.export(filename, format="mp3")
+        combined.export(filename, format="mp3", bitrate="192k")
         # remove the files
         os.remove(date + "song.mp3")
         os.remove(date + "tts.mp3")
         return filename
     
 
-def download_and_add_to_queue():
+def download_and_add_to_queue(spotify: MediaGatherer):
     song = RECOMMENDATION_QUEUE.pop(0)
     print(f"{Fore.RED}Downloading:{Style.RESET_ALL} " + song)
     song_info = spotify.get_song_info(song)
@@ -170,6 +169,7 @@ def download_and_add_to_queue():
     host_prompt = HostPrompt()
     speech = host_prompt.get_completion(song_info)
     filename = song_downloader.download_combine(speech)
+    global SONG_QUEUE
     if filename:
         SONG_QUEUE.append(filename)
     print(f"{Fore.BLUE}Downloaded:{Style.RESET_ALL} {song_info['track']} by {song_info['artist']}")
@@ -180,36 +180,51 @@ def wait_for_play(filename):
     # get song length from file
     song = AudioSegment.from_mp3(filename)
     song_length = len(song) / 1000
+    # store the time the song started
+    start_time = time.time()
+    os.environ['TIME_STARTED'] = str(start_time)
     time.sleep(song_length)
+    
     title = filename.split("$delim$")[1].replace(".mp3", "")
     print(f"{Fore.CYAN}Finished Playing:{Style.RESET_ALL} " + title)
     global SONGS_PLAYED
     SONGS_PLAYED += 1
     print(f"{Fore.MAGENTA}Songs Played:{Style.RESET_ALL} {SONGS_PLAYED}")
     os.remove(filename)
+    os.environ['NOW_PLAYING'] = ""
     global CURRENTLY_PLAYING
     CURRENTLY_PLAYING = False
 
-def get_new_recs():
+def get_new_recs(spotify: MediaGatherer):
     artist_seed = ["5FwydyGVcsQllnM4xM6jw4", "6AX5hnjYSvcjZd9IyqYPsp", "0MkAzpDHUZpuDnWGUII4RN", "13rS3lCWshTVt6HsCNjvBI", "72cBWuYjXkWxEXqZcoH5kE"]
     track_seed = ["3hVlV66Z3PfvXwIYOTeZdi", "51R5mPcJjOnfv9lKY1u5sW", "59apounXrrY20vdeMk00SJ", "547Io2VkgfeN4SPRMiDGRt", "4omurqpm7aWH9VVz2Ii4yO"]
     recs = spotify.get_recommendations(artist_seed, track_seed)
+    global RECOMMENDATION_QUEUE
     for recommendation in recs:
         RECOMMENDATION_QUEUE.append(recommendation['name'] + " " + recommendation['artists'][0]['name'])
     print(f"{Fore.LIGHTYELLOW_EX}Got new recommendations!{Style.RESET_ALL}")
     global GATHERING_RECS
     GATHERING_RECS = False
 
-if __name__ == "__main__":
+def main():
+    os.environ['NOW_PLAYING'] = ""
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gtts.json"
     openai.api_key = OPENAI_KEY
     spotify = MediaGatherer("gsherman27", "2df7fbe926664abf83f560e5b78814e2", SPOTIFY_KEY, "http://google.com/")
 
+    global RECOMMENDATION_QUEUE
+    global SONG_QUEUE
     RECOMMENDATION_QUEUE = []
     SONG_QUEUE = []
     
-    get_new_recs()
+    get_new_recs(spotify)
+
+    global CURRENTLY_DOWNLOADING
+    global CURRENTLY_PLAYING
+    global GATHERING_RECS
+    global SONGS_PLAYED
+    global TOKENS_USED
 
     CURRENTLY_DOWNLOADING = 0
     CURRENTLY_PLAYING = False
@@ -219,19 +234,22 @@ if __name__ == "__main__":
 
 
     while True:
-        if len(SONG_QUEUE) < 2 and CURRENTLY_DOWNLOADING < 2:
+        if len(SONG_QUEUE) < 1 and CURRENTLY_DOWNLOADING < 1:
             CURRENTLY_DOWNLOADING += 1
             time.sleep(1)
-            threading.Thread(target=download_and_add_to_queue).start()
+            threading.Thread(target=download_and_add_to_queue, args=(spotify,)).start()
         
         if len(SONG_QUEUE) > 0 and not CURRENTLY_PLAYING:
             CURRENTLY_PLAYING = True
             song = SONG_QUEUE.pop(0)
             title = song.split("$delim$")[1].replace(".mp3", "")
             print(f"{Fore.GREEN}Playing:{Style.RESET_ALL} " + title)
-            subprocess.Popen(["vlc", "--play-and-exit", "-Idummy", song],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT)
+
+            os.environ["NOW_PLAYING"] = song
+            # subprocess.Popen(["vlc", "--play-and-exit", "-Idummy", song],
+            #     stdout=subprocess.DEVNULL,
+            #     stderr=subprocess.STDOUT)
+
             threading.Thread(target=wait_for_play, args=(song,)).start()
         
         if len(RECOMMENDATION_QUEUE) < 4 and not GATHERING_RECS:
