@@ -1,0 +1,5 @@
+spotipy
+pydub
+python-vlc
+spotdl
+openai

@@ -87,12 +87,12 @@ def combine_tts_song(song_info: dict[str, str]) -> str:
     combined = tts_file + song_file
 
     now = datetime.now()
-    combined.export(f"{song_info['track']} - {song_info['artist']} {now}.mp3", format="mp3")
+    combined.export(f"./media/{song_info['track']} - {song_info['artist']} {now}.mp3", format="mp3")
 
     os.remove("tts.mp3")
     os.remove(f"{song_info['artist']} - {song_info['track']}.mp3")
 
-    return f"{song_info['track']} - {song_info['artist']} {now}.mp3"
+    return f"./media/{song_info['track']} - {song_info['artist']} {now}.mp3"
 
 def gather_recs():
     artist_seed = spotifyObject.recommendations(seed_artists=["5FwydyGVcsQllnM4xM6jw4", "6AX5hnjYSvcjZd9IyqYPsp", "0MkAzpDHUZpuDnWGUII4RN", "13rS3lCWshTVt6HsCNjvBI", "72cBWuYjXkWxEXqZcoH5kE"], limit=15)
@@ -205,6 +205,7 @@ if __name__ == "__main__":
             print("Song finished")
             os.remove(song)
             os._exit(0)
+            
         elif p > 0:
             pid, sts = os.waitpid(p, os.WNOHANG)
             # check the exit code of the child process to see if it has finished
