@@ -5,30 +5,35 @@ import json
 
 host_name = socket.gethostname()
 host_ip = socket.gethostbyname(host_name)
-print(host_ip)
 port = 5000
+meta_port = 5001
+
 
 SOCKETS = []
+META_SOCKETS = []
+META_SENT = set()
 
-def gather_sockets(server_socket, BUFF_SIZE):
+def gather_sockets(server_socket, BUFF_SIZE, meta=False):
     
     while True:
         _, addr = server_socket.recvfrom(BUFF_SIZE)
-        if addr not in SOCKETS:
+        if not meta and addr not in SOCKETS:
             SOCKETS.append(addr)
             print("new socket", addr)
+        elif meta and addr not in META_SOCKETS:
+            META_SOCKETS.append(addr)
+            print("new meta socket", addr)
 
-def send_data_to_sockets(server_socket, data):
-    for addr in SOCKETS:
-        server_socket.sendto(data, addr)
-
-def close_unused_sockets():
-    while True:
+def send_data_to_sockets(server_socket, data, meta=False):
+    if not meta:
         for addr in SOCKETS:
-            if addr not in alradio.CONNECTIONS:
-                SOCKETS.remove(addr)
-                print("removed socket", addr)
-        time.sleep(10)
+            server_socket.sendto(data, addr)
+    else:
+        for addr in META_SOCKETS:
+            if addr not in META_SENT and data != "":
+                server_socket.sendto(data.encode(), addr)
+                META_SENT.add(addr)
+
 
 def audio_stream_UDP():
     BUFF_SIZE = 65536
@@ -46,10 +51,6 @@ def audio_stream_UDP():
         while str(os.environ.get('NOW_PLAYING', "")) == "":
             pass
         filename = str(os.environ.get('NOW_PLAYING'))
-        song_data = str(os.environ.get('NOW_PLAYING_DATA'))
-        song_data = json.loads(song_data)
-        print(song_data)
-        #filename = "media/2022-11-08 21:02:05.450878$delim$47 - Remastered - Sunny Day Real Estate.wav"
 
         wf = wave.open(filename)
         p = pyaudio.PyAudio()
@@ -59,7 +60,6 @@ def audio_stream_UDP():
                         rate=wf.getframerate(),
                         input=True,
                         frames_per_buffer=CHUNK)
-
         data = None
         sample_rate = wf.getframerate()
         while True:
@@ -69,9 +69,31 @@ def audio_stream_UDP():
                 break
 
             threading.Thread(target=send_data_to_sockets, args=(server_socket, data)).start()
-            time.sleep(0.94 * CHUNK/sample_rate)
+            time.sleep(0.87 * CHUNK/sample_rate)
             
-           
+
+def metadata_UDP():  
+    # create socket for metadata
+    server_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+    server_socket.bind((host_ip, (meta_port)))
+    print('server listening at',(host_ip, (meta_port)))
+    threading.Thread(target=gather_sockets, args=(server_socket, 1024, True)).start()
+    old_data = ""
+    while True:
+        time.sleep(2)  
+        new_data = os.environ.get('NOW_PLAYING_DATA')
+        if new_data != old_data:
+            META_SENT.clear()
+            old_data = new_data
+        
+        send_data_to_sockets(server_socket, new_data, True)
+
+
+
+
+
                 
 threading.Thread(target=alradio.main).start()
-threading.Thread(target=audio_stream_UDP, args=()).start()
+threading.Thread(target=audio_stream_UDP, args=()).start() # stream port
+threading.Thread(target=metadata_UDP, args=()).start() # metadata port
+

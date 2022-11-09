@@ -132,23 +132,23 @@ class SongDownloader:
         self.genre = song_info['genre']
         self.song_info = song_info
 
-    def download_song(self, date) -> str:
+    def download_song(self, date) -> bool:
         """Download song from spotify"""
 
         # get the date string to the ms
         subprocess.run(
-            ["spotdl", "download", self.song_info['song_url']],
+            ["spotdl", "download", self.song_info['song_url'], "--output", "./media/{year}-" + date],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT)
         
-        if not os.path.exists(f"{self.song_info['artist']} - {self.song_info['track']}.mp3"):
+        if not os.path.exists(f"./media/{self.song_info['release_year']}-{date}.mp3"):
             return False
         
         # rename the file to the correct format
-        os.rename(f"{self.song_info['artist']} - {self.song_info['track']}.mp3", date + "song.mp3")
+        os.rename(f"./media/{self.song_info['release_year']}-{date}.mp3", "./media/" + date + "song.mp3")
         return True
     
-    def download_combine(self, speech: str) -> None:
+    def download_combine(self, speech: str):
         """Download the song and combine it with the tts"""
         date = str(datetime.now())
         if not self.download_song(date):
@@ -162,15 +162,15 @@ class SongDownloader:
     
     def combine_songs(self, date: str) -> str:
         """Combine the song and tts"""
-        song = AudioSegment.from_mp3(date + "song.mp3")
+        song = AudioSegment.from_mp3("./media/" + date + "song.mp3")
         tts = AudioSegment.from_mp3("./media/" + date + "tts.mp3")
         combined = tts + song
 
-        combined = combined.set_frame_rate(22050)
+        combined = combined.set_frame_rate(44100)
         filename = "./media/" + date + f"$delim${self.track} - {self.artist}.wav"
         combined.export(filename, format="wav")
 
-        os.remove(date + "song.mp3")
+        os.remove("./media/" + date + "song.mp3")
         os.remove("./media/" + date + "tts.mp3")
         return filename
     
@@ -193,9 +193,9 @@ def download_and_add_to_queue(spotify: MediaGatherer):
     global SONG_QUEUE
     if filename:
         SONG_QUEUE.append((filename, song_info))
-        print(f"{Fore.BLUE}Downloaded:{Style.RESET_ALL} {song_info['track']} by {song_info['artist']}")
+        print(f"{Fore.BLUE}Downloaded:{Style.RESET_ALL} {song_info['track']} - {song_info['artist']}")
     else:
-        print(f"{Fore.RED}Failed to download:{Style.RESET_ALL} {song_info['track']} by {song_info['artist']}")
+        print(f"{Fore.RED}Failed to download:{Style.RESET_ALL} {song_info['track']} - {song_info['artist']}")
 
 
 def wait_for_play(filename):
@@ -226,6 +226,7 @@ def get_new_recs(spotify: MediaGatherer):
 
 def main():
     os.environ['NOW_PLAYING'] = ""
+    os.environ['NOW_PLAYING_DATA'] = ""
 
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gtts.json"
     openai.api_key = OPENAI_KEY
@@ -264,6 +265,7 @@ def main():
             print(f"{Fore.GREEN}Playing:{Style.RESET_ALL} " + title)
 
             os.environ["NOW_PLAYING"] = song
+            # turn data into a json string
             os.environ["NOW_PLAYING_DATA"] = json.dumps(data)
             # subprocess.Popen(["vlc", "--play-and-exit", "-Idummy", song],
             #     stdout=subprocess.DEVNULL,
