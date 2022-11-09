@@ -58,7 +58,6 @@ def audio_stream_UDP():
 
         data = None
         sample_rate = wf.getframerate()
-
         while True:
             data = wf.readframes(CHUNK) 
             if not data:
@@ -67,7 +66,7 @@ def audio_stream_UDP():
                 break
 
             threading.Thread(target=send_data_to_sockets, args=(server_socket, data)).start()
-            time.sleep(0.91 * CHUNK/sample_rate)
+            time.sleep(0.94 * CHUNK/sample_rate)
             
            
                 

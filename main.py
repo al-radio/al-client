@@ -77,18 +77,17 @@ class HostPrompt:
         self.max_tokens = 110
 
     def get_completion(self, song_info: dict[str, str]) -> str:
-        # prompt = f"A Toronto radio station called AL Radio is about to play the song \"{song_info['track']}\" by \"{song_info['artist']}\". The song came out in {song_info['release_year']} on an album titled \"{song_info['album']}\". The song's genre is {song_info['genre']}. This is what a radio host for AL Radio would say to the audience, speaking to the tone of {song_info['genre']}, before playing this song."
-        # response = openai.Completion.create(engine=self.engine, prompt=prompt, temperature=self.temperature, max_tokens=self.max_tokens)
+        prompt = f"A Toronto radio station called AL Radio is about to play the song \"{song_info['track']}\" by \"{song_info['artist']}\". The song came out in {song_info['release_year']} on an album titled \"{song_info['album']}\". The song's genre is {song_info['genre']}. This is what a radio host for AL Radio would say to the audience, speaking to the tone of {song_info['genre']}, before playing this song."
+        response = openai.Completion.create(engine=self.engine, prompt=prompt, temperature=self.temperature, max_tokens=self.max_tokens)
 
-        # if song_info["track"] and song_info["artist"] not in response['choices'][0]['text']:
-        #     response['choices'][0]['text'] = response['choices'][0]['text'][:-1] + f" {song_info['track']} by {song_info['artist']}, right now.\""
+        if song_info["track"] and song_info["artist"] not in response['choices'][0]['text']:
+            response['choices'][0]['text'] = response['choices'][0]['text'][:-1] + f" {song_info['track']} by {song_info['artist']}, right now.\""
         
-        # global TOKENS_USED
-        # TOKENS_USED += response['usage']['total_tokens']
-        # print(f"{Fore.LIGHTBLUE_EX}Tokens used:{Style.RESET_ALL} {TOKENS_USED} ::: {Fore.LIGHTRED_EX}Estimated Cost: {Style.RESET_ALL}${round(TOKENS_USED / 1000 * 0.002, 4)}")
+        global TOKENS_USED
+        TOKENS_USED += response['usage']['total_tokens']
+        print(f"{Fore.LIGHTBLUE_EX}Tokens used:{Style.RESET_ALL} {TOKENS_USED} ::: {Fore.LIGHTRED_EX}Estimated Cost: {Style.RESET_ALL}${round(TOKENS_USED / 1000 * 0.002, 4)}")
         
-        # return response['choices'][0]['text']
-        return "This is a test"
+        return response['choices'][0]['text']
 
 class TTS:
 
@@ -187,7 +186,7 @@ def wait_for_play(filename):
     SONGS_PLAYED += 1
     CURRENTLY_PLAYING = False
 
-    title = filename.split("$delim$")[1].replace(".mp3", "")
+    title = filename.split("$delim$")[1].replace(".wav", "")
     print(f"{Fore.CYAN}Finished Playing:{Style.RESET_ALL} " + title)
     print(f"{Fore.MAGENTA}Songs Played:{Style.RESET_ALL} {SONGS_PLAYED}")
 
@@ -240,12 +239,10 @@ def main():
         if len(SONG_QUEUE) > 0 and not CURRENTLY_PLAYING:
             CURRENTLY_PLAYING = True
             song = SONG_QUEUE.pop(0)
-            title = song.split("$delim$")[1].replace(".mp3", "")
+            title = song.split("$delim$")[1].replace(".wav", "")
             print(f"{Fore.GREEN}Playing:{Style.RESET_ALL} " + title)
 
             os.environ["NOW_PLAYING"] = song
-            start_time = time.time()
-            os.environ['TIME_STARTED'] = str(start_time)
             # subprocess.Popen(["vlc", "--play-and-exit", "-Idummy", song],
             #     stdout=subprocess.DEVNULL,
             #     stderr=subprocess.STDOUT)
@@ -254,4 +251,4 @@ def main():
         
         if len(RECOMMENDATION_QUEUE) < 4 and not GATHERING_RECS:
             GATHERING_RECS = True
-            threading.Thread(target=get_new_recs).start()
+            threading.Thread(target=get_new_recs, args=(spotify,)).start()

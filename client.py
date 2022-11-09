@@ -38,9 +38,20 @@ def audio_stream_UDP():
 	t1.start()
 	time.sleep(1)
 	print('Now Playing...')
+	while q.qsize() <= 5:
+		pass
 	while True:
 		frame = q.get()
 		stream.write(frame)
+		if q.qsize() < 1:
+			print('Buffering...')
+			while q.qsize() <= 5:
+				pass
+			if q.qsize() > 50:
+				print("Catching up to server...")
+				while not q.empty():
+					q.get()
+
 
 	client_socket.close()
 	print('Audio closed')
