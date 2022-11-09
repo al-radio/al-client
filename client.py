@@ -2,7 +2,7 @@
 # This is client code to receive video and audio frames over UDP
 
 import socket
-import threading, wave, pyaudio, time, queue
+import threading, pyaudio, time, queue
 
 host_name = socket.gethostname()
 host_ip = socket.gethostbyname(host_name)
@@ -37,20 +37,26 @@ def audio_stream_UDP():
 	t1 = threading.Thread(target=getAudioData, args=())
 	t1.start()
 	time.sleep(1)
+
 	print('Now Playing...')
-	while q.qsize() <= 5:
+	while q.qsize() <= 5: # create a buffer of 5 frames
 		pass
+
 	while True:
 		frame = q.get()
 		stream.write(frame)
+
+		# queue to small, get more frames
 		if q.qsize() < 1:
 			print('Buffering...')
 			while q.qsize() <= 5:
 				pass
-			if q.qsize() > 50:
-				print("Catching up to server...")
-				while not q.empty():
-					q.get()
+
+		# queue too big, catch up to server by removing frames
+		if q.qsize() > 50:
+			print("Catching up to server...")
+			while not q.empty():
+				q.get()
 
 
 	client_socket.close()

@@ -10,6 +10,7 @@ from google.cloud import texttospeech
 from pydub import AudioSegment
 from datetime import datetime
 from colorama import Fore, Style
+import json
 
 from keys import *
 
@@ -46,12 +47,21 @@ class MediaGatherer:
         spotifyObject = self.get_object()
         searchResults = spotifyObject.search(search_query, 1, 0, "track")
         tracks_items = searchResults['tracks']['items']
-        song_url = tracks_items[0]['external_urls']['spotify']
+
+        if tracks_items[0]['duration_ms'] / 1000 < 30 or tracks_items[0]['duration_ms'] / 1000 > 900:
+            return None
+
+        track = tracks_items[0]['name']
         artist = tracks_items[0]['artists'][0]['name']
         album = tracks_items[0]['album']['name']
-        track = tracks_items[0]['name']
+
+        if len(track + artist + album) > 150:
+            return None
+
+        song_url = tracks_items[0]['external_urls']['spotify']
         release_year = tracks_items[0]['album']['release_date'].split('-')[0]
         song_genres = spotifyObject.artist(tracks_items[0]['artists'][0]['id'])['genres']
+        album_art = spotifyObject.album(tracks_items[0]['album']['id'])['images'][0]['url']
 
         if len(song_genres) > 2:
             genre = song_genres[0] + " and " + song_genres[1]
@@ -66,7 +76,8 @@ class MediaGatherer:
             "album": album,
             "track": track,
             "release_year": release_year,
-            "genre": genre
+            "genre": genre,
+            "album_art": album_art
         }
     
 class HostPrompt:
@@ -77,17 +88,18 @@ class HostPrompt:
         self.max_tokens = 110
 
     def get_completion(self, song_info: dict[str, str]) -> str:
-        prompt = f"A Toronto radio station called AL Radio is about to play the song \"{song_info['track']}\" by \"{song_info['artist']}\". The song came out in {song_info['release_year']} on an album titled \"{song_info['album']}\". The song's genre is {song_info['genre']}. This is what a radio host for AL Radio would say to the audience, speaking to the tone of {song_info['genre']}, before playing this song."
-        response = openai.Completion.create(engine=self.engine, prompt=prompt, temperature=self.temperature, max_tokens=self.max_tokens)
+        # prompt = f"A Toronto radio station called AL Radio is about to play the song \"{song_info['track']}\" by \"{song_info['artist']}\". The song came out in {song_info['release_year']} on an album titled \"{song_info['album']}\". The song's genre is {song_info['genre']}. This is what a radio host for AL Radio would say to the audience, speaking to the tone of {song_info['genre']}, before playing this song."
+        # response = openai.Completion.create(engine=self.engine, prompt=prompt, temperature=self.temperature, max_tokens=self.max_tokens)
 
-        if song_info["track"] and song_info["artist"] not in response['choices'][0]['text']:
-            response['choices'][0]['text'] = response['choices'][0]['text'][:-1] + f" {song_info['track']} by {song_info['artist']}, right now.\""
+        # if song_info["track"] and song_info["artist"] not in response['choices'][0]['text']:
+        #     response['choices'][0]['text'] = response['choices'][0]['text'][:-1] + f" {song_info['track']} by {song_info['artist']}, right now.\""
         
-        global TOKENS_USED
-        TOKENS_USED += response['usage']['total_tokens']
-        print(f"{Fore.LIGHTBLUE_EX}Tokens used:{Style.RESET_ALL} {TOKENS_USED} ::: {Fore.LIGHTRED_EX}Estimated Cost: {Style.RESET_ALL}${round(TOKENS_USED / 1000 * 0.002, 4)}")
+        # global TOKENS_USED
+        # TOKENS_USED += response['usage']['total_tokens']
+        # print(f"{Fore.LIGHTBLUE_EX}Tokens used:{Style.RESET_ALL} {TOKENS_USED} ::: {Fore.LIGHTRED_EX}Estimated Cost: {Style.RESET_ALL}${round(TOKENS_USED / 1000 * 0.002, 4)}")
         
-        return response['choices'][0]['text']
+        # return response['choices'][0]['text']
+        return "This is a test"
 
 class TTS:
 
@@ -138,12 +150,13 @@ class SongDownloader:
     
     def download_combine(self, speech: str) -> None:
         """Download the song and combine it with the tts"""
-        tts = TTS()
-        tts_speech = tts.get_speech(speech)
         date = str(datetime.now())
-        tts.download_speech(tts_speech, "./media/" + date + "tts.mp3")
         if not self.download_song(date):
             return False
+        
+        tts = TTS()
+        tts_speech = tts.get_speech(speech)
+        tts.download_speech(tts_speech, "./media/" + date + "tts.mp3")
         
         return self.combine_songs(date)
     
@@ -152,11 +165,11 @@ class SongDownloader:
         song = AudioSegment.from_mp3(date + "song.mp3")
         tts = AudioSegment.from_mp3("./media/" + date + "tts.mp3")
         combined = tts + song
-        # change samplerate of combined
+
         combined = combined.set_frame_rate(22050)
         filename = "./media/" + date + f"$delim${self.track} - {self.artist}.wav"
         combined.export(filename, format="wav")
-        # remove the files
+
         os.remove(date + "song.mp3")
         os.remove("./media/" + date + "tts.mp3")
         return filename
@@ -166,16 +179,24 @@ def download_and_add_to_queue(spotify: MediaGatherer):
     song = RECOMMENDATION_QUEUE.pop(0)
     print(f"{Fore.RED}Downloading:{Style.RESET_ALL} " + song)
     song_info = spotify.get_song_info(song)
+    global CURRENTLY_DOWNLOADING
+    if not song_info:
+        CURRENTLY_DOWNLOADING -= 1
+        return
+
     song_downloader = SongDownloader(song_info)
     host_prompt = HostPrompt()
     speech = host_prompt.get_completion(song_info)
     filename = song_downloader.download_combine(speech)
+    CURRENTLY_DOWNLOADING -= 1
+
     global SONG_QUEUE
     if filename:
-        SONG_QUEUE.append(filename)
-    print(f"{Fore.BLUE}Downloaded:{Style.RESET_ALL} {song_info['track']} by {song_info['artist']}")
-    global CURRENTLY_DOWNLOADING
-    CURRENTLY_DOWNLOADING -= 1
+        SONG_QUEUE.append((filename, song_info))
+        print(f"{Fore.BLUE}Downloaded:{Style.RESET_ALL} {song_info['track']} by {song_info['artist']}")
+    else:
+        print(f"{Fore.RED}Failed to download:{Style.RESET_ALL} {song_info['track']} by {song_info['artist']}")
+
 
 def wait_for_play(filename):
     while str(os.environ.get("NOW_PLAYING", "")) != "":
@@ -238,11 +259,12 @@ def main():
         
         if len(SONG_QUEUE) > 0 and not CURRENTLY_PLAYING:
             CURRENTLY_PLAYING = True
-            song = SONG_QUEUE.pop(0)
+            song, data = SONG_QUEUE.pop(0)
             title = song.split("$delim$")[1].replace(".wav", "")
             print(f"{Fore.GREEN}Playing:{Style.RESET_ALL} " + title)
 
             os.environ["NOW_PLAYING"] = song
+            os.environ["NOW_PLAYING_DATA"] = json.dumps(data)
             # subprocess.Popen(["vlc", "--play-and-exit", "-Idummy", song],
             #     stdout=subprocess.DEVNULL,
             #     stderr=subprocess.STDOUT)

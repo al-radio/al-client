@@ -1,6 +1,5 @@
 spotipy
 pydub
-python-vlc
 spotdl
 openai
-flask
+pyaudio

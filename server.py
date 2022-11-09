@@ -1,6 +1,7 @@
 import socket, os
 import threading, wave, pyaudio, time
 import main as alradio
+import json
 
 host_name = socket.gethostname()
 host_ip = socket.gethostbyname(host_name)
@@ -45,6 +46,9 @@ def audio_stream_UDP():
         while str(os.environ.get('NOW_PLAYING', "")) == "":
             pass
         filename = str(os.environ.get('NOW_PLAYING'))
+        song_data = str(os.environ.get('NOW_PLAYING_DATA'))
+        song_data = json.loads(song_data)
+        print(song_data)
         #filename = "media/2022-11-08 21:02:05.450878$delim$47 - Remastered - Sunny Day Real Estate.wav"
 
         wf = wave.open(filename)
@@ -62,7 +66,6 @@ def audio_stream_UDP():
             data = wf.readframes(CHUNK) 
             if not data:
                 os.environ['NOW_PLAYING'] = ""
-                time.sleep(2)
                 break
 
             threading.Thread(target=send_data_to_sockets, args=(server_socket, data)).start()
