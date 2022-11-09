@@ -142,7 +142,7 @@ class SongDownloader:
         tts = TTS()
         tts_speech = tts.get_speech(speech)
         date = str(datetime.now())
-        tts.download_speech(tts_speech, date + "tts.mp3")
+        tts.download_speech(tts_speech, "./media/" + date + "tts.mp3")
         if not self.download_song(date):
             return False
         
@@ -151,13 +151,15 @@ class SongDownloader:
     def combine_songs(self, date: str) -> str:
         """Combine the song and tts"""
         song = AudioSegment.from_mp3(date + "song.mp3")
-        tts = AudioSegment.from_mp3(date + "tts.mp3")
+        tts = AudioSegment.from_mp3("./media/" + date + "tts.mp3")
         combined = tts + song
-        filename = "./media/" + date + f"$delim${self.track} - {self.artist}.mp3"
-        combined.export(filename, format="mp3", bitrate="192k")
+        # change samplerate of combined
+        combined = combined.set_frame_rate(22050)
+        filename = "./media/" + date + f"$delim${self.track} - {self.artist}.wav"
+        combined.export(filename, format="wav")
         # remove the files
         os.remove(date + "song.mp3")
-        os.remove(date + "tts.mp3")
+        os.remove("./media/" + date + "tts.mp3")
         return filename
     
 
@@ -177,23 +179,19 @@ def download_and_add_to_queue(spotify: MediaGatherer):
     CURRENTLY_DOWNLOADING -= 1
 
 def wait_for_play(filename):
-    # get song length from file
-    song = AudioSegment.from_mp3(filename)
-    song_length = len(song) / 1000
-    # store the time the song started
-    start_time = time.time()
-    os.environ['TIME_STARTED'] = str(start_time)
-    time.sleep(song_length)
-    
+    while str(os.environ.get("NOW_PLAYING", "")) != "":
+        pass # wait for the song to finish playing, it is changed inside the server code
+
+    global SONGS_PLAYED
+    global CURRENTLY_PLAYING
+    SONGS_PLAYED += 1
+    CURRENTLY_PLAYING = False
+
     title = filename.split("$delim$")[1].replace(".mp3", "")
     print(f"{Fore.CYAN}Finished Playing:{Style.RESET_ALL} " + title)
-    global SONGS_PLAYED
-    SONGS_PLAYED += 1
     print(f"{Fore.MAGENTA}Songs Played:{Style.RESET_ALL} {SONGS_PLAYED}")
+
     os.remove(filename)
-    os.environ['NOW_PLAYING'] = ""
-    global CURRENTLY_PLAYING
-    CURRENTLY_PLAYING = False
 
 def get_new_recs(spotify: MediaGatherer):
     artist_seed = ["5FwydyGVcsQllnM4xM6jw4", "6AX5hnjYSvcjZd9IyqYPsp", "0MkAzpDHUZpuDnWGUII4RN", "13rS3lCWshTVt6HsCNjvBI", "72cBWuYjXkWxEXqZcoH5kE"]
@@ -246,6 +244,8 @@ def main():
             print(f"{Fore.GREEN}Playing:{Style.RESET_ALL} " + title)
 
             os.environ["NOW_PLAYING"] = song
+            start_time = time.time()
+            os.environ['TIME_STARTED'] = str(start_time)
             # subprocess.Popen(["vlc", "--play-and-exit", "-Idummy", song],
             #     stdout=subprocess.DEVNULL,
             #     stderr=subprocess.STDOUT)
