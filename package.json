@@ -1,0 +1,23 @@
+{
+  "name": "alradio",
+  "version": "1.0.0",
+  "description": "AL Radio, the community driven, AL powered broadcast!",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GregSherman/alradio.git"
+  },
+  "keywords": [
+    "AL",
+    "Radio"
+  ],
+  "author": "Greg Sherman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GregSherman/alradio/issues"
+  },
+  "homepage": "https://github.com/GregSherman/alradio#readme"
+}

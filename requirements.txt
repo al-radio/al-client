@@ -1,5 +1,0 @@
-spotipy
-pydub
-spotdl
-openai
-pyaudio
