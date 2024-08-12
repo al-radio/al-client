@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AL Radio, the community driven, AL powered broadcast!",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "test": "test"
   },
@@ -19,5 +20,11 @@
   "bugs": {
     "url": "https://github.com/GregSherman/alradio/issues"
   },
-  "homepage": "https://github.com/GregSherman/alradio#readme"
+  "homepage": "https://github.com/GregSherman/alradio#readme",
+  "dependencies": {
+    "axios": "^1.7.3",
+    "express": "^4.19.2",
+    "freyr": "^0.10.3",
+    "mongodb": "^6.8.0"
+  }
 }
