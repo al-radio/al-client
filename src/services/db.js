@@ -28,7 +28,7 @@ class DatabaseService {
       genres: metadata.genres,
       releaseDate: metadata.album.release_date,
       lastPlayed: new Date(),
-      url: metadata.href,
+      url: metadata.external_urls.spotify,
       artUrl: metadata.album.images[0].url,
       introSpeech: "",
     };

@@ -1,17 +1,21 @@
 import express, { json } from "express";
 import songRoutes from "./routes/routes.js";
-import { playNextSong } from "./services/audio.js";
+import SongController from "./controllers/songController.js";
 import SpotifyService from "./services/spotify.js";
+import fs from "fs";
 
 const app = express();
 app.use(json());
 
-app.use("/api/songs", songRoutes);
+app.use("/", songRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
-  // Start the audio playback process
+  fs.readdirSync("./audio").forEach((file) => {
+    fs.unlinkSync(`./audio/${file}`);
+  });
   await SpotifyService.authenticate();
-  await playNextSong();
+  await SongController.getNextSong();
+  SongController.player();
 });

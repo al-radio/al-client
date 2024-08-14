@@ -1,8 +1,11 @@
 // src/services/queue.js
 class QueueService {
   constructor() {
+    // Format: ["trackId1", "trackId2", ...]
     this.userQueue = [];
-    this.suggestionQueue = ["3RZZreij9AuToQGJ4nXaoh"];
+    // Format: ["trackId1", "trackId2", ...]
+    this.suggestionQueue = ["6EGVplf6GrIyKZSs99LXOp"];
+    // Format: [{path: "path/to/audio/file", metadata: {}}]
     this.audioQueue = [];
   }
 
@@ -31,12 +34,20 @@ class QueueService {
   }
 
   addToAudioQueue(audioFilePath) {
+    console.log("Added audio file", audioFilePath, "to audio queue");
     this.audioQueue.push(audioFilePath);
-    console.log("Added audio file to audio queue");
   }
 
   popNextAudioFile() {
     return this.audioQueue.shift();
+  }
+
+  isAudioQueueEmpty() {
+    return this.audioQueue.length === 0;
+  }
+
+  getNextSongMetadata() {
+    return this.audioQueue[-1]?.metadata
   }
 }
 

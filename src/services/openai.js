@@ -10,9 +10,20 @@ class OpenAiService {
     this.organizationId = process.env.OPENAI_ORGANIZATION_ID;
   }
 
-  async generateSongIntro(metadata) {
-    const prompt = `You are a radio host at Al Radio, a Toronto-based radio station. You are about to play the song "${metadata.title}" by "${metadata.artist}". The song was released in ${metadata.releaseDate} on the album "${metadata.album}". The song's genre is ${metadata.genres}. Write an introduction for this song that captures the essence of the song and the artist's style. Be whimsical yet poignant, and make sure to engage the audience's imagination. Respond only with the text of the introduction and no extra scene-setting / emojis. Keep it to a few sentences.`;
-    console.log("Prompt:", prompt);
+  async generateSongIntro(thisSongMetadata, previousSongMetadata) {
+    console.log("Generating song intro for", thisSongMetadata?.title);
+    console.log("Previous song metadata:", previousSongMetadata?.title);
+    let prompt = `You are a radio host at Al Radio, a Toronto-based radio station.
+     You are about to play the song "${thisSongMetadata.title}" by "${thisSongMetadata.artist}".
+      The song was released in ${thisSongMetadata.releaseDate} on the album "${thisSongMetadata.album}".
+       The song's genre is ${thisSongMetadata.genres}. Write an introduction for this song as someone who had an energetic emotional bond to music.
+       Respond only with the text of the introduction and no extra scene-setting / emojis. Keep it to a few sentences.`;
+
+    if (previousSongMetadata) {
+        prompt += `\n\nYou had previously played "${previousSongMetadata.title}" by "${previousSongMetadata.artist}"
+        of the album "${previousSongMetadata.album} with genres ${previousSongMetadata.genres}. Provide a smooth
+        transition between the previous song and the upcoming one, noting any similarities or contrasts in style, genre, or mood.`;
+    }
     try {
       const response = await axios.post(
         `${this.baseUrl}/chat/completions`,
@@ -43,7 +54,7 @@ class OpenAiService {
         {
           input: text,
           model: "tts-1",
-          voice: "onyx",
+          voice: "fable",
         },
         {
           headers: {
@@ -52,10 +63,8 @@ class OpenAiService {
           responseType: "arraybuffer",
         }
       );
-      // Save the audio file to disk
-      const audioPath = `./audio/announcement.mp3`;
+      const audioPath = `./audio/${Date.now()}.mp3`;
       fs.writeFileSync(audioPath, response.data);
-      console.log("Audio file saved:", audioPath);
       return audioPath;
     } catch (error) {
       console.error("Error during text to speech conversion:", error);

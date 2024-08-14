@@ -25,8 +25,10 @@
     "axios": "^1.7.3",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "freyr": "^0.10.3",
+    "ffprobe": "^1.1.2",
+    "ffprobe-static": "^3.1.0",
     "mongodb": "^6.8.0",
-    "openai": "^4.55.5"
+    "openai": "^4.55.5",
+    "throttle": "^1.0.3"
   }
 }

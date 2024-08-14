@@ -38,7 +38,6 @@ class SpotifyService {
         limit: 1,
       },
     });
-    console.log("Retrieved track: ", response.data.tracks.items[0]);
     return response.data.tracks.items[0];
   }
 
@@ -52,8 +51,8 @@ class SpotifyService {
         limit: 15,
       },
     });
-    console.log("Retrieved recommendations: ", response);
-    return response;
+    const recommendations = response.data.tracks.map((track) => track.id);
+    return recommendations;
   }
 
   async getTrackData(trackId) {
@@ -74,8 +73,6 @@ class SpotifyService {
       }
     );
     response.data.genres = artistResponse.data.genres;
-
-    console.log("Retrieved track data: ", response.data);
     return response.data;
   }
 }
