@@ -6,8 +6,6 @@ class OpenAiService {
   constructor() {
     this.baseUrl = "https://api.openai.com/v1";
     this.apiKey = process.env.OPENAI_API_KEY;
-    this.projectId = process.env.OPENAI_PROJECT_ID;
-    this.organizationId = process.env.OPENAI_ORGANIZATION_ID;
   }
 
   async generateSongIntro(thisSongMetadata, previousSongMetadata) {

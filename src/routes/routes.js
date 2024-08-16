@@ -1,8 +1,6 @@
 // src/routes/routes.js
 import { Router } from "express";
-import SongController from "../controllers/songController.js";
 import ClientService from "../services/client.js";
-import path from "path";
 const router = Router();
 
 router.get("/", (req, res) => ClientService.serveWebpage(req, res));
