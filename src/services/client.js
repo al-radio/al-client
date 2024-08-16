@@ -52,7 +52,7 @@ class ClientService {
       ? await SpotifyService.getTrackData(trackId)
       : await SpotifyService.searchTrack(query);
 
-    console.log("Got user suggested track:", track.title);
+    console.log("Got user suggested track:", track.name, track.artists[0].name);
 
     if (track) {
       // TODO: Check if the song has been played recently or if it is already in the user queue.
@@ -66,13 +66,16 @@ class ClientService {
   async getCurrentSongMetadata(req, res) {
     const metadata = QueueService.currentSongMetadata;
     if (!metadata) {
-      return res.status(404).json({ message: "No song is currently playing" });
+      return res.status(500).json({ message: "No song is currently playing" });
     }
     res.json(this._clientifyMetadata(metadata));
   }
 
   async getSongHistory(req, res) {
-    const songHistory = await DBService.getLastPlayedSongs(10);
+    const songHistory = await DBService.getLastPlayedSongs(
+      10,
+      QueueService.currentSongMetadata?.id
+    );
     const reducedHistory = songHistory.map((song) =>
       this._clientifyMetadata(song)
     );

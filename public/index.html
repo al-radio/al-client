@@ -1,27 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Radio</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="container">
-        <h1>AL Radio</h1>
-        <div class="player-container">
-            <img id="album-art" src="" class="album-art">
-            <audio id="audio-player" src="/stream" type="audio/mpeg" controls autoplay>
-                Your browser does not support the audio element.
-            </audio>
-        </div>
-        <div id="song-info">
-            <h2 id="song-title"></h2>
-            <p id="song-artist"></p>
-            <p id="song-album"></p>
-        </div>
+      <h1>AL Radio</h1>
+      <div class="player-container">
+        <img id="album-art" src="" class="album-art" />
+        <audio
+          id="audio-player"
+          src="/stream"
+          type="audio/mpeg"
+          controls
+          autoplay
+        >
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+      <div id="song-info">
+        <h2 id="song-title"></h2>
+        <p id="song-artist"></p>
+        <p id="song-album"></p>
+      </div>
+      <div id="submit-container">
+        <h2>Submit a Song</h2>
+        <form id="submit-form">
+          <input
+            type="text"
+            id="song-query"
+            placeholder="Enter Spotify track URL or ID"
+            required
+          />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      <div id="history-container">
+        <h2>Recent Song History</h2>
+        <ul id="history-list"></ul>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

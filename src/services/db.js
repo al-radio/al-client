@@ -54,7 +54,7 @@ class DatabaseService {
     return songs;
   }
 
-  async getLastPlayedSongs(limit) {
+  async getLastPlayedSongs(limit, beforeTrackId = null) {
     const db = await connect();
     const songs = await db
       .collection("tracks")
@@ -62,6 +62,10 @@ class DatabaseService {
       .sort({ lastPlayed: -1 })
       .limit(limit)
       .toArray();
+      if (beforeTrackId) {
+        const index = songs.findIndex((track) => track.trackId === beforeTrackId);
+        return songs.slice(index + 1, index + 1 + limit);
+      }
     console.log("Last played", limit, "songs:", songs.map((track) => track.title + " " + track.album));
     return songs;
   }

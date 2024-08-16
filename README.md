@@ -11,4 +11,4 @@
 ## Run
 
 - `node --env-file=.env.local src/index.js`
-- listen to the stream `mpg123 http://localhost:3000/stream`
+- listen to the stream `mpg123 http://localhost:$PORT/stream`

@@ -45,7 +45,6 @@ class SpotifyService {
           limit: 1,
         },
       });
-      console.log("searchTrack response", response.data.tracks.items[0]);
       return response.data.tracks.items[0];
     } catch (error) {
       if (error.response.status === 401) {
