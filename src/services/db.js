@@ -11,22 +11,24 @@ async function connect() {
 
 class DatabaseService {
   async getSongMetadata(trackId) {
+    console.log('Retrieving metadata for trackId', trackId);
     const db = await connect();
     const track = await db.collection('tracks').findOne({ trackId });
     return track;
   }
 
   async saveSongMetadata(metadata) {
+    console.log('Saving metadata for trackId', metadata.trackId);
     const db = await connect();
     const song = {
-      trackId: metadata.id,
-      title: metadata.name,
-      artist: metadata.artists[0].name,
-      album: metadata.album.name,
+      trackId: metadata.trackId,
+      title: metadata.title,
+      artist: metadata.artist,
+      album: metadata.album,
       genres: metadata.genres,
-      releaseDate: metadata.album.release_date,
-      url: metadata.external_urls.spotify,
-      artUrl: metadata.album.images[0].url
+      releaseDate: metadata.releaseDate,
+      url: metadata.url,
+      artUrl: metadata.artUrl
     };
 
     // expire after 1 week
@@ -38,6 +40,7 @@ class DatabaseService {
   }
 
   async markSongAsPlayed(trackId) {
+    console.log('Marking song as played:', trackId);
     const db = await connect();
     await db.collection('tracks').updateOne(
       { trackId },

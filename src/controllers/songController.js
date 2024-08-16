@@ -81,12 +81,12 @@ class SongController {
 
   async gatherSongFiles(trackMetadata) {
     // Download the track and generate an intro speech. Skip song if either fails
+    const audioFilePath = await this.downloadTrack(trackMetadata.url);
     const announcementText = await OpenAIService.generateSongIntro(
       trackMetadata,
       QueueService.getNextSongMetadata() || QueueService.currentSongMetadata
     );
     const announcementAudioPath = await OpenAIService.textToSpeech(announcementText);
-    const audioFilePath = await this.downloadTrack(trackMetadata.url);
     if (!audioFilePath || !announcementAudioPath) {
       throw new Error('Failed to download track or generate intro speech. Skipping song.');
     }

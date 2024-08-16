@@ -26,6 +26,19 @@ class SpotifyService {
     }
   }
 
+  extractMetadata(track) {
+    return {
+      trackId: track.id,
+      title: track.name,
+      artist: track.artists[0].name,
+      album: track.album.name,
+      genres: track.genres,
+      releaseDate: track.album.release_date,
+      url: track.external_urls.spotify,
+      artUrl: track.album.images[0].url
+    };
+  }
+
   async searchTrack(query) {
     try {
       const response = await axios.get(`${this.baseUrl}/search`, {
@@ -38,9 +51,9 @@ class SpotifyService {
           limit: 1
         }
       });
-      return response.data.tracks.items[0];
+      return this.extractMetadata(response.data.tracks.items[0]);
     } catch (error) {
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         await this.authenticate();
         return this.searchTrack(query);
       }
@@ -62,7 +75,7 @@ class SpotifyService {
       const recommendations = response.data.tracks.map(track => track.id);
       return recommendations;
     } catch (error) {
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         await this.authenticate();
         return this.getRecommendations(trackIds);
       }
@@ -71,6 +84,7 @@ class SpotifyService {
   }
 
   async getTrackData(trackId) {
+    console.log('Getting track data from spotify for:', trackId);
     try {
       const response = await axios.get(`${this.baseUrl}/tracks/${trackId}`, {
         headers: {
@@ -86,9 +100,9 @@ class SpotifyService {
         }
       });
       response.data.genres = artistResponse.data.genres;
-      return response.data;
+      return this.extractMetadata(response.data);
     } catch (error) {
-      if (error.response.status === 401) {
+      if (error.response?.status === 401) {
         await this.authenticate();
         return this.getTrackData(trackId);
       }

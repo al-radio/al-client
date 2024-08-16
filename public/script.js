@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
       songArtist.textContent = `${songData.artist}`;
       songAlbum.textContent = `${songData.album}`;
       albumArt.src = songData.artUrl || 'default-album-art.png';
-      updateSongHistory(CURRENT_SONG_METADATA);
+      await updateSongHistory(CURRENT_SONG_METADATA);
       CURRENT_SONG_METADATA = songData;
     } catch (error) {
       console.error('Error fetching song info:', error);
