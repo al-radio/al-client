@@ -1,7 +1,7 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
 
-const url = 'mongodb://localhost:27017'; // Local MongoDB URL
-const dbName = 'musicDB';
+const url = "mongodb://localhost:27017"; // Local MongoDB URL
+const dbName = "musicDB";
 
 async function connect() {
   const client = new MongoClient(url);
@@ -12,7 +12,7 @@ async function connect() {
 class DatabaseService {
   async getSongMetadata(trackId) {
     const db = await connect();
-    const track = await db.collection('tracks').findOne({ trackId });
+    const track = await db.collection("tracks").findOne({ trackId });
     return track;
   }
 
@@ -27,16 +27,18 @@ class DatabaseService {
       releaseDate: metadata.album.release_date,
       lastPlayed: new Date(),
       url: metadata.external_urls.spotify,
-      artUrl: metadata.album.images[0].url
+      artUrl: metadata.album.images[0].url,
     };
 
     // expire after 1 week
-    await db.collection('tracks').updateOne(
-      { trackId: metadata.id },
-      { $set: song },
-      { upsert: true },
-      { expireAfterSeconds: 604800 }
-    );
+    await db
+      .collection("tracks")
+      .updateOne(
+        { trackId: metadata.id },
+        { $set: song },
+        { upsert: true },
+        { expireAfterSeconds: 604800 }
+      );
 
     return song;
   }
@@ -44,15 +46,23 @@ class DatabaseService {
   async getRecentlyPlayedSongs(hours) {
     const db = await connect();
     const cutoff = new Date(Date.now() - hours * 3600 * 1000);
-    const songs = await db.collection('tracks').find({ lastPlayed: { $gte: cutoff } }).toArray();
-    console.log("Recent tracks from DB:", songs)
+    const songs = await db
+      .collection("tracks")
+      .find({ lastPlayed: { $gte: cutoff } })
+      .toArray();
+    console.log("Recently played songs:", songs.map((track) => track.title + " " + track.album));
     return songs;
   }
 
   async getLastPlayedSongs(limit) {
     const db = await connect();
-    const songs = await db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
-    console.log("Last played", limit, "songs:", songs);
+    const songs = await db
+      .collection("tracks")
+      .find()
+      .sort({ lastPlayed: -1 })
+      .limit(limit)
+      .toArray();
+    console.log("Last played", limit, "songs:", songs.map((track) => track.title + " " + track.album));
     return songs;
   }
 }
