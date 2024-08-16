@@ -57,6 +57,7 @@ class SongController {
     }
 
     QueueService.currentSongMetadata = metadata;
+    DBService.markSongAsPlayed(metadata.trackId);
     await this._streamToClients(path);
   }
 
@@ -93,12 +94,10 @@ class SongController {
       );
     }
 
-    const concatenatedAudioPath = await this.combineAudioFiles(
+    return await this.combineAudioFiles(
       announcementAudioPath,
       audioFilePath
     );
-
-    return concatenatedAudioPath;
   }
 
   async getNextSong() {

@@ -1,5 +1,6 @@
+let CURRENT_SONG_METADATA = {};
+
 document.addEventListener("DOMContentLoaded", () => {
-  const audioElement = document.getElementById("audio-player");
   const songTitle = document.getElementById("song-title");
   const songArtist = document.getElementById("song-artist");
   const songAlbum = document.getElementById("song-album");
@@ -8,22 +9,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitForm = document.getElementById("submit-form");
   const songQueryInput = document.getElementById("song-query");
 
-  async function updateSongInfo() {
+  async function getSongInfo() {
     try {
       const response = await fetch("/song");
       if (!response.ok) throw new Error("Failed to fetch song metadata");
 
       const songData = await response.json();
+      if (songData.title === CURRENT_SONG_METADATA.title) return;
       songTitle.textContent = songData.title;
       songArtist.textContent = `${songData.artist}`;
       songAlbum.textContent = `${songData.album}`;
-      albumArt.src = songData.artUrl || 'default-album-art.png'; // Provide a default image if artUrl is missing
+      albumArt.src = songData.artUrl || 'default-album-art.png';
+      updateSongHistory(CURRENT_SONG_METADATA);
+      CURRENT_SONG_METADATA = songData;
     } catch (error) {
       console.error("Error fetching song info:", error);
     }
   }
 
-  async function updateSongHistory() {
+  async function getSongHistory() {
     try {
       const response = await fetch("/history");
       if (!response.ok) throw new Error("Failed to fetch song history");
@@ -44,6 +48,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function updateSongHistory(songData) {
+    if (!songData.title) return;
+    // Add the new song to the top of the history list
+    const listItem = document.createElement("li");
+    listItem.innerHTML = `
+      <strong>${songData.title}</strong> by ${songData.artist} (Album: ${songData.album})
+      <br><img src="${songData.artUrl}" alt="${songData.title}" class="history-art">
+    `;
+    historyList.prepend(listItem);
+  }
+
   async function submitSong(query) {
     try {
       const response = await fetch("/submit", {
@@ -56,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
       if (result.success) {
         console.log("Song submitted successfully");
-        updateSongHistory(); // Update history after successful submission
       } else {
         console.error("Failed to submit song");
       }
@@ -75,9 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Initial fetch of song info and history
-  updateSongInfo();
-  updateSongHistory();
+  getSongInfo();
+  getSongHistory();
 
   // Poll for song info updates every 10 seconds
-  setInterval(updateSongInfo, 10000);
+  setInterval(getSongInfo, 10000);
 });

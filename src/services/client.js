@@ -79,6 +79,10 @@ class ClientService {
     const reducedHistory = songHistory.map((song) =>
       this._clientifyMetadata(song)
     );
+    // remove current song from history
+    if (reducedHistory.length && reducedHistory[0] === QueueService.currentSongMetadata) {
+      reducedHistory.shift();
+    }
     res.json(reducedHistory);
   }
 }

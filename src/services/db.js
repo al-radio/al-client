@@ -25,7 +25,6 @@ class DatabaseService {
       album: metadata.album.name,
       genres: metadata.genres,
       releaseDate: metadata.album.release_date,
-      lastPlayed: new Date(),
       url: metadata.external_urls.spotify,
       artUrl: metadata.album.images[0].url,
     };
@@ -43,6 +42,17 @@ class DatabaseService {
     return song;
   }
 
+  async markSongAsPlayed(trackId) {
+    const db = await connect();
+    await db.collection("tracks").updateOne(
+      { trackId },
+      {
+        $set: { lastPlayed: new Date() },
+        $inc: { playedCount: 1 },
+      }
+    );
+  }
+
   async getRecentlyPlayedSongs(hours) {
     const db = await connect();
     const cutoff = new Date(Date.now() - hours * 3600 * 1000);
@@ -50,11 +60,16 @@ class DatabaseService {
       .collection("tracks")
       .find({ lastPlayed: { $gte: cutoff } })
       .toArray();
-    console.log("Recently played songs:", songs.map((track) => track.title + " " + track.album));
+    console.log(
+      "Songs played in the last",
+      hours,
+      "hours:",
+      songs.map((track) => track.title + " " + track.artist)
+    );
     return songs;
   }
 
-  async getLastPlayedSongs(limit, beforeTrackId = null) {
+  async getLastPlayedSongs(limit) {
     const db = await connect();
     const songs = await db
       .collection("tracks")
@@ -62,11 +77,12 @@ class DatabaseService {
       .sort({ lastPlayed: -1 })
       .limit(limit)
       .toArray();
-      if (beforeTrackId) {
-        const index = songs.findIndex((track) => track.trackId === beforeTrackId);
-        return songs.slice(index + 1, index + 1 + limit);
-      }
-    console.log("Last played", limit, "songs:", songs.map((track) => track.title + " " + track.album));
+    console.log(
+      "Last played",
+      limit,
+      "songs:",
+      songs.map((track) => track.title + " " + track.artist)
+    );
     return songs;
   }
 }

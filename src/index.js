@@ -4,7 +4,6 @@ import SongController from "./controllers/songController.js";
 import SpotifyService from "./services/spotify.js";
 import fs from "fs";
 import path from "path";
-import bodyParser from "body-parser";
 
 const app = express();
 app.use(express.static(path.join(process.cwd(), "public")));
@@ -13,7 +12,7 @@ app.use("/", songRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running at http://localhost:${PORT}`);
   fs.readdirSync("./audio").forEach((file) => {
     fs.unlinkSync(`./audio/${file}`);
   });

@@ -10,5 +10,4 @@
 
 ## Run
 
-- `node --env-file=.env.local src/index.js`
-- listen to the stream `mpg123 http://localhost:$PORT/stream`
+- `npm start` to run the db and server. client at `http://localhost:$PORT/`
