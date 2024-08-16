@@ -1,25 +1,24 @@
-import SpotifyService from "../services/spotify.js";
-import QueueService from "../services/queue.js";
-import OpenAIService from "../services/openai.js";
-import DBService from "../services/db.js";
-import ClientService from "../services/client.js";
+import SpotifyService from '../services/spotify.js';
+import QueueService from '../services/queue.js';
+import OpenAIService from '../services/openai.js';
+import DBService from '../services/db.js';
+import ClientService from '../services/client.js';
 
-import fs from "fs";
-import Throttle from "throttle";
-import ffprobe from "ffprobe";
-import ffprobeStatic from "ffprobe-static";
-import { exec } from "child_process";
-import { promisify } from "util";
+import fs from 'fs';
+import Throttle from 'throttle';
+import ffprobe from 'ffprobe';
+import ffprobeStatic from 'ffprobe-static';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 class SongController {
-
   _writeDataToClients(data) {
-    ClientService.clients.forEach((client) => client.write(data));
+    ClientService.clients.forEach(client => client.write(data));
   }
 
   async _getBitrateFromAudioFile(path) {
     const ffprobeResult = await ffprobe(path, {
-      path: ffprobeStatic.path,
+      path: ffprobeStatic.path
     });
     return ffprobeResult.streams[0].bit_rate;
   }
@@ -30,10 +29,10 @@ class SongController {
     const throttle = new Throttle(bitrate / 8);
 
     throttle
-      .on("data", (data) => {
+      .on('data', data => {
         this._writeDataToClients(data);
       })
-      .on("end", () => {
+      .on('end', () => {
         readable.close();
         fs.unlinkSync(path);
         this.player();
@@ -45,16 +44,18 @@ class SongController {
   async player() {
     let { path, metadata } = QueueService.popNextAudioFile() || {};
 
-    while (true) {
+    do {
       if (path) {
         // Found a song, get more if needed
-        if (QueueService.isAudioQueueEmpty()) this.getNextSong();
+        if (QueueService.isAudioQueueEmpty()) {
+          this.getNextSong();
+        }
         break;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       ({ path, metadata } = QueueService.popNextAudioFile() || {});
-    }
+    } while (!path);
 
     QueueService.currentSongMetadata = metadata;
     DBService.markSongAsPlayed(metadata.trackId);
@@ -74,7 +75,7 @@ class SongController {
 
   async getTrackData(trackId) {
     // Fetch metadata from the database or Spotify API
-    let trackMetadata = await DBService.getSongMetadata(trackId) || await SpotifyService.getTrackData(trackId);
+    let trackMetadata = (await DBService.getSongMetadata(trackId)) || (await SpotifyService.getTrackData(trackId));
     return DBService.saveSongMetadata(trackMetadata);
   }
 
@@ -84,20 +85,13 @@ class SongController {
       trackMetadata,
       QueueService.getNextSongMetadata() || QueueService.currentSongMetadata
     );
-    const announcementAudioPath = await OpenAIService.textToSpeech(
-      announcementText
-    );
+    const announcementAudioPath = await OpenAIService.textToSpeech(announcementText);
     const audioFilePath = await this.downloadTrack(trackMetadata.url);
     if (!audioFilePath || !announcementAudioPath) {
-      throw new Error(
-        "Failed to download track or generate intro speech. Skipping song."
-      );
+      throw new Error('Failed to download track or generate intro speech. Skipping song.');
     }
 
-    return await this.combineAudioFiles(
-      announcementAudioPath,
-      audioFilePath
-    );
+    return await this.combineAudioFiles(announcementAudioPath, audioFilePath);
   }
 
   async getNextSong() {
@@ -112,10 +106,10 @@ class SongController {
       const concatenatedAudioPath = await this.gatherSongFiles(trackMetadata);
       QueueService.addToAudioQueue({
         path: concatenatedAudioPath,
-        metadata: trackMetadata,
+        metadata: trackMetadata
       });
     } catch (error) {
-      console.error("Error getting next song:", error);
+      console.error('Error getting next song:', error);
       this.getNextSong();
     }
   }
@@ -127,7 +121,7 @@ class SongController {
     if (stderr) {
       throw new Error(`Failed to download track from ${url}`);
     }
-    const fileName = url.split("/track/")[1].split("?")[0].replace(/\n/g, "");
+    const fileName = url.split('/track/')[1].split('?')[0].replace(/\n/g, '');
     return `./audio/${fileName}.mp3`;
   }
 }

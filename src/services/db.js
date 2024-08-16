@@ -1,7 +1,7 @@
-import { MongoClient } from "mongodb";
+import { MongoClient } from 'mongodb';
 
-const url = "mongodb://localhost:27017"; // Local MongoDB URL
-const dbName = "musicDB";
+const url = 'mongodb://localhost:27017'; // Local MongoDB URL
+const dbName = 'musicDB';
 
 async function connect() {
   const client = new MongoClient(url);
@@ -12,7 +12,7 @@ async function connect() {
 class DatabaseService {
   async getSongMetadata(trackId) {
     const db = await connect();
-    const track = await db.collection("tracks").findOne({ trackId });
+    const track = await db.collection('tracks').findOne({ trackId });
     return track;
   }
 
@@ -26,29 +26,24 @@ class DatabaseService {
       genres: metadata.genres,
       releaseDate: metadata.album.release_date,
       url: metadata.external_urls.spotify,
-      artUrl: metadata.album.images[0].url,
+      artUrl: metadata.album.images[0].url
     };
 
     // expire after 1 week
     await db
-      .collection("tracks")
-      .updateOne(
-        { trackId: metadata.id },
-        { $set: song },
-        { upsert: true },
-        { expireAfterSeconds: 604800 }
-      );
+      .collection('tracks')
+      .updateOne({ trackId: metadata.id }, { $set: song }, { upsert: true }, { expireAfterSeconds: 604800 });
 
     return song;
   }
 
   async markSongAsPlayed(trackId) {
     const db = await connect();
-    await db.collection("tracks").updateOne(
+    await db.collection('tracks').updateOne(
       { trackId },
       {
         $set: { lastPlayed: new Date() },
-        $inc: { playedCount: 1 },
+        $inc: { playedCount: 1 }
       }
     );
   }
@@ -57,31 +52,26 @@ class DatabaseService {
     const db = await connect();
     const cutoff = new Date(Date.now() - hours * 3600 * 1000);
     const songs = await db
-      .collection("tracks")
+      .collection('tracks')
       .find({ lastPlayed: { $gte: cutoff } })
       .toArray();
     console.log(
-      "Songs played in the last",
+      'Songs played in the last',
       hours,
-      "hours:",
-      songs.map((track) => track.title + " " + track.artist)
+      'hours:',
+      songs.map(track => track.title + ' ' + track.artist)
     );
     return songs;
   }
 
   async getLastPlayedSongs(limit) {
     const db = await connect();
-    const songs = await db
-      .collection("tracks")
-      .find()
-      .sort({ lastPlayed: -1 })
-      .limit(limit)
-      .toArray();
+    const songs = await db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
     console.log(
-      "Last played",
+      'Last played',
       limit,
-      "songs:",
-      songs.map((track) => track.title + " " + track.artist)
+      'songs:',
+      songs.map(track => track.title + ' ' + track.artist)
     );
     return songs;
   }

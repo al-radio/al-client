@@ -79,7 +79,7 @@ audio {
   margin-top: 20px;
 }
 
-#submit-form input[type="text"] {
+#submit-form input[type='text'] {
   width: 300px;
   padding: 5px;
   margin-right: 10px;

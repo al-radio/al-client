@@ -1,8 +1,8 @@
-import SpotifyService from "./spotify.js";
-import QueueService from "./queue.js";
-import DBService from "./db.js";
+import SpotifyService from './spotify.js';
+import QueueService from './queue.js';
+import DBService from './db.js';
 
-import path from "path";
+import path from 'path';
 class ClientService {
   constructor() {
     this.clients = [];
@@ -14,45 +14,41 @@ class ClientService {
       artist: metadata.artist,
       album: metadata.album,
       url: metadata.url,
-      artUrl: metadata.artUrl,
+      artUrl: metadata.artUrl
     };
   }
 
   serveWebpage(req, res) {
-    res.sendFile("index.html", { root: path.join(process.cwd(), "public") });
+    res.sendFile('index.html', { root: path.join(process.cwd(), 'public') });
   }
 
   addClientToStream(req, res) {
     res.writeHead(200, {
-      "Content-Type": "audio/mpeg",
-      Connection: "keep-alive",
+      'Content-Type': 'audio/mpeg',
+      Connection: 'keep-alive'
     });
 
     this.clients.push(res);
-    res.on("close", () => {
-      this.clients = this.clients.filter((client) => client !== res);
+    res.on('close', () => {
+      this.clients = this.clients.filter(client => client !== res);
     });
   }
 
   async submitSong(req, res) {
     const query = req.body.query;
     if (!query) {
-      return res
-        .status(400)
-        .json({ message: "Invalid Request. Expected 1 parameter 'query'." });
+      return res.status(400).json({ message: 'Invalid Request. Expected 1 parameter "query".' });
     }
 
     let trackId;
-    if (query.includes("spotify.com/track/")) {
-      trackId = query.split("/").pop();
+    if (query.includes('spotify.com/track/')) {
+      trackId = query.split('/').pop();
     } else if (/^[a-zA-Z0-9]{22}$/.test(query)) {
       trackId = query;
     }
-    const track = trackId
-      ? await SpotifyService.getTrackData(trackId)
-      : await SpotifyService.searchTrack(query);
+    const track = trackId ? await SpotifyService.getTrackData(trackId) : await SpotifyService.searchTrack(query);
 
-    console.log("Got user suggested track:", track.name, track.artists[0].name);
+    console.log('Got user suggested track:', track.name, track.artists[0].name);
 
     if (track) {
       // TODO: Check if the song has been played recently or if it is already in the user queue.
@@ -66,19 +62,14 @@ class ClientService {
   async getCurrentSongMetadata(req, res) {
     const metadata = QueueService.currentSongMetadata;
     if (!metadata) {
-      return res.status(500).json({ message: "No song is currently playing" });
+      return res.status(500).json({ message: 'No song is currently playing' });
     }
     res.json(this._clientifyMetadata(metadata));
   }
 
   async getSongHistory(req, res) {
-    const songHistory = await DBService.getLastPlayedSongs(
-      10,
-      QueueService.currentSongMetadata?.id
-    );
-    const reducedHistory = songHistory.map((song) =>
-      this._clientifyMetadata(song)
-    );
+    const songHistory = await DBService.getLastPlayedSongs(10, QueueService.currentSongMetadata?.id);
+    const reducedHistory = songHistory.map(song => this._clientifyMetadata(song));
     // remove current song from history
     if (reducedHistory.length && reducedHistory[0] === QueueService.currentSongMetadata) {
       reducedHistory.shift();
