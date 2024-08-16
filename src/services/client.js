@@ -8,6 +8,16 @@ class ClientService {
     this.clients = [];
   }
 
+  _clientifyMetadata(metadata) {
+    return {
+      title: metadata.title,
+      artist: metadata.artist,
+      album: metadata.album,
+      url: metadata.url,
+      artUrl: metadata.artUrl,
+    };
+  }
+
   serveWebpage(req, res) {
     res.sendFile("index.html", { root: path.join(process.cwd(), "public") });
   }
@@ -55,12 +65,18 @@ class ClientService {
 
   async getCurrentSongMetadata(req, res) {
     const metadata = QueueService.currentSongMetadata;
-    res.json(metadata);
+    if (!metadata) {
+      return res.status(404).json({ message: "No song is currently playing" });
+    }
+    res.json(this._clientifyMetadata(metadata));
   }
 
   async getSongHistory(req, res) {
     const songHistory = await DBService.getLastPlayedSongs(10);
-    res.json(songHistory);
+    const reducedHistory = songHistory.map((song) =>
+      this._clientifyMetadata(song)
+    );
+    res.json(reducedHistory);
   }
 }
 
