@@ -3,14 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming Radio</title>
+    <title>AI Radio</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the AI-Powered Radio Station</h1>
-    <audio id="audio-player" controls autoplay>
-        <source src="/stream" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-    <p>Enjoy the stream!</p>
+    <div class="container">
+        <h1>AL Radio</h1>
+        <div class="player-container">
+            <img id="album-art" src="" class="album-art">
+            <audio id="audio-player" src="/stream" type="audio/mpeg" controls autoplay>
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <div id="song-info">
+            <h2 id="song-title"></h2>
+            <p id="song-artist"></p>
+            <p id="song-album"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

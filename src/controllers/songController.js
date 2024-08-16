@@ -13,38 +13,25 @@ import { promisify } from "util";
 
 class SongController {
 
-  currentSongMetadata = null;
+  _writeDataToClients(data) {
+    ClientService.clients.forEach((client) => client.write(data));
+  }
 
-  async player() {
-    let { path, metadata } = QueueService.popNextAudioFile() || {};
-
-    while (true) {
-      if (path) {
-        if (QueueService.isAudioQueueEmpty()) {
-          console.log("Queue is empty, getting more songs");
-          this.getNextSong();
-        }
-        break;
-      }
-      // Wait for a second before checking the queue again
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      ({ path, metadata } = QueueService.popNextAudioFile() || {});
-    }
-
-    this.currentSongMetadata = metadata;
-    console.log("Playing audio file", path);
-
-    // Throttle the write stream to match the bitrate of the audio file
+  async _getBitrateFromAudioFile(path) {
     const ffprobeResult = await ffprobe(path, {
       path: ffprobeStatic.path,
     });
-    const bitrate = ffprobeResult.streams[0].bit_rate;
+    return ffprobeResult.streams[0].bit_rate;
+  }
+
+  async _streamToClients(path) {
+    const bitrate = await this._getBitrateFromAudioFile(path);
     const readable = fs.createReadStream(path);
     const throttle = new Throttle(bitrate / 8);
 
     throttle
       .on("data", (data) => {
-        ClientService.clients.forEach((client) => client.write(data));
+        this._writeDataToClients(data);
       })
       .on("end", () => {
         readable.close();
@@ -55,33 +42,22 @@ class SongController {
     readable.pipe(throttle);
   }
 
-  async submitSong(req, res) {
-    const query = req.body.query;
-    const track = await SpotifyService.searchTrack(query);
-    if (track) {
-      const success = SpotifyService.addToUserQueue(track.id);
-      res.json({ success });
-    } else {
-      res.status(404).json({ success: false });
+  async player() {
+    let { path, metadata } = QueueService.popNextAudioFile() || {};
+
+    while (true) {
+      if (path) {
+        // Found a song, get more if needed
+        if (QueueService.isAudioQueueEmpty()) this.getNextSong();
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      ({ path, metadata } = QueueService.popNextAudioFile() || {});
     }
-  }
 
-  async populateSuggestionQueue() {
-    // Get recommendations based on last five played
-    const lastFiveSongs = await DBService.getLastPlayedSongs(5);
-    const lastFiveTrackIds = lastFiveSongs.map((track) => track.trackId);
-    let suggestions = await SpotifyService.getRecommendations(lastFiveTrackIds);
-
-    // Do not suggest songs that have been played in the last two hours
-    const tooRecentlyPlayed = await DBService.getRecentlyPlayedSongs(2);
-    const tooRecentlyTrackIds = tooRecentlyPlayed.map((track) => track.trackId);
-    suggestions = suggestions.filter(
-      (track) => !tooRecentlyTrackIds.includes(track)
-    );
-
-    // Limit to 5 suggestions
-    suggestions = suggestions.slice(0, 5);
-    suggestions.forEach((track) => QueueService.addToSuggestionQueue(track));
+    QueueService.currentSongMetadata = metadata;
+    await this._streamToClients(path);
   }
 
   async combineAudioFiles(first, second) {
@@ -95,64 +71,64 @@ class SongController {
     return concatenatedAudioPath;
   }
 
+  async getTrackData(trackId) {
+    // Fetch metadata from the database or Spotify API
+    let trackMetadata = await DBService.getSongMetadata(trackId) || await SpotifyService.getTrackData(trackId);
+    return DBService.saveSongMetadata(trackMetadata);
+  }
+
+  async gatherSongFiles(trackMetadata) {
+    // Download the track and generate an intro speech. Skip song if either fails
+    const announcementText = await OpenAIService.generateSongIntro(
+      trackMetadata,
+      QueueService.getNextSongMetadata() || QueueService.currentSongMetadata
+    );
+    const announcementAudioPath = await OpenAIService.textToSpeech(
+      announcementText
+    );
+    const audioFilePath = await this.downloadTrack(trackMetadata.url);
+    if (!audioFilePath || !announcementAudioPath) {
+      throw new Error(
+        "Failed to download track or generate intro speech. Skipping song."
+      );
+    }
+
+    const concatenatedAudioPath = await this.combineAudioFiles(
+      announcementAudioPath,
+      audioFilePath
+    );
+
+    return concatenatedAudioPath;
+  }
+
   async getNextSong() {
     let nextTrackId = QueueService.popNextTrack();
     if (!nextTrackId) {
-      await this.populateSuggestionQueue();
+      await SpotifyService.populateSuggestionQueue();
       nextTrackId = QueueService.popNextTrack();
     }
 
     try {
-      // Fetch metadata from the database or Spotify API
-      let trackMetadata = await DBService.getSongMetadata(nextTrackId);
-      if (!trackMetadata) {
-        let spotifyTrackData = await SpotifyService.getTrackData(nextTrackId);
-        trackMetadata = await DBService.saveSongMetadata(spotifyTrackData);
-      }
-
-      // Download the track and generate an intro speech. Skip song if either fails
-      const announcementText = await OpenAIService.generateSongIntro(
-        trackMetadata,
-        QueueService.getNextSongMetadata() || this.currentSongMetadata
-      );
-      const announcementAudioPath = await OpenAIService.textToSpeech(
-        announcementText
-      );
-      const audioFilePath = await this.downloadTrack(trackMetadata.url);
-
-      if (!audioFilePath || !announcementAudioPath) {
-        this.getNextSong();
-        return;
-      }
-
-      const concatenatedAudioPath = await this.combineAudioFiles(
-        announcementAudioPath,
-        audioFilePath
-      );
-
+      let trackMetadata = await this.getTrackData(nextTrackId);
+      const concatenatedAudioPath = await this.gatherSongFiles(trackMetadata);
       QueueService.addToAudioQueue({
         path: concatenatedAudioPath,
         metadata: trackMetadata,
       });
     } catch (error) {
-      console.error("Error during song playback:", error);
+      console.error("Error getting next song:", error);
+      this.getNextSong();
     }
   }
 
   async downloadTrack(url) {
-    const command = `spotdl download ${url} --output="./audio/"`;
+    const command = `spotdl download ${url} --output="./audio/{track-id}"`;
     const execAsync = promisify(exec);
-    const { stdout, stderr } = await execAsync(command);
+    const { stderr } = await execAsync(command);
     if (stderr) {
-      console.error("Error downloading track:", stderr);
-      return;
+      throw new Error(`Failed to download track from ${url}`);
     }
-    let fileName =
-      stdout.match(/"(.*?)"/)?.[1] ||
-      stdout.match(/Skipping (.*?) \(file already exists\)/)?.[1]
-    fileName = fileName.replace(/[/\\?%*:|"<>]/g, '-');
-
-    console.log(`Downloaded track: ${fileName}.mp3`);
+    const fileName = url.split("/track/")[1].split("?")[0].replace(/\n/g, "");
     return `./audio/${fileName}.mp3`;
   }
 }

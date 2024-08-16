@@ -41,8 +41,7 @@ class OpenAiService {
       );
       return response.data.choices[0].message.content;
     } catch (error) {
-      console.error("Error during song intro generation:", error.response.data);
-      return "I am sorry, I cannot generate an introduction for this song.";
+      throw new Error("Failed to generate song intro:", error);
     }
   }
 
@@ -67,7 +66,7 @@ class OpenAiService {
       fs.writeFileSync(audioPath, response.data);
       return audioPath;
     } catch (error) {
-      console.error("Error during text to speech conversion:", error);
+      throw new Error("Failed to convert text to speech:", error);
       return;
     }
   }

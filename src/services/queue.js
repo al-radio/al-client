@@ -4,9 +4,10 @@ class QueueService {
     // Format: ["trackId1", "trackId2", ...]
     this.userQueue = [];
     // Format: ["trackId1", "trackId2", ...]
-    this.suggestionQueue = ["6EGVplf6GrIyKZSs99LXOp"];
+    this.suggestionQueue = [];
     // Format: [{path: "path/to/audio/file", metadata: {}}]
     this.audioQueue = [];
+    this.currentSongMetadata = null;
   }
 
   addToUserQueue(trackId) {

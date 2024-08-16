@@ -1,12 +1,14 @@
-import express, { json } from "express";
+import express from "express";
 import songRoutes from "./routes/routes.js";
 import SongController from "./controllers/songController.js";
 import SpotifyService from "./services/spotify.js";
 import fs from "fs";
+import path from "path";
+import bodyParser from "body-parser";
 
 const app = express();
-app.use(json());
-
+app.use(express.static(path.join(process.cwd(), "public")));
+app.use(express.json());
 app.use("/", songRoutes);
 
 const PORT = process.env.PORT || 3000;
