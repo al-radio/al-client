@@ -117,11 +117,13 @@ class SongController {
     console.log('Downloading track from:', url);
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
     const execAsync = promisify(exec);
-    const { stderr } = await execAsync(command);
+    const { stdout, stderr } = await execAsync(command);
+    console.log(stdout);
     if (stderr) {
       throw new Error(`Failed to download track from ${url}`);
     }
     const fileName = url.split('/track/')[1].split('?')[0].replace(/\n/g, '');
+    console.log('Downloaded track:', fileName);
     return `./audio/${fileName}.mp3`;
   }
 }
