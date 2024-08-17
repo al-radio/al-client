@@ -3,6 +3,9 @@ import QueueService from '../services/queue.js';
 import OpenAIService from '../services/openai.js';
 import DBService from '../services/db.js';
 import ClientService from '../services/client.js';
+import ProxyService from '../services/proxy.js';
+
+import { EndableError } from '../errors.js';
 
 import fs from 'fs';
 import Throttle from 'throttle';
@@ -109,20 +112,33 @@ class SongController {
       });
     } catch (error) {
       console.error('Error getting next song:', error);
+      if (error instanceof EndableError) {
+        console.error('Ending song playback');
+        return;
+      }
       this.getNextSong();
     }
   }
 
-  async downloadTrack(url) {
+  async downloadTrack(url, raiseError = false) {
     console.log('Downloading track from:', url);
+    await ProxyService.setProxy();
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
     const execAsync = promisify(exec);
-    const { stdout, stderr } = await execAsync(command);
-    console.log(stdout);
-    if (stderr) {
-      throw new Error(`Failed to download track from ${url}`);
+    await execAsync(command);
+
+    const fileName = url.split('/track/')[1].split('?')[0];
+
+    // check if the file was downloaded, if not switch proxies
+    if (!fs.existsSync(`./audio/${fileName}.mp3`)) {
+      ProxyService.markActiveProxyBad();
+      if (raiseError) {
+        throw new Error('Failed to download track twice. Skipping song.');
+      }
+      console.error('Failed to download track:', fileName, 'Retrying');
+      return this.downloadTrack(url, true);
     }
-    const fileName = url.split('/track/')[1].split('?')[0].replace(/\n/g, '');
+
     console.log('Downloaded track:', fileName);
     return `./audio/${fileName}.mp3`;
   }

@@ -6,8 +6,9 @@
 - get ffmpeg: `brew install ffmpeg`
 - get spotdl: `pip install spotdl`
 - `npm i`
-- populate `.env.local`
+- populate `.env.local` and rename to `.env`
 
 ## Run
 
-- `npm start` to run the db and server. client at `http://localhost:$PORT/`
+- `npm start` for deployment
+- `npm run start:local` to use .env file

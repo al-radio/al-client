@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "setup-audio": "mkdir -p ./audio && rm -rf ./audio/*",
-    "start:local": "npm run setup-audio && dotenv node src/index.js",
+    "start:local": "npm run setup-audio && node --env-file=.env src/index.js",
     "start": "npm run setup-audio && node src/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -44,6 +44,7 @@
     "express": "^4.19.2",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.1.0",
+    "https-proxy-agent": "^7.0.5",
     "mongodb": "^6.8.0",
     "openai": "^4.55.5",
     "throttle": "^1.0.3"
