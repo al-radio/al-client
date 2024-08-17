@@ -1,6 +1,7 @@
 import SpotifyService from './spotify.js';
 import QueueService from './queue.js';
 import DBService from './db.js';
+import SongController from '../controllers/songController.js';
 
 import path from 'path';
 class ClientService {
@@ -62,7 +63,7 @@ class ClientService {
   }
 
   async getCurrentSongMetadata(req, res) {
-    const metadata = QueueService.currentSongMetadata;
+    const metadata = SongController.currentSongMetadata;
     if (!metadata) {
       return res.status(500).json({ message: 'No song is currently playing' });
     }
@@ -70,10 +71,10 @@ class ClientService {
   }
 
   async getSongHistory(req, res) {
-    const songHistory = await DBService.getLastPlayedSongs(10, QueueService.currentSongMetadata?.id);
+    const songHistory = await DBService.getLastPlayedSongs(10, SongController.currentSongMetadata?.trackId);
     const reducedHistory = songHistory.map(song => this._clientifyMetadata(song));
     // remove current song from history
-    if (reducedHistory.length && reducedHistory[0] === QueueService.currentSongMetadata) {
+    if (reducedHistory.length && reducedHistory[0] === SongController.currentSongMetadata) {
       reducedHistory.shift();
     }
     res.json(reducedHistory);

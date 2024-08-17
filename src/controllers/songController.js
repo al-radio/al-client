@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 import SpotifyService from '../services/spotify.js';
 import QueueService from '../services/queue.js';
 import OpenAIService from '../services/openai.js';
@@ -17,17 +18,17 @@ import { promisify } from 'util';
 class SongController {
   constructor() {
     this.songPlaying = false;
+    this.currentSongMetadata = {};
   }
 
   // The song player. it takes the existing audio file and streams it to the clients.
   async player() {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (!this.songPlaying) {
         const { path, metadata } = QueueService.popNextAudioFile() || {};
         if (path) {
           this.songPlaying = true;
-          QueueService.currentSongMetadata = metadata;
+          this.currentSongMetadata = metadata;
           await DBService.markSongAsPlayed(metadata.trackId);
           this._streamToClients(path);
         }
@@ -38,7 +39,6 @@ class SongController {
 
   // The song gatherer. it gets the next song from the queue and downloads it.
   async songGatherer() {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       // dont need another song if there is one in the queue
       if (!QueueService.doesAudioQueueNeedFilling()) {
@@ -122,7 +122,7 @@ class SongController {
     const audioFilePath = await this._downloadTrack(trackMetadata.url);
     const announcementText = await OpenAIService.generateSongIntro(
       trackMetadata,
-      QueueService.getNextSongMetadata() || QueueService.currentSongMetadata
+      QueueService.getNextSongMetadata() || this.currentSongMetadata
     );
     const announcementAudioPath = await OpenAIService.textToSpeech(announcementText);
     if (!audioFilePath || !announcementAudioPath) {
@@ -140,7 +140,7 @@ class SongController {
       try {
         await ProxyService.setProxy();
         console.log('Downloading track from:', url);
-        await execAsync(command, { timeout: 100000 });
+        await execAsync(command, { timeout: 30000 });
 
         const fileName = url.split('/track/')[1].split('?')[0];
         const filePath = `./audio/${fileName}.mp3`;

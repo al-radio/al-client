@@ -1,4 +1,3 @@
-// src/services/openai.js
 import axios from 'axios';
 import fs from 'fs';
 
@@ -17,7 +16,7 @@ class OpenAiService {
        The song's genre is ${thisSongMetadata.genres}. Write an introduction for this song as someone who had an energetic emotional bond to music.
        Respond only with the text of the introduction and no extra scene-setting / emojis. Keep it to a few sentences.`;
 
-    if (previousSongMetadata) {
+    if (previousSongMetadata.title) {
       prompt += `\n\nYou had previously played "${previousSongMetadata.title}" by "${previousSongMetadata.artist}"
         of the album "${previousSongMetadata.album} with genres ${previousSongMetadata.genres}. Provide a smooth
         transition between the previous song and the upcoming one, noting any similarities or contrasts in style, genre, or mood.`;

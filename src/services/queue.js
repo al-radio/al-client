@@ -1,4 +1,3 @@
-// src/services/queue.js
 class QueueService {
   constructor() {
     // Format: ["trackId1", "trackId2", ...]
@@ -7,7 +6,6 @@ class QueueService {
     this.suggestionQueue = [];
     // Format: [{path: "path/to/audio/file", metadata: {}}]
     this.audioQueue = [];
-    this.currentSongMetadata = null;
     this.numSongsToPreload = 2;
   }
 
@@ -47,7 +45,7 @@ class QueueService {
   }
 
   getNextSongMetadata() {
-    return this.audioQueue[-1]?.metadata;
+    return this.audioQueue[this.audioQueue.length - 1]?.metadata;
   }
 }
 
