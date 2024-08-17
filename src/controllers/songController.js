@@ -115,11 +115,12 @@ class SongController {
         });
         break;
       } catch (error) {
-        console.error('Error getting next song:', error);
         if (error instanceof EndableError) {
-          console.error('Ending song playback');
-          break;
+          // something real bad happened, it will happen again. end the program
+          throw error;
         }
+        console.error('Error getting next song:', error);
+        console.log('Skipping song:', nextTrackId);
       }
     }
   }

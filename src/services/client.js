@@ -5,7 +5,7 @@ import DBService from './db.js';
 import path from 'path';
 class ClientService {
   constructor() {
-    this.clients = [];
+    this.clients = new Set();
   }
 
   _clientifyMetadata(metadata) {
@@ -28,9 +28,11 @@ class ClientService {
       Connection: 'keep-alive'
     });
 
-    this.clients.push(res);
+    this.clients.add(res);
+    console.log('New client connected to stream');
     res.on('close', () => {
-      this.clients = this.clients.filter(client => client !== res);
+      this.clients.delete(res);
+      console.log('Client disconnected from stream');
     });
   }
 
