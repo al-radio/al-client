@@ -121,24 +121,18 @@ class SongController {
   }
 
   async downloadTrack(url, raiseError = false) {
-    console.log('Downloading track from:', url);
     await ProxyService.setProxy();
+    console.log('Downloading track from:', url);
 
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
 
-    await new Promise((resolve, reject) => {
-      const child = exec(command);
-      const timeout = setTimeout(() => {
-        child.kill();
-        console.error('Download timed out after 45 seconds.');
-        reject();
-      }, 45000);
-
-      child.on('exit', () => {
-        clearTimeout(timeout);
-        resolve();
-      });
-    });
+    const execAsync = promisify(exec);
+    let stderr;
+    try {
+      stderr = await execAsync(command, { timeout: 60000 });
+    } catch {
+      console.error('Error downloading track:', stderr);
+    }
 
     // check if the file was downloaded, if not switch proxies
     const fileName = url.split('/track/')[1].split('?')[0];
