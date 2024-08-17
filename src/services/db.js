@@ -12,9 +12,17 @@ class DatabaseService {
     return client.db(this.dbName);
   }
 
+  async getDb() {
+    if (!this.db) {
+      await this.connect();
+    }
+    return this.db;
+  }
+
   async getSongMetadata(trackId) {
     console.log('Retrieving metadata for trackId', trackId);
-    const track = await this.db.collection('tracks').findOne({ trackId });
+    const db = await this.getDb();
+    const track = await db.collection('tracks').findOne({ trackId });
     return track;
   }
 
@@ -32,7 +40,8 @@ class DatabaseService {
     };
 
     // expire after 1 week
-    await this.db
+    const db = await this.getDb();
+    await db
       .collection('tracks')
       .updateOne({ trackId: metadata.id }, { $set: song }, { upsert: true }, { expireAfterSeconds: 604800 });
 
@@ -41,7 +50,8 @@ class DatabaseService {
 
   async markSongAsPlayed(trackId) {
     console.log('Marking song as played:', trackId);
-    await this.db.collection('tracks').updateOne(
+    const db = await this.getDb();
+    await db.collection('tracks').updateOne(
       { trackId },
       {
         $set: { lastPlayed: new Date() },
@@ -52,7 +62,8 @@ class DatabaseService {
 
   async getRecentlyPlayedSongs(hours) {
     const cutoff = new Date(Date.now() - hours * 3600 * 1000);
-    const songs = await this.db
+    const db = await this.getDb();
+    const songs = await db
       .collection('tracks')
       .find({ lastPlayed: { $gte: cutoff } })
       .toArray();
@@ -60,7 +71,8 @@ class DatabaseService {
   }
 
   async getLastPlayedSongs(limit) {
-    const songs = await this.db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
+    const db = await this.getDb();
+    const songs = await db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
     return songs;
   }
 }
