@@ -7,7 +7,7 @@
   "scripts": {
     "setup-audio": "mkdir -p ./audio && rm -rf ./audio/*",
     "start:local": "npm run setup-audio && node --env-file=.env src/index.js",
-    "start": "npm run setup-audio && node src/index.js",
+    "start": "npm run setup-audio && node --optimize_for_size --max_old_space_size=460 src/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,json,css,md}\""
