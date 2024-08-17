@@ -10,7 +10,7 @@ import DBService from './services/db.js';
 const app = express();
 app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(express.json());
-app.use('/', songRoutes);
+app.use((req, res) => res.sendStatus(404));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
@@ -36,4 +36,5 @@ app.listen(PORT, async () => {
   await SpotifyService.authenticate();
   await SongController.getNextSong();
   SongController.player();
+  app.use('/', songRoutes);
 });
