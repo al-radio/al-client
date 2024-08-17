@@ -9,7 +9,6 @@ class DatabaseService {
   async connect() {
     const client = new MongoClient(this.MongoURI);
     await client.connect();
-    console.log('Connected to database');
     return client.db(this.dbName);
   }
 
@@ -73,12 +72,6 @@ class DatabaseService {
   async getLastPlayedSongs(limit) {
     const db = await this.connect();
     const songs = await db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
-    console.log(
-      'Last played',
-      limit,
-      'songs:',
-      songs.map(track => track.title + ' ' + track.artist)
-    );
     return songs;
   }
 }
