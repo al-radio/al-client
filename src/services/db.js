@@ -8,8 +8,8 @@ class DatabaseService {
 
   async connect() {
     const client = new MongoClient(this.MongoURI);
-    this.db = await client.connect();
-    return client.db(this.dbName);
+    await client.connect();
+    this.db = client.db(this.dbName);
   }
 
   async getDb() {
