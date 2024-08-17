@@ -39,6 +39,19 @@ class SpotifyService {
     };
   }
 
+  async getArtistGenres(artistId) {
+    try {
+      const artistResponse = await axios.get(`${this.baseUrl}/artists/${artistId}`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      });
+      return artistResponse.data.genres;
+    } catch (error) {
+      throw new Error('Failed to get artist genres:', error);
+    }
+  }
+
   async searchTrack(query) {
     try {
       const response = await axios.get(`${this.baseUrl}/search`, {
@@ -51,7 +64,12 @@ class SpotifyService {
           limit: 1
         }
       });
-      return this.extractMetadata(response.data.tracks.items[0]);
+      // add genres to track metadata
+      const artistId = response.data.tracks.items[0].artists[0].id;
+      response.data.tracks.items[0].genres = await this.getArtistGenres(artistId);
+
+      const metadata = this.extractMetadata(response.data.tracks.items[0]);
+      return await DBService.saveSongMetadata(metadata);
     } catch (error) {
       if (error.response?.status === 401) {
         await this.authenticate();
@@ -92,15 +110,12 @@ class SpotifyService {
         }
       });
 
-      // get artist genres
+      // add genres to track metadata
       const artistId = response.data.artists[0].id;
-      const artistResponse = await axios.get(`${this.baseUrl}/artists/${artistId}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      });
-      response.data.genres = artistResponse.data.genres;
-      return this.extractMetadata(response.data);
+      response.data.genres = await this.getArtistGenres(artistId);
+
+      const metadata = this.extractMetadata(response.data);
+      return await DBService.saveSongMetadata(metadata);
     } catch (error) {
       if (error.response?.status === 401) {
         await this.authenticate();

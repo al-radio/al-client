@@ -63,7 +63,7 @@ class SongController {
   }
 
   async combineAudioFiles(first, second) {
-    const concatenatedAudioPath = `./audio/${new Date().getTime()}.mp3`;
+    const concatenatedAudioPath = `./audio/combined-${new Date().getTime()}.mp3`;
     const ffmpeg = promisify(exec);
     await ffmpeg(
       `ffmpeg -i "${first}" -i "${second}" -filter_complex '[0:0][1:0]concat=n=2:v=0:a=1[out]' -map '[out]' -y "${concatenatedAudioPath}"`
@@ -75,8 +75,7 @@ class SongController {
 
   async getTrackData(trackId) {
     // Fetch metadata from the database or Spotify API
-    let trackMetadata = (await DBService.getSongMetadata(trackId)) || (await SpotifyService.getTrackData(trackId));
-    return DBService.saveSongMetadata(trackMetadata);
+    return (await DBService.getSongMetadata(trackId)) || (await SpotifyService.getTrackData(trackId));
   }
 
   async gatherSongFiles(trackMetadata) {
@@ -115,6 +114,7 @@ class SongController {
   }
 
   async downloadTrack(url) {
+    console.log('Downloading track from:', url);
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
     const execAsync = promisify(exec);
     const { stderr } = await execAsync(command);
