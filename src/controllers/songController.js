@@ -124,7 +124,7 @@ class SongController {
     }
   }
 
-  async downloadTrack(url, raiseError = false) {
+  async downloadTrack(url, failCount = 0) {
     await ProxyService.setProxy();
     console.log('Downloading track from:', url);
 
@@ -141,11 +141,11 @@ class SongController {
     const fileName = url.split('/track/')[1].split('?')[0];
     if (!fs.existsSync(`./audio/${fileName}.mp3`)) {
       ProxyService.markActiveProxyBad();
-      if (raiseError) {
-        throw new Error('Failed to download track twice. Skipping song.');
+      if (failCount === 5) {
+        throw new Error(`Failed to download track ${failCount} times. Skipping song.`);
       }
-      console.error('Failed to download track:', fileName, 'Retrying');
-      return this.downloadTrack(url, true);
+      console.error('Failed to download track:', fileName, 'Retry:', failCount);
+      return this.downloadTrack(url, failCount + 1);
     }
 
     console.log('Downloaded track:', fileName);
