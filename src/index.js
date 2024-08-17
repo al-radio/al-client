@@ -33,6 +33,6 @@ app.listen(PORT, async () => {
   }
 
   await SpotifyService.authenticate();
-  await SongController.getNextSong();
+  SongController.songGatherer();
   SongController.player();
 });

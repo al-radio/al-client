@@ -8,6 +8,7 @@ class QueueService {
     // Format: [{path: "path/to/audio/file", metadata: {}}]
     this.audioQueue = [];
     this.currentSongMetadata = null;
+    this.numSongsToPreload = 2;
   }
 
   addToUserQueue(trackId) {
@@ -41,8 +42,8 @@ class QueueService {
     return this.audioQueue.shift();
   }
 
-  isAudioQueueEmpty() {
-    return this.audioQueue.length === 0;
+  doesAudioQueueNeedFilling() {
+    return this.audioQueue.length < this.numSongsToPreload;
   }
 
   getNextSongMetadata() {

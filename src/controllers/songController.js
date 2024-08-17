@@ -15,6 +15,62 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 class SongController {
+  constructor() {
+    this.songPlaying = false;
+  }
+
+  // The song player. it takes the existing audio file and streams it to the clients.
+  async player() {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (!this.songPlaying) {
+        const { path, metadata } = QueueService.popNextAudioFile() || {};
+        if (path) {
+          this.songPlaying = true;
+          QueueService.currentSongMetadata = metadata;
+          await DBService.markSongAsPlayed(metadata.trackId);
+          this._streamToClients(path);
+        }
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+
+  // The song gatherer. it gets the next song from the queue and downloads it.
+  async songGatherer() {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // dont need another song if there is one in the queue
+      if (!QueueService.doesAudioQueueNeedFilling()) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        continue;
+      }
+
+      const nextTrackId = QueueService.popNextTrack();
+      if (!nextTrackId) {
+        console.log('No more songs in queue. Populating suggestion queue.');
+        await SpotifyService.populateSuggestionQueue();
+        continue;
+      }
+
+      try {
+        const trackMetadata = await this.getTrackData(nextTrackId);
+        const concatenatedAudioPath = await this._gatherSongFiles(trackMetadata);
+        QueueService.addToAudioQueue({
+          path: concatenatedAudioPath,
+          metadata: trackMetadata
+        });
+      } catch (error) {
+        if (error instanceof EndableError) {
+          // something real bad happened, it will happen again. end the program
+          throw error;
+        }
+        console.error('Error getting next song:', error);
+        console.log('Skipping song:', nextTrackId);
+      }
+    }
+  }
+
   _writeDataToClients(data) {
     ClientService.clients.forEach(client => client.write(data));
   }
@@ -36,36 +92,16 @@ class SongController {
         this._writeDataToClients(data);
       })
       .on('end', () => {
+        console.log('Song ended');
+        this.songPlaying = false;
         readable.close();
         fs.unlinkSync(path);
-        this.player();
       });
 
     readable.pipe(throttle);
   }
 
-  async player() {
-    let { path, metadata } = QueueService.popNextAudioFile() || {};
-
-    do {
-      if (path) {
-        // Found a song, get more if needed
-        if (QueueService.isAudioQueueEmpty()) {
-          this.getNextSong();
-        }
-        break;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      ({ path, metadata } = QueueService.popNextAudioFile() || {});
-    } while (!path);
-
-    QueueService.currentSongMetadata = metadata;
-    DBService.markSongAsPlayed(metadata.trackId);
-    await this._streamToClients(path);
-  }
-
-  async combineAudioFiles(first, second) {
+  async _combineAudioFiles(first, second) {
     const concatenatedAudioPath = `./audio/combined-${new Date().getTime()}.mp3`;
     const ffmpeg = promisify(exec);
     await ffmpeg(
@@ -81,9 +117,9 @@ class SongController {
     return (await DBService.getSongMetadata(trackId)) || (await SpotifyService.getTrackData(trackId));
   }
 
-  async gatherSongFiles(trackMetadata) {
+  async _gatherSongFiles(trackMetadata) {
     // Download the track and generate an intro speech. Skip song if either fails
-    const audioFilePath = await this.downloadTrack(trackMetadata.url);
+    const audioFilePath = await this._downloadTrack(trackMetadata.url);
     const announcementText = await OpenAIService.generateSongIntro(
       trackMetadata,
       QueueService.getNextSongMetadata() || QueueService.currentSongMetadata
@@ -93,64 +129,37 @@ class SongController {
       throw new Error('Failed to download track or generate intro speech. Skipping song.');
     }
 
-    return await this.combineAudioFiles(announcementAudioPath, audioFilePath);
+    return await this._combineAudioFiles(announcementAudioPath, audioFilePath);
   }
 
-  async getNextSong() {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      let nextTrackId = QueueService.popNextTrack();
-      if (!nextTrackId) {
-        console.log('No more songs in queue. Populating suggestion queue.');
-        await SpotifyService.populateSuggestionQueue();
-        continue;
-      }
-
-      try {
-        let trackMetadata = await this.getTrackData(nextTrackId);
-        const concatenatedAudioPath = await this.gatherSongFiles(trackMetadata);
-        QueueService.addToAudioQueue({
-          path: concatenatedAudioPath,
-          metadata: trackMetadata
-        });
-        break;
-      } catch (error) {
-        if (error instanceof EndableError) {
-          // something real bad happened, it will happen again. end the program
-          throw error;
-        }
-        console.error('Error getting next song:', error);
-        console.log('Skipping song:', nextTrackId);
-      }
-    }
-  }
-
-  async downloadTrack(url, failCount = 0) {
-    await ProxyService.setProxy();
-    console.log('Downloading track from:', url);
-
+  async _downloadTrack(url) {
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
-
     const execAsync = promisify(exec);
-    try {
-      await execAsync(command, { timeout: 100000 });
-    } catch {
-      console.error('Error downloading track.');
-    }
 
-    // check if the file was downloaded, if not switch proxies
-    const fileName = url.split('/track/')[1].split('?')[0];
-    if (!fs.existsSync(`./audio/${fileName}.mp3`)) {
-      ProxyService.markActiveProxyBad();
-      if (failCount === 5) {
-        throw new Error(`Failed to download track ${failCount} times. Skipping song.`);
+    for (let failCount = 1; failCount <= 5; failCount++) {
+      try {
+        await ProxyService.setProxy();
+        console.log('Downloading track from:', url);
+        await execAsync(command, { timeout: 100000 });
+
+        const fileName = url.split('/track/')[1].split('?')[0];
+        const filePath = `./audio/${fileName}.mp3`;
+
+        if (fs.existsSync(filePath)) {
+          console.log('Downloaded track:', fileName);
+          return filePath;
+        }
+
+        // File not found, mark proxy as bad and retry
+        ProxyService.markActiveProxyBad();
+        console.error('Failed to download track:', fileName, 'Retry:', failCount);
+      } catch (error) {
+        console.error('Error downloading track:', error);
+        ProxyService.markActiveProxyBad();
+        console.error('Retrying download, attempt:', failCount);
       }
-      console.error('Failed to download track:', fileName, 'Retry:', failCount);
-      return this.downloadTrack(url, failCount + 1);
     }
-
-    console.log('Downloaded track:', fileName);
-    return `./audio/${fileName}.mp3`;
+    throw new Error('Failed to download track after 5 attempts. Skipping song.');
   }
 }
 
