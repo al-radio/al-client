@@ -5,9 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start:db": "mkdir -p data/db && mongod --dbpath data/db",
-    "start:service": "dotenv node src/index.js",
-    "start": "npm run start:db & npm run start:service",
+    "start:local": "dotenv node src/index.js",
+    "start": "node src/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,json,css,md}\""
