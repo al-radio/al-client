@@ -48,7 +48,7 @@ class ClientService {
     }
     const track = trackId ? await SpotifyService.getTrackData(trackId) : await SpotifyService.searchTrack(query);
 
-    console.log('Got user suggested track:', track.name, track.artists[0].name);
+    console.log('Got user suggested track:', track.title, track.artist);
 
     if (track) {
       // TODO: Check if the song has been played recently or if it is already in the user queue.
