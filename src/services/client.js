@@ -52,7 +52,7 @@ class ClientService {
 
     if (track) {
       // TODO: Check if the song has been played recently or if it is already in the user queue.
-      const success = QueueService.addToUserQueue(track.id);
+      const success = QueueService.addToUserQueue(track.trackId);
       res.json({ success });
     } else {
       res.status(404).json({ success: false });

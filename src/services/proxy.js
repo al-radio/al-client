@@ -17,7 +17,7 @@ class ProxyService {
       this.proxyList.pop();
       this.proxyList = proxyList.map(proxy => this.parseProxy(proxy));
     } catch (error) {
-      console.error('Failed to refresh proxy list. ');
+      console.error('Failed to refresh proxy list.');
     }
   }
 
