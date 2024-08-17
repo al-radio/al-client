@@ -4,13 +4,13 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 
 class ProxyService {
   constructor() {
-    this.apiUrl =
-      'https://api.proxyscrape.com/v3/free-proxy-list/get?request=displayproxies&country=ca,us&protocol=http&proxy_format=protocolipport&format=text&timeout=2000';
+    this.apiUrl = process.env.PROXY_LIST_URL;
     this.activeProxy = {};
     this.proxyList = [];
   }
 
   async refreshProxyList() {
+    if (!this.apiUrl) return;
     try {
       const response = await axios.get(this.apiUrl);
       let proxyList = response.data.split('\r\n');
@@ -22,26 +22,31 @@ class ProxyService {
   }
 
   async setProxy() {
+    if (!this.apiUrl) return;
     const proxy = await this._getProxy();
     process.env.http_proxy = `http://${proxy.host}:${proxy.port}`;
   }
 
   parseProxy(proxy) {
+    if (!this.apiUrl) return;
     proxy = proxy.replace('http://', '');
     const [host, port] = proxy.split(':');
     return { host: host, port: +port };
   }
 
   unsetProxy() {
+    if (!this.apiUrl) return;
     process.env.http_proxy = '';
   }
 
   markActiveProxyBad() {
+    if (!this.apiUrl) return;
     this._markProxyBad(this.activeProxy);
     this.activeProxy = {};
   }
 
   async _testProxy(proxy) {
+    if (!this.apiUrl) return;
     const testUrl = 'https://httpbin.org/ip';
     try {
       console.log('Testing proxy:', proxy);
@@ -59,6 +64,7 @@ class ProxyService {
   }
 
   async _getProxy(raise = false) {
+    if (!this.apiUrl) return;
     if (this.activeProxy.host && (await this._testProxy(this.activeProxy))) {
       return this.activeProxy;
     }
@@ -87,6 +93,7 @@ class ProxyService {
   }
 
   _markProxyBad(proxy) {
+    if (!this.apiUrl) return;
     this.proxyList = this.proxyList.filter(p => p !== proxy);
   }
 }

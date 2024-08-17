@@ -97,26 +97,30 @@ class SongController {
   }
 
   async getNextSong() {
-    let nextTrackId = QueueService.popNextTrack();
-    if (!nextTrackId) {
-      await SpotifyService.populateSuggestionQueue();
-      nextTrackId = QueueService.popNextTrack();
-    }
-
-    try {
-      let trackMetadata = await this.getTrackData(nextTrackId);
-      const concatenatedAudioPath = await this.gatherSongFiles(trackMetadata);
-      QueueService.addToAudioQueue({
-        path: concatenatedAudioPath,
-        metadata: trackMetadata
-      });
-    } catch (error) {
-      console.error('Error getting next song:', error);
-      if (error instanceof EndableError) {
-        console.error('Ending song playback');
-        return;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let nextTrackId = QueueService.popNextTrack();
+      if (!nextTrackId) {
+        console.log('No more songs in queue. Populating suggestion queue.');
+        await SpotifyService.populateSuggestionQueue();
+        continue;
       }
-      this.getNextSong();
+
+      try {
+        let trackMetadata = await this.getTrackData(nextTrackId);
+        const concatenatedAudioPath = await this.gatherSongFiles(trackMetadata);
+        QueueService.addToAudioQueue({
+          path: concatenatedAudioPath,
+          metadata: trackMetadata
+        });
+        break;
+      } catch (error) {
+        console.error('Error getting next song:', error);
+        if (error instanceof EndableError) {
+          console.error('Ending song playback');
+          break;
+        }
+      }
     }
   }
 
@@ -127,11 +131,10 @@ class SongController {
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
 
     const execAsync = promisify(exec);
-    let stderr;
     try {
-      stderr = await execAsync(command, { timeout: 60000 });
+      await execAsync(command, { timeout: 100000 });
     } catch {
-      console.error('Error downloading track:', stderr);
+      console.error('Error downloading track.');
     }
 
     // check if the file was downloaded, if not switch proxies

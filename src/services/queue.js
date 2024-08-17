@@ -32,9 +32,9 @@ class QueueService {
     return this.userQueue.length ? this.userQueue.shift() : this.suggestionQueue.shift();
   }
 
-  addToAudioQueue(audioFilePath) {
-    console.log('Added audio file', audioFilePath, 'to audio queue');
-    this.audioQueue.push(audioFilePath);
+  addToAudioQueue(audioFile) {
+    console.log('Added audio file', audioFile.metadata?.title, ' - ', audioFile.metadata?.artist, 'to audio queue');
+    this.audioQueue.push(audioFile);
   }
 
   popNextAudioFile() {
