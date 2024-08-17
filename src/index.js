@@ -5,6 +5,7 @@ import SpotifyService from './services/spotify.js';
 import ProxyService from './services/proxy.js';
 import QueueService from './services/queue.js';
 import path from 'path';
+import DBService from './services/db.js';
 
 const app = express();
 app.use(express.static(path.join(process.cwd(), 'public')));
@@ -31,6 +32,7 @@ app.listen(PORT, async () => {
     console.error('No initial songs provided. Gathering suggested tracks from Spotify instead.');
   }
 
+  await DBService.connect();
   await SpotifyService.authenticate();
   await SongController.getNextSong();
   SongController.player();

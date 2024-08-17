@@ -4,12 +4,11 @@ class DatabaseService {
   constructor() {
     this.MongoURI = process.env.MONGO_URI;
     this.dbName = 'musicDB';
-    this.db = this.connect();
   }
 
   async connect() {
     const client = new MongoClient(this.MongoURI);
-    await client.connect();
+    this.db = await client.connect();
     return client.db(this.dbName);
   }
 
