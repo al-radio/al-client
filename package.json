@@ -5,8 +5,9 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start:local": "dotenv node src/index.js",
-    "start": "node src/index.js",
+    "setup-audio": "mkdir -p ./audio && rm -rf ./audio/*",
+    "start:local": "npm run setup-audio && dotenv node src/index.js",
+    "start": "npm run setup-audio && node src/index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,json,css,md}\""
