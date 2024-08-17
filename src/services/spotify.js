@@ -125,7 +125,7 @@ class SpotifyService {
     }
   }
 
-  async populateSuggestionQueue(numberOfSuggestions = 5) {
+  async populateSuggestionQueue(numberOfSuggestions = 2) {
     // Get recommendations based on last five played
     const lastFiveSongs = await DBService.getLastPlayedSongs(5);
     const lastFiveTrackIds = lastFiveSongs.map(track => track.trackId);

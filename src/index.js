@@ -22,8 +22,9 @@ app.listen(PORT, async () => {
   }
 
   // Choose initial songs
-  if (process.env.INITIAL_SONGS) {
-    const initialTrackIds = process.env.INITIAL_SONGS.split(',');
+  if (process.env.INITIAL_TRACK_IDS) {
+    const initialTrackIds = process.env.INITIAL_TRACK_IDS.split(',');
+    console.log('Using initial songs:', initialTrackIds);
     for (const trackId of initialTrackIds) {
       QueueService.addToSuggestionQueue(trackId);
     }
