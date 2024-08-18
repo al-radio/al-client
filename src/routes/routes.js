@@ -7,6 +7,6 @@ router.get('/stream', (req, res) => ClientService.addClientToStream(req, res));
 router.get('/song', (req, res) => ClientService.getCurrentSongMetadata(req, res));
 router.get('/history', (req, res) => ClientService.getSongHistory(req, res));
 
-router.post('/submit', (req, res) => ClientService.submitSong(req, res));
+router.post('/submit', (req, res) => ClientService.submitSongRequest(req, res));
 
 export default router;

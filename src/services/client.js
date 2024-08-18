@@ -42,7 +42,7 @@ class ClientService extends EventEmitter {
     });
 
     this.clients.add(res);
-    console.log('clientConnected');
+    console.log('Client connected to stream');
     this.emit('clientConnected');
     res.on('close', () => {
       this.clients.delete(res);
@@ -50,25 +50,26 @@ class ClientService extends EventEmitter {
     });
   }
 
-  async submitSong(req, res) {
-    const query = req.body.query;
-    if (!query) {
-      return res.status(400).json({ message: 'Invalid Request. Expected 1 parameter "query".' });
-    }
-
-    let trackId;
-    if (query.includes('spotify.com/track/')) {
-      trackId = query.split('/').pop();
-    } else if (/^[a-zA-Z0-9]{22}$/.test(query)) {
-      trackId = query;
-    }
-
-    const track = trackId ? await SpotifyService.getTrackData(trackId) : await SpotifyService.searchTrack(query);
-    trackId = track.trackId;
-    console.log('Got user suggested track:', track.title, track.artist);
-
+  async _handleSearchQuerySubmit(req, res, query) {
+    const track = await SpotifyService.searchTrack(query);
     if (!track.trackId) {
-      res.status(404).json({ success: false, message: 'Song not found' });
+      res.status(404).json({ message: 'Song not found' });
+      return;
+    }
+
+    if (QueueService.isUserQueueFull()) {
+      res.status(400).json({ message: 'User queue is full.' });
+      console.log('User queue is full');
+      return false;
+    }
+
+    res.json(this._clientifyMetadata(track));
+  }
+
+  async _handleDirectTrackSubmit(req, res, trackId) {
+    const track = await SpotifyService.getTrackData(trackId);
+    if (!track.trackId) {
+      res.status(404).json({ message: 'Song not found' });
       return;
     }
 
@@ -83,7 +84,7 @@ class ClientService extends EventEmitter {
       console.log('Song is already in the queue');
       return false;
     }
-    // check that it hasnt been played recently
+
     if (await DBService.hasSongBeenPlayedRecently(trackId)) {
       res.status(400).json({ message: 'Song has been played too recently.' });
       console.log('Song has been played recently');
@@ -91,27 +92,33 @@ class ClientService extends EventEmitter {
     }
 
     await QueueService.addToUserQueue(trackId);
-    res.json({ success: true });
+    res.end();
+  }
+
+  async submitSongRequest(req, res) {
+    const query = req.body.query;
+    if (!query) {
+      return res.status(400).json({ message: 'Invalid Request. Expected 1 parameter "query".' });
+    }
+
+    let trackId;
+    if (query.includes('spotify.com/track/')) {
+      trackId = query.split('/').pop();
+    } else if (/^[a-zA-Z0-9]{22}$/.test(query)) {
+      trackId = query;
+    }
+
+    // TODO: Need a check for if the song is in the process of downloading.
+    if (trackId) {
+      return this._handleDirectTrackSubmit(req, res, trackId);
+    } else {
+      return this._handleSearchQuerySubmit(req, res, query);
+    }
   }
 
   async getCurrentSongMetadata(req, res) {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    const sendMetadata = metadata => {
-      res.write(`data: ${JSON.stringify(metadata)}\n\n`);
-    };
-    sendMetadata(this._clientifyMetadata(SongController.currentSongMetadata));
-
-    SongController.on('currentSongMetadataUpdated', metadata => {
-      sendMetadata(this._clientifyMetadata(metadata));
-    });
-
-    req.on('close', () => {
-      SongController.off('currentSongMetadataUpdated', sendMetadata);
-      res.end();
-    });
+    const metadata = this._clientifyMetadata(SongController.currentSongMetadata);
+    res.json(metadata);
   }
 
   async getSongHistory(req, res) {

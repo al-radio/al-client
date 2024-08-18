@@ -38,7 +38,12 @@ class SongController extends EventEmitter {
   // The song player. it takes the existing audio file and streams it to the clients.
   async player() {
     if (this.songPlaying || !ClientService.hasActiveClients() || QueueService.isAudioQueueEmpty()) {
-      console.log('Song player not ready:', this.songPlaying, !ClientService.hasActiveClients(), QueueService.isAudioQueueEmpty());
+      console.log(
+        'Song player not ready:',
+        this.songPlaying,
+        !ClientService.hasActiveClients(),
+        QueueService.isAudioQueueEmpty()
+      );
       return;
     }
     const { path, metadata } = QueueService.popNextAudioFile() || {};
