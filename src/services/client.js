@@ -60,9 +60,10 @@ class ClientService extends EventEmitter {
     }
 
     const track = trackId ? await SpotifyService.getTrackData(trackId) : await SpotifyService.searchTrack(query);
+    trackId = track.trackId;
     console.log('Got user suggested track:', track.title, track.artist);
 
-    if (!track.title) {
+    if (!track.trackId) {
       res.status(404).json({ success: false, message: 'Song not found' });
       return;
     }
