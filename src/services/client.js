@@ -63,11 +63,23 @@ class ClientService {
   }
 
   async getCurrentSongMetadata(req, res) {
-    const metadata = SongController.currentSongMetadata;
-    if (!metadata) {
-      return res.status(500).json({ message: 'No song is currently playing' });
-    }
-    res.json(this._clientifyMetadata(metadata));
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sendMetadata = metadata => {
+      res.write(`data: ${JSON.stringify(metadata)}\n\n`);
+    };
+    sendMetadata(this._clientifyMetadata(SongController.currentSongMetadata));
+
+    SongController.on('currentSongMetadataUpdated', metadata => {
+      sendMetadata(this._clientifyMetadata(metadata));
+    });
+
+    req.on('close', () => {
+      SongController.off('currentSongMetadataUpdated', sendMetadata);
+      res.end();
+    });
   }
 
   async getSongHistory(req, res) {

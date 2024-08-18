@@ -1,6 +1,5 @@
-let CURRENT_SONG_METADATA = {};
-
 document.addEventListener('DOMContentLoaded', () => {
+  let CURRENT_SONG_METADATA = {};
   const songTitle = document.getElementById('song-title');
   const songArtist = document.getElementById('song-artist');
   const songAlbum = document.getElementById('song-album');
@@ -9,23 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitForm = document.getElementById('submit-form');
   const songQueryInput = document.getElementById('song-query');
 
-  async function getSongInfo() {
-    try {
-      const response = await fetch('/song');
-      if (!response.ok) throw new Error('Failed to fetch song metadata');
+  const currentSongDataEventSource = new EventSource('/song');
+  currentSongDataEventSource.onmessage = event => {
+    const songData = JSON.parse(event.data);
+    updateSongHistory(songData);
+    CURRENT_SONG_METADATA = songData;
+    songTitle.textContent = CURRENT_SONG_METADATA.title;
+    songArtist.textContent = `${CURRENT_SONG_METADATA.artist}`;
+    songAlbum.textContent = `${CURRENT_SONG_METADATA.album}`;
+    albumArt.src = CURRENT_SONG_METADATA.artUrl;
+  };
 
-      const songData = await response.json();
-      if (songData.title === CURRENT_SONG_METADATA.title) return;
-      songTitle.textContent = songData.title;
-      songArtist.textContent = `${songData.artist}`;
-      songAlbum.textContent = `${songData.album}`;
-      albumArt.src = songData.artUrl || 'default-album-art.png';
-      await updateSongHistory(CURRENT_SONG_METADATA);
-      CURRENT_SONG_METADATA = songData;
-    } catch (error) {
-      console.error('Error fetching song info:', error);
-    }
-  }
+  currentSongDataEventSource.onerror = error => {
+    console.error('EventSource failed:', error);
+    currentSongDataEventSource.close();
+  };
 
   async function getSongHistory() {
     try {
@@ -48,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function updateSongHistory(songData) {
+  function updateSongHistory(songData) {
     if (!songData.title) return;
     // Add the new song to the top of the history list
     const listItem = document.createElement('li');
@@ -80,18 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   submitForm.addEventListener('submit', event => {
-    event.preventDefault(); // Prevent the form from submitting the default way
+    event.preventDefault();
     const query = songQueryInput.value.trim();
     if (query) {
       submitSong(query);
-      songQueryInput.value = ''; // Clear the input field
+      songQueryInput.value = '';
     }
   });
 
-  // Initial fetch of song info and history
-  getSongInfo();
   getSongHistory();
-
-  // Poll for song info updates every 10 seconds
-  setInterval(getSongInfo, 10000);
 });

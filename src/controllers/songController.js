@@ -14,9 +14,11 @@ import ffprobe from 'ffprobe';
 import ffprobeStatic from 'ffprobe-static';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import EventEmitter from 'events';
 
-class SongController {
+class SongController extends EventEmitter {
   constructor() {
+    super();
     this.songPlaying = false;
     this.currentSongMetadata = {};
   }
@@ -27,9 +29,7 @@ class SongController {
       if (!this.songPlaying) {
         const { path, metadata } = QueueService.popNextAudioFile() || {};
         if (path) {
-          this.songPlaying = true;
-          this.currentSongMetadata = metadata;
-          await DBService.markSongAsPlayed(metadata.trackId);
+          await this._markSongAsPlayed(metadata);
           this._streamToClients(path);
         }
       }
@@ -69,6 +69,18 @@ class SongController {
         console.log('Skipping song:', nextTrackId);
       }
     }
+  }
+
+  async _markSongAsPlayed(metadata) {
+    this.songPlaying = true;
+    this.currentSongMetadata = metadata;
+    await DBService.markSongAsPlayed(metadata.trackId);
+    new Promise(resolve => {
+      setTimeout(() => {
+        this.emit('currentSongMetadataUpdated', metadata);
+        resolve();
+      }, 5000);
+    });
   }
 
   _writeDataToClients(data) {
@@ -136,7 +148,7 @@ class SongController {
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
     const execAsync = promisify(exec);
 
-    for (let failCount = 1; failCount <= 5; failCount++) {
+    for (let failCount = 1; failCount <= 10; failCount++) {
       try {
         await ProxyService.setProxy();
         console.log('Downloading track from:', url);
@@ -159,7 +171,7 @@ class SongController {
         console.error('Retrying download, attempt:', failCount);
       }
     }
-    throw new Error('Failed to download track after 5 attempts. Skipping song.');
+    throw new Error('Failed to download track after 10 attempts. Skipping song.');
   }
 }
 

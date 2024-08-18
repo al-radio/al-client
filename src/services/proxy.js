@@ -63,6 +63,9 @@ class ProxyService {
     }
   }
 
+  // Go through the proxy list and find a working proxy.
+  // If no working proxies are found, refresh the list and try again.
+  // If still no proxies are found, throw an error to end the program.
   async _getProxy(raise = false) {
     if (!this.apiUrl) return;
     if (this.activeProxy.host && (await this._testProxy(this.activeProxy))) {
@@ -84,7 +87,7 @@ class ProxyService {
     }
 
     if (raise) {
-      // throw a special error if we couldn't find a working proxy to end the program
+      // No working proxies means we can't continue. End the program.
       throw new NoProxyError('No working proxies found');
     }
 
