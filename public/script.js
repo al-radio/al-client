@@ -161,4 +161,15 @@ albumArt.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
   getCurrentSongMetadata();
   setInterval(getCurrentSongMetadata, 10000);
+
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', () => {
+      handleReplayAudio();
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audioPlayer.pause();
+    });
+    navigator.mediaSession.setActionHandler('seekbackward', null);
+    navigator.mediaSession.setActionHandler('seekforward', null);
+  }
 });
