@@ -57,6 +57,17 @@ function updateSongHistory(songData) {
   historyList.appendChild(listItem);
 }
 
+function updateMediaSessionMetadata() {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: CURRENT_SONG_METADATA.title,
+      artist: CURRENT_SONG_METADATA.artist,
+      album: CURRENT_SONG_METADATA.album,
+      artwork: [{ src: CURRENT_SONG_METADATA.artUrl, sizes: '96x96', type: 'image/png' }]
+    });
+  }
+}
+
 async function getCurrentSongMetadata() {
   try {
     const response = await fetch('/song');
@@ -78,6 +89,7 @@ async function getCurrentSongMetadata() {
     albumArt.src = metadata.artUrl;
     albumArt.alt = metadata.title;
     getSongHistory();
+    updateMediaSessionMetadata();
   } catch (error) {
     console.error('Error fetching current song metadata:', error);
   }
