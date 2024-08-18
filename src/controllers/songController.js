@@ -27,7 +27,7 @@ class SongController extends EventEmitter {
     // Event listeners for the song player
     QueueService.on('songQueued', () => this.player());
     ClientService.on('clientConnected', () => this.player());
-    this.on('songStartedPlaying', () => this.player());
+    this.on('songEnded', () => this.player());
 
     // Event listeners for the song gatherer
     QueueService.on('audioQueueNeedsFilling', () => this.songGatherer());
@@ -38,6 +38,7 @@ class SongController extends EventEmitter {
   // The song player. it takes the existing audio file and streams it to the clients.
   async player() {
     if (this.songPlaying || !ClientService.hasActiveClients() || QueueService.isAudioQueueEmpty()) {
+      console.log('Song player not ready:', this.songPlaying, !ClientService.hasActiveClients(), QueueService.isAudioQueueEmpty());
       return;
     }
     const { path, metadata } = QueueService.popNextAudioFile() || {};
@@ -78,7 +79,6 @@ class SongController extends EventEmitter {
 
   async _markSongAsPlayed(metadata) {
     this.songPlaying = true;
-    this.emit('songStartedPlaying');
     this.currentSongMetadata = metadata;
     await DBService.markSongAsPlayed(metadata.trackId);
     new Promise(resolve => {
@@ -110,8 +110,9 @@ class SongController extends EventEmitter {
         this._writeDataToClients(data);
       })
       .on('end', () => {
-        console.log('Song ended');
         this.songPlaying = false;
+        console.log('Song ended');
+        this.emit('songEnded');
         readable.close();
         fs.unlinkSync(path);
       });

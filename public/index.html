@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -11,14 +11,8 @@
       <h1>AL Radio</h1>
       <div class="player-container">
         <img id="album-art" src="" class="album-art" />
-        <audio
-          id="audio-player"
-          src="/stream"
-          type="audio/mpeg"
-          controls
-          autoplay
-        >
-          Your browser does not support the audio element.
+        <audio id="audio-player">
+          <source src="/stream" type="audio/mpeg" />
         </audio>
       </div>
       <div id="song-info">
@@ -29,12 +23,7 @@
       <div id="submit-container">
         <h2>Submit a Song</h2>
         <form id="submit-form">
-          <input
-            type="text"
-            id="song-query"
-            placeholder="Input search query or Spotify TrackID/Url"
-            required
-          />
+          <input type="text" id="song-query" placeholder="Input search query or Spotify TrackID/Url" required />
           <button type="submit">Submit</button>
         </form>
       </div>

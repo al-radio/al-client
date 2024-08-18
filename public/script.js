@@ -6,7 +6,27 @@ const albumArt = document.getElementById('album-art');
 const historyList = document.getElementById('history-list');
 const submitForm = document.getElementById('submit-form');
 const songQueryInput = document.getElementById('song-query');
+const audioPlayer = document.getElementById('audio-player');
 const currentSongDataEventSource = new EventSource('/song');
+
+// Use this when resuming playback to ensure the stream is up to date
+function handleReplayAudio() {
+  if (!audioPlayer) return;
+  if (!audioPlayer.paused) {
+    audioPlayer.pause();
+  }
+
+  // use a unique url param to not use cached data
+  const audioSourceUrl = '/stream';
+  const uniqueUrl = audioSourceUrl + '?t=' + Date.now();
+  audioPlayer.src = uniqueUrl;
+
+  // Load and play the audio
+  audioPlayer.load();
+  audioPlayer.volume = 1.0; // Set desired volume
+  audioPlayer.play();
+  audioPlayer.currentTime = 0;
+}
 
 async function getSongHistory() {
   try {
@@ -96,4 +116,15 @@ window.addEventListener('beforeunload', function () {
 document.addEventListener('DOMContentLoaded', () => {
   getSongHistory();
   connectToSSE();
+});
+
+// add a listener for the album art. if it is clicked, toggle the play/pauase state
+albumArt.addEventListener('click', () => {
+  if (audioPlayer.paused) {
+    console.log('playing audio');
+    handleReplayAudio();
+  } else {
+    console.log('pausing audio');
+    audioPlayer.pause();
+  }
 });
