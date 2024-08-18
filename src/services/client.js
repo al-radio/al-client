@@ -18,7 +18,7 @@ class ClientService extends EventEmitter {
       title: metadata.title,
       artist: metadata.artist,
       album: metadata.album,
-      url: metadata.url,
+      urlForPlatform: metadata.urlForPlatform,
       artUrl: metadata.artUrl
     };
   }
@@ -57,12 +57,6 @@ class ClientService extends EventEmitter {
       return;
     }
 
-    if (QueueService.isUserQueueFull()) {
-      res.status(400).json({ message: 'User queue is full.' });
-      console.log('User queue is full');
-      return false;
-    }
-
     res.json(this._clientifyMetadata(track));
   }
 
@@ -73,13 +67,7 @@ class ClientService extends EventEmitter {
       return;
     }
 
-    if (QueueService.isUserQueueFull()) {
-      res.status(400).json({ message: 'User queue is full.' });
-      console.log('User queue is full');
-      return false;
-    }
-
-    if (QueueService.userQueueHasTrack(trackId) || QueueService.audioQueueHasTrack(trackId)) {
+    if (this._isTrackIdQueued(trackId)) {
       res.status(400).json({ message: 'Song is already in the queue.' });
       console.log('Song is already in the queue');
       return false;
@@ -95,7 +83,21 @@ class ClientService extends EventEmitter {
     res.end();
   }
 
+  _isTrackIdQueued(trackId) {
+    return (
+      QueueService.userQueueHasTrack(trackId) ||
+      QueueService.audioQueueHasTrack(trackId) ||
+      SongController.isTrackIdPlayingOrDownloading(trackId)
+    );
+  }
+
   async submitSongRequest(req, res) {
+    if (QueueService.isUserQueueFull()) {
+      res.status(400).json({ message: 'The queue is full.' });
+      console.log('User queue is full');
+      return false;
+    }
+
     const query = req.body.query;
     if (!query) {
       return res.status(400).json({ message: 'Invalid Request. Expected 1 parameter "query".' });

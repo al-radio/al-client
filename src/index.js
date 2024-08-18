@@ -32,6 +32,6 @@ app.listen(PORT, async () => {
     console.error('No initial songs provided. Gathering suggested tracks from Spotify instead.');
   }
 
-  await SpotifyService.authenticate();
+  await SpotifyService.initialize();
   SongController.initialize();
 });

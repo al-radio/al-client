@@ -20,32 +20,20 @@ class DatabaseService {
   }
 
   async getSongMetadata(trackId) {
-    console.log('Retrieving metadata for trackId', trackId);
+    console.log('Retrieving metadata for from database for trackid:', trackId);
     const db = await this.getDb();
     const track = await db.collection('tracks').findOne({ trackId });
     return track;
   }
 
   async saveSongMetadata(metadata) {
-    console.log('Saving metadata for trackId', metadata.trackId);
-    const song = {
-      trackId: metadata.trackId,
-      title: metadata.title,
-      artist: metadata.artist,
-      album: metadata.album,
-      genres: metadata.genres,
-      releaseDate: metadata.releaseDate,
-      url: metadata.url,
-      artUrl: metadata.artUrl
-    };
+    console.log('Saving data to database for trackid:', metadata.trackId);
 
     // expire after 1 week
     const db = await this.getDb();
     await db
       .collection('tracks')
-      .updateOne({ trackId: metadata.id }, { $set: song }, { upsert: true }, { expireAfterSeconds: 604800 });
-
-    return song;
+      .updateOne({ trackId: metadata.trackId }, { $set: metadata }, { upsert: true }, { expireAfterSeconds: 604800 });
   }
 
   async markSongAsPlayed(trackId) {

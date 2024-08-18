@@ -21,6 +21,8 @@ class SongController extends EventEmitter {
     super();
     this.songPlaying = false;
     this.currentSongMetadata = {};
+    this.songDownloading = false;
+    this.songDownloadingTrackId = null;
   }
 
   initialize() {
@@ -30,7 +32,7 @@ class SongController extends EventEmitter {
     this.on('songEnded', () => this.player());
 
     // Event listeners for the song gatherer
-    QueueService.on('audioQueueNeedsFilling', () => this.songGatherer());
+    this.on('notDownloading', () => this.songGatherer());
     this.on('songGathererFailed', () => this.songGatherer());
     this.songGatherer();
   }
@@ -56,6 +58,11 @@ class SongController extends EventEmitter {
 
   // The song gatherer. it gets the next song from the queue and downloads it.
   async songGatherer() {
+    if (this.songDownloading || !QueueService.audioQueueNeedsFilling()) {
+      console.log('Song gatherer not ready:', this.songDownloading, !QueueService.audioQueueNeedsFilling());
+      return;
+    }
+
     console.log('Gathering next song');
     let nextTrackId = QueueService.popNextTrack();
     if (!nextTrackId) {
@@ -63,6 +70,8 @@ class SongController extends EventEmitter {
       await SpotifyService.populateSuggestionQueue();
       nextTrackId = QueueService.popNextTrack();
     }
+
+    this._setStateDownloading(nextTrackId);
 
     try {
       const trackMetadata = await this.getTrackData(nextTrackId);
@@ -80,6 +89,22 @@ class SongController extends EventEmitter {
       console.log('Skipping song:', nextTrackId);
       this.emit('songGathererFailed');
     }
+
+    this._setStateNotDownloading();
+  }
+
+  _setStateDownloading(trackId) {
+    this.songDownloading = true;
+    this.songDownloadingTrackId = trackId;
+    this.emit('downloading');
+    console.log('State set to downloading:', trackId);
+  }
+
+  _setStateNotDownloading() {
+    this.songDownloading = false;
+    this.songDownloadingTrackId = null;
+    this.emit('notDownloading');
+    console.log('State set to not downloading');
   }
 
   async _markSongAsPlayed(metadata) {
@@ -142,7 +167,7 @@ class SongController extends EventEmitter {
 
   async _gatherSongFiles(trackMetadata) {
     // Download the track and generate an intro speech. Skip song if either fails
-    const audioFilePath = await this._downloadTrack(trackMetadata.url);
+    const audioFilePath = await this._downloadTrack(trackMetadata.urlForPlatform.spotify);
     const announcementText = await OpenAIService.generateSongIntro(
       trackMetadata,
       QueueService.getNextSongMetadata() || this.currentSongMetadata
@@ -183,6 +208,10 @@ class SongController extends EventEmitter {
       }
     }
     throw new Error('Failed to download track after 10 attempts. Skipping song.');
+  }
+
+  isTrackIdPlayingOrDownloading(trackId) {
+    return this.currentSongMetadata?.trackId === trackId || this.songDownloadingTrackId === trackId;
   }
 }
 
