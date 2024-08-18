@@ -11,6 +11,7 @@ class ClientService {
 
   _clientifyMetadata(metadata) {
     return {
+      trackId: metadata.trackId,
       title: metadata.title,
       artist: metadata.artist,
       album: metadata.album,
@@ -83,13 +84,15 @@ class ClientService {
   }
 
   async getSongHistory(req, res) {
-    const songHistory = await DBService.getLastPlayedSongs(10, SongController.currentSongMetadata?.trackId);
-    const reducedHistory = songHistory.map(song => this._clientifyMetadata(song));
-    // remove current song from history
-    if (reducedHistory.length && reducedHistory[0] === SongController.currentSongMetadata) {
-      reducedHistory.shift();
+    const songHistory = await DBService.getLastPlayedSongs(10);
+
+    // Do not send the current song in the history
+    const currentTrackId = SongController.currentSongMetadata?.trackId;
+    if (songHistory.length && songHistory[0].trackId === currentTrackId) {
+      songHistory.shift();
     }
-    res.json(reducedHistory);
+    const clientifiedHistory = songHistory.map(song => this._clientifyMetadata(song));
+    res.json(clientifiedHistory);
   }
 }
 

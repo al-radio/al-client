@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const songData = JSON.parse(event.data);
     updateSongHistory(songData);
     CURRENT_SONG_METADATA = songData;
-    songTitle.textContent = CURRENT_SONG_METADATA.title;
-    songArtist.textContent = `${CURRENT_SONG_METADATA.artist}`;
-    songAlbum.textContent = `${CURRENT_SONG_METADATA.album}`;
+    songTitle.textContent = CURRENT_SONG_METADATA.title || 'Loading...';
+    songArtist.textContent = CURRENT_SONG_METADATA.artist || 'Loading...';
+    songAlbum.textContent = CURRENT_SONG_METADATA.album || 'Loading...';
     albumArt.src = CURRENT_SONG_METADATA.artUrl;
   };
 

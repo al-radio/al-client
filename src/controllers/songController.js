@@ -169,6 +169,10 @@ class SongController extends EventEmitter {
         console.error('Error downloading track:', error);
         ProxyService.markActiveProxyBad();
         console.error('Retrying download, attempt:', failCount);
+        if (failCount % 3 === 0 && global.gc) {
+          console.log('Running garbage collection');
+          global.gc();
+        }
       }
     }
     throw new Error('Failed to download track after 10 attempts. Skipping song.');
