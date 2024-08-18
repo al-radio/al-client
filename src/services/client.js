@@ -4,7 +4,7 @@ import DBService from './db.js';
 import SongController from '../controllers/songController.js';
 
 import path from 'path';
-import { EventEmitter } from 'events';
+import EventEmitter from 'events';
 class ClientService extends EventEmitter {
   // eslint-disable-next-line constructor-super
   constructor() {
@@ -23,7 +23,7 @@ class ClientService extends EventEmitter {
     };
   }
 
-  _hasActiveClients() {
+  hasActiveClients() {
     return this.clients.size > 0;
   }
 
@@ -34,12 +34,16 @@ class ClientService extends EventEmitter {
   addClientToStream(req, res) {
     res.writeHead(200, {
       'Content-Type': 'audio/mpeg',
-      Connection: 'keep-alive'
+      Connection: 'keep-alive',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
+      'Surrogate-Control': 'no-store'
     });
 
     this.clients.add(res);
-    this.emit('clientConnected', res);
-    console.log('New client connected to stream');
+    console.log('clientConnected');
+    this.emit('clientConnected');
     res.on('close', () => {
       this.clients.delete(res);
       console.log('Client disconnected from stream');

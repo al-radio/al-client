@@ -1,9 +1,9 @@
 import express from 'express';
 import songRoutes from './routes/routes.js';
-import SongController from './controllers/songController.js';
 import SpotifyService from './services/spotify.js';
 import ProxyService from './services/proxy.js';
 import QueueService from './services/queue.js';
+import SongController from './controllers/songController.js';
 import path from 'path';
 
 const app = express();
@@ -33,6 +33,5 @@ app.listen(PORT, async () => {
   }
 
   await SpotifyService.authenticate();
-  SongController.songGatherer();
-  SongController.player();
+  SongController.initialize();
 });

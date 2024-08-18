@@ -1,5 +1,8 @@
-class QueueService {
+import { EventEmitter } from 'events';
+
+class QueueService extends EventEmitter {
   constructor() {
+    super();
     // Format: ["trackId1", "trackId2", ...]
     this.userQueue = [];
     // Format: ["trackId1", "trackId2", ...]
@@ -31,14 +34,23 @@ class QueueService {
   addToAudioQueue(audioFile) {
     console.log('Added audio file', audioFile.metadata?.title, ' - ', audioFile.metadata?.artist, 'to audio queue');
     this.audioQueue.push(audioFile);
+    this.emit('songQueued');
   }
 
   popNextAudioFile() {
-    return this.audioQueue.shift();
+    const file = this.audioQueue.shift();
+    if (this.doesAudioQueueNeedFilling()) {
+      this.emit('audioQueueNeedsFilling');
+    }
+    return file;
   }
 
   doesAudioQueueNeedFilling() {
     return this.audioQueue.length < this.numSongsToPreload;
+  }
+
+  isAudioQueueEmpty() {
+    return this.audioQueue.length === 0;
   }
 
   getNextSongMetadata() {

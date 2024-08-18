@@ -1,9 +1,9 @@
 /* eslint-disable no-constant-condition */
+import ClientService from '../services/client.js';
 import SpotifyService from '../services/spotify.js';
 import QueueService from '../services/queue.js';
 import OpenAIService from '../services/openai.js';
 import DBService from '../services/db.js';
-import ClientService from '../services/client.js';
 import ProxyService from '../services/proxy.js';
 
 import { EndableError } from '../errors.js';
@@ -23,56 +23,62 @@ class SongController extends EventEmitter {
     this.currentSongMetadata = {};
   }
 
+  initialize() {
+    // Event listeners for the song player
+    QueueService.on('songQueued', () => this.player());
+    ClientService.on('clientConnected', () => this.player());
+    this.on('songStartedPlaying', () => this.player());
+
+    // Event listeners for the song gatherer
+    QueueService.on('audioQueueNeedsFilling', () => this.songGatherer());
+    this.on('songGathererFailed', () => this.songGatherer());
+    this.songGatherer();
+  }
+
   // The song player. it takes the existing audio file and streams it to the clients.
   async player() {
-    while (true) {
-      if (!this.songPlaying) {
-        const { path, metadata } = QueueService.popNextAudioFile() || {};
-        if (path) {
-          await this._markSongAsPlayed(metadata);
-          this._streamToClients(path);
-        }
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    if (this.songPlaying || !ClientService.hasActiveClients() || QueueService.isAudioQueueEmpty()) {
+      return;
+    }
+    const { path, metadata } = QueueService.popNextAudioFile() || {};
+    if (path) {
+      console.log('Playing song', metadata.title, ' - ', metadata.artist);
+      await this._markSongAsPlayed(metadata);
+      this._streamToClients(path);
     }
   }
 
   // The song gatherer. it gets the next song from the queue and downloads it.
   async songGatherer() {
-    while (true) {
-      // dont need another song if there is one in the queue
-      if (!QueueService.doesAudioQueueNeedFilling()) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        continue;
-      }
+    console.log('Gathering next song');
+    let nextTrackId = QueueService.popNextTrack();
+    if (!nextTrackId) {
+      console.log('No more songs in queue. Populating suggestion queue.');
+      await SpotifyService.populateSuggestionQueue();
+      nextTrackId = QueueService.popNextTrack();
+    }
 
-      const nextTrackId = QueueService.popNextTrack();
-      if (!nextTrackId) {
-        console.log('No more songs in queue. Populating suggestion queue.');
-        await SpotifyService.populateSuggestionQueue();
-        continue;
+    try {
+      const trackMetadata = await this.getTrackData(nextTrackId);
+      const concatenatedAudioPath = await this._gatherSongFiles(trackMetadata);
+      QueueService.addToAudioQueue({
+        path: concatenatedAudioPath,
+        metadata: trackMetadata
+      });
+    } catch (error) {
+      if (error instanceof EndableError) {
+        // something real bad happened, it will happen again. end the program
+        throw error;
       }
-
-      try {
-        const trackMetadata = await this.getTrackData(nextTrackId);
-        const concatenatedAudioPath = await this._gatherSongFiles(trackMetadata);
-        QueueService.addToAudioQueue({
-          path: concatenatedAudioPath,
-          metadata: trackMetadata
-        });
-      } catch (error) {
-        if (error instanceof EndableError) {
-          // something real bad happened, it will happen again. end the program
-          throw error;
-        }
-        console.error('Error getting next song:', error);
-        console.log('Skipping song:', nextTrackId);
-      }
+      console.error('Error getting next song:', error);
+      console.log('Skipping song:', nextTrackId);
+      this.emit('songGathererFailed');
     }
   }
 
   async _markSongAsPlayed(metadata) {
     this.songPlaying = true;
+    this.emit('songStartedPlaying');
     this.currentSongMetadata = metadata;
     await DBService.markSongAsPlayed(metadata.trackId);
     new Promise(resolve => {
@@ -101,13 +107,7 @@ class SongController extends EventEmitter {
 
     throttle
       .on('data', data => {
-        if (ClientService._hasActiveClients()) {
-          this._writeDataToClients(data);
-        } else {
-          console.log('No active clients, pausing song');
-          readable.pause();
-          throttle.pause();
-        }
+        this._writeDataToClients(data);
       })
       .on('end', () => {
         console.log('Song ended');
@@ -115,14 +115,6 @@ class SongController extends EventEmitter {
         readable.close();
         fs.unlinkSync(path);
       });
-
-    ClientService.on('clientConnected', () => {
-      if (readable.isPaused()) {
-        throttle.resume();
-        readable.resume();
-      }
-    });
-
     readable.pipe(throttle);
   }
 
@@ -161,11 +153,11 @@ class SongController extends EventEmitter {
     const command = `spotdl download ${url} --output="./audio/{track-id}"`;
     const execAsync = promisify(exec);
 
-    for (let failCount = 1; failCount <= 10; failCount++) {
+    for (let failCount = 1; failCount <= 5; failCount++) {
       try {
         await ProxyService.setProxy();
         console.log('Downloading track from:', url);
-        await execAsync(command, { timeout: 30000 });
+        await execAsync(command, { timeout: 60000 });
 
         const fileName = url.split('/track/')[1].split('?')[0];
         const filePath = `./audio/${fileName}.mp3`;
@@ -182,10 +174,6 @@ class SongController extends EventEmitter {
         console.error('Error downloading track:', error);
         ProxyService.markActiveProxyBad();
         console.error('Retrying download, attempt:', failCount);
-        if (failCount % 3 === 0 && global.gc) {
-          console.log('Running garbage collection');
-          global.gc();
-        }
       }
     }
     throw new Error('Failed to download track after 10 attempts. Skipping song.');
