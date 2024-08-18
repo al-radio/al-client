@@ -11,7 +11,7 @@ AL Radio accepts song requests in the form of a search query, a Spotify Track ID
 ## Setup
 
 - `npm i`
-- FFmpeg: `brew install ffmpeg` or your system equiavlent.
+- FFmpeg: `brew install ffmpeg` or your system equivalent.
 - SpotDL: `pip install spotdl`.
 
 ### Use Local Database

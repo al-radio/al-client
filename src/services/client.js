@@ -4,8 +4,11 @@ import DBService from './db.js';
 import SongController from '../controllers/songController.js';
 
 import path from 'path';
-class ClientService {
+import { EventEmitter } from 'events';
+class ClientService extends EventEmitter {
+  // eslint-disable-next-line constructor-super
   constructor() {
+    super();
     this.clients = new Set();
   }
 
@@ -20,6 +23,10 @@ class ClientService {
     };
   }
 
+  _hasActiveClients() {
+    return this.clients.size > 0;
+  }
+
   serveWebpage(req, res) {
     res.sendFile('index.html', { root: path.join(process.cwd(), 'public') });
   }
@@ -31,6 +38,7 @@ class ClientService {
     });
 
     this.clients.add(res);
+    this.emit('clientConnected', res);
     console.log('New client connected to stream');
     res.on('close', () => {
       this.clients.delete(res);
@@ -50,17 +58,35 @@ class ClientService {
     } else if (/^[a-zA-Z0-9]{22}$/.test(query)) {
       trackId = query;
     }
-    const track = trackId ? await SpotifyService.getTrackData(trackId) : await SpotifyService.searchTrack(query);
 
+    const track = trackId ? await SpotifyService.getTrackData(trackId) : await SpotifyService.searchTrack(query);
     console.log('Got user suggested track:', track.title, track.artist);
 
-    if (track) {
-      // TODO: Check if the song has been played recently or if it is already in the user queue.
-      const success = QueueService.addToUserQueue(track.trackId);
-      res.json({ success });
-    } else {
-      res.status(404).json({ success: false });
+    if (!track.title) {
+      res.status(404).json({ success: false, message: 'Song not found' });
+      return;
     }
+
+    if (QueueService.isUserQueueFull()) {
+      res.status(400).json({ message: 'User queue is full.' });
+      console.log('User queue is full');
+      return false;
+    }
+
+    if (QueueService.userQueueHasTrack(trackId) || QueueService.audioQueueHasTrack(trackId)) {
+      res.status(400).json({ message: 'Song is already in the queue.' });
+      console.log('Song is already in the queue');
+      return false;
+    }
+    // check that it hasnt been played recently
+    if (await DBService.hasSongBeenPlayedRecently(trackId)) {
+      res.status(400).json({ message: 'Song has been played too recently.' });
+      console.log('Song has been played recently');
+      return false;
+    }
+
+    await QueueService.addToUserQueue(trackId);
+    res.json({ success: true });
   }
 
   async getCurrentSongMetadata(req, res) {

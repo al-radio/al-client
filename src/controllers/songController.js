@@ -101,7 +101,13 @@ class SongController extends EventEmitter {
 
     throttle
       .on('data', data => {
-        this._writeDataToClients(data);
+        if (ClientService._hasActiveClients()) {
+          this._writeDataToClients(data);
+        } else {
+          console.log('No active clients, pausing song');
+          readable.pause();
+          throttle.pause();
+        }
       })
       .on('end', () => {
         console.log('Song ended');
@@ -109,6 +115,13 @@ class SongController extends EventEmitter {
         readable.close();
         fs.unlinkSync(path);
       });
+
+    ClientService.on('clientConnected', () => {
+      if (readable.isPaused()) {
+        throttle.resume();
+        readable.resume();
+      }
+    });
 
     readable.pipe(throttle);
   }

@@ -9,13 +9,10 @@ class QueueService {
     this.numSongsToPreload = 2;
   }
 
-  addToUserQueue(trackId) {
-    if (this.userQueue.length < 100) {
-      this.userQueue.push(trackId);
-      console.log('Added trackId', trackId, 'to user queue');
-      return true;
-    }
-    return false;
+  async addToUserQueue(trackId) {
+    this.userQueue.push(trackId);
+    this.suggestionQueue = [];
+    console.log('Added trackId', trackId, 'to user queue');
   }
 
   addToSuggestionQueue(trackId) {
@@ -46,6 +43,18 @@ class QueueService {
 
   getNextSongMetadata() {
     return this.audioQueue[this.audioQueue.length - 1]?.metadata;
+  }
+
+  isUserQueueFull() {
+    return this.userQueue.length >= 100;
+  }
+
+  userQueueHasTrack(trackId) {
+    return this.userQueue.includes(trackId);
+  }
+
+  audioQueueHasTrack(trackId) {
+    return this.audioQueue.some(audioFile => audioFile.metadata.trackId === trackId);
   }
 }
 

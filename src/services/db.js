@@ -75,6 +75,11 @@ class DatabaseService {
     const songs = await db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
     return songs;
   }
+
+  async hasSongBeenPlayedRecently(trackId, hours = 3) {
+    const recentlyPlayed = await this.getRecentlyPlayedSongs(hours);
+    return recentlyPlayed.some(song => song.trackId === trackId);
+  }
 }
 
 export default new DatabaseService();

@@ -16,7 +16,7 @@ app.listen(PORT, async () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 
   // Circumvent youtube ip blocking
-  if (process.env.USE_PROXIES) {
+  if (process.env.PROXY_LIST_URL) {
     console.log('Using proxies');
     await ProxyService.refreshProxyList();
   }
