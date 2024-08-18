@@ -2,26 +2,26 @@ import { MongoClient } from 'mongodb';
 
 class DatabaseService {
   constructor() {
-    this.MongoURI = process.env.MONGO_URI;
-    this.dbName = 'musicDB';
+    this._mongoUri = process.env.MONGO_URI;
+    this._dbName = 'musicDB';
   }
 
-  async connect() {
-    const client = new MongoClient(this.MongoURI);
+  async _connect() {
+    const client = new MongoClient(this._mongoUri);
     await client.connect();
-    this.db = client.db(this.dbName);
+    this.db = client.db(this._dbName);
   }
 
-  async getDb() {
+  async _getDb() {
     if (!this.db) {
-      await this.connect();
+      await this._connect();
     }
     return this.db;
   }
 
   async getSongMetadata(trackId) {
     console.log('Retrieving metadata for from database for trackid:', trackId);
-    const db = await this.getDb();
+    const db = await this._getDb();
     const track = await db.collection('tracks').findOne({ trackId });
     return track;
   }
@@ -30,7 +30,7 @@ class DatabaseService {
     console.log('Saving data to database for trackid:', metadata.trackId);
 
     // expire after 1 week
-    const db = await this.getDb();
+    const db = await this._getDb();
     await db
       .collection('tracks')
       .updateOne({ trackId: metadata.trackId }, { $set: metadata }, { upsert: true }, { expireAfterSeconds: 604800 });
@@ -38,7 +38,7 @@ class DatabaseService {
 
   async markSongAsPlayed(trackId) {
     console.log('Marking song as played:', trackId);
-    const db = await this.getDb();
+    const db = await this._getDb();
     await db.collection('tracks').updateOne(
       { trackId },
       {
@@ -50,7 +50,7 @@ class DatabaseService {
 
   async getRecentlyPlayedSongs(hours) {
     const cutoff = new Date(Date.now() - hours * 3600 * 1000);
-    const db = await this.getDb();
+    const db = await this._getDb();
     const songs = await db
       .collection('tracks')
       .find({ lastPlayed: { $gte: cutoff } })
@@ -59,7 +59,7 @@ class DatabaseService {
   }
 
   async getLastPlayedSongs(limit) {
-    const db = await this.getDb();
+    const db = await this._getDb();
     const songs = await db.collection('tracks').find().sort({ lastPlayed: -1 }).limit(limit).toArray();
     return songs;
   }

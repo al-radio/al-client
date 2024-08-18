@@ -27,18 +27,18 @@ class SongController extends EventEmitter {
 
   initialize() {
     // Event listeners for the song player
-    QueueService.on('songQueued', () => this.player());
-    ClientService.on('clientConnected', () => this.player());
-    this.on('songEnded', () => this.player());
+    QueueService.on('songQueued', () => this._player());
+    ClientService.on('clientConnected', () => this._player());
+    this.on('songEnded', () => this._player());
 
     // Event listeners for the song gatherer
-    this.on('notDownloading', () => this.songGatherer());
-    this.on('songGathererFailed', () => this.songGatherer());
-    this.songGatherer();
+    this.on('notDownloading', () => this._songGatherer());
+    QueueService.on('audioQueueNeedsFilling', () => this._songGatherer());
+    this._songGatherer();
   }
 
   // The song player. it takes the existing audio file and streams it to the clients.
-  async player() {
+  async _player() {
     if (this.songPlaying || !ClientService.hasActiveClients() || QueueService.isAudioQueueEmpty()) {
       console.log(
         'Song player not ready:',
@@ -50,14 +50,13 @@ class SongController extends EventEmitter {
     }
     const { path, metadata } = QueueService.popNextAudioFile() || {};
     if (path) {
-      console.log('Playing song', metadata.title, ' - ', metadata.artist);
       await this._markSongAsPlayed(metadata);
       this._streamToClients(path);
     }
   }
 
   // The song gatherer. it gets the next song from the queue and downloads it.
-  async songGatherer() {
+  async _songGatherer() {
     if (this.songDownloading || !QueueService.audioQueueNeedsFilling()) {
       console.log('Song gatherer not ready:', this.songDownloading, !QueueService.audioQueueNeedsFilling());
       return;
@@ -87,7 +86,6 @@ class SongController extends EventEmitter {
       }
       console.error('Error getting next song:', error);
       console.log('Skipping song:', nextTrackId);
-      this.emit('songGathererFailed');
     }
 
     this._setStateNotDownloading();
@@ -111,6 +109,7 @@ class SongController extends EventEmitter {
     this.songPlaying = true;
     this.currentSongMetadata = metadata;
     await DBService.markSongAsPlayed(metadata.trackId);
+    console.log('Playing song', metadata.title, ' - ', metadata.artist);
     new Promise(resolve => {
       setTimeout(() => {
         this.emit('currentSongMetadataUpdated', metadata);
@@ -120,7 +119,7 @@ class SongController extends EventEmitter {
   }
 
   _writeDataToClients(data) {
-    ClientService.clients.forEach(client => client.write(data));
+    ClientService._clients.forEach(client => client.write(data));
   }
 
   async _getBitrateFromAudioFile(path) {

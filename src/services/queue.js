@@ -4,23 +4,23 @@ class QueueService extends EventEmitter {
   constructor() {
     super();
     // Format: ["trackId1", "trackId2", ...]
-    this.userQueue = [];
+    this._userQueue = [];
     // Format: ["trackId1", "trackId2", ...]
-    this.suggestionQueue = [];
+    this._suggestionQueue = [];
     // Format: [{path: "path/to/audio/file", metadata: {}}]
-    this.audioQueue = [];
-    this.numSongsToPreload = 2;
+    this._audioQueue = [];
+    this._numSongsToPreload = 2;
   }
 
   async addToUserQueue(trackId) {
-    this.userQueue.push(trackId);
-    this.suggestionQueue = [];
+    this._userQueue.push(trackId);
+    this._suggestionQueue = [];
     console.log('Added trackId', trackId, 'to user queue');
   }
 
   addToSuggestionQueue(trackId) {
-    if (this.suggestionQueue.length < 5) {
-      this.suggestionQueue.push(trackId);
+    if (this._suggestionQueue.length < 5) {
+      this._suggestionQueue.push(trackId);
       console.log('Added trackId', trackId, 'to suggestion queue');
       return true;
     }
@@ -28,42 +28,46 @@ class QueueService extends EventEmitter {
   }
 
   popNextTrack() {
-    return this.userQueue.length ? this.userQueue.shift() : this.suggestionQueue.shift();
+    return this._userQueue.length ? this._userQueue.shift() : this._suggestionQueue.shift();
   }
 
   addToAudioQueue(audioFile) {
-    console.log('Added audio file', audioFile.metadata?.title, ' - ', audioFile.metadata?.artist, 'to audio queue');
-    this.audioQueue.push(audioFile);
+    this._audioQueue.push(audioFile);
     this.emit('songQueued');
+    console.log('Added audio file', audioFile.metadata?.title, ' - ', audioFile.metadata?.artist, 'to audio queue');
   }
 
   popNextAudioFile() {
-    const file = this.audioQueue.shift();
+    const file = this._audioQueue.shift();
+    if (this.audioQueueNeedsFilling()) {
+      console.log('Audio queue needs filling');
+      this.emit('audioQueueNeedsFilling');
+    }
     return file;
   }
 
   audioQueueNeedsFilling() {
-    return this.audioQueue.length < this.numSongsToPreload;
+    return this._audioQueue.length < this._numSongsToPreload;
   }
 
   isAudioQueueEmpty() {
-    return this.audioQueue.length === 0;
+    return this._audioQueue.length === 0;
   }
 
   getNextSongMetadata() {
-    return this.audioQueue[this.audioQueue.length - 1]?.metadata;
+    return this._audioQueue[this._audioQueue.length - 1]?.metadata;
   }
 
   isUserQueueFull() {
-    return this.userQueue.length >= 100;
+    return this._userQueue.length >= 100;
   }
 
   userQueueHasTrack(trackId) {
-    return this.userQueue.includes(trackId);
+    return this._userQueue.includes(trackId);
   }
 
   audioQueueHasTrack(trackId) {
-    return this.audioQueue.some(audioFile => audioFile.metadata.trackId === trackId);
+    return this._audioQueue.some(audioFile => audioFile.metadata.trackId === trackId);
   }
 }
 

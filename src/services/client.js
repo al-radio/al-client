@@ -9,7 +9,7 @@ class ClientService extends EventEmitter {
   // eslint-disable-next-line constructor-super
   constructor() {
     super();
-    this.clients = new Set();
+    this._clients = new Set();
   }
 
   _clientifyMetadata(metadata) {
@@ -24,7 +24,7 @@ class ClientService extends EventEmitter {
   }
 
   hasActiveClients() {
-    return this.clients.size > 0;
+    return this._clients.size > 0;
   }
 
   serveWebpage(req, res) {
@@ -41,11 +41,11 @@ class ClientService extends EventEmitter {
       'Surrogate-Control': 'no-store'
     });
 
-    this.clients.add(res);
+    this._clients.add(res);
     console.log('Client connected to stream');
     this.emit('clientConnected');
     res.on('close', () => {
-      this.clients.delete(res);
+      this._clients.delete(res);
       console.log('Client disconnected from stream');
     });
   }

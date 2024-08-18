@@ -4,9 +4,9 @@ import QueueService from './queue.js';
 
 class SpotifyService {
   constructor() {
-    this.baseUrl = 'https://api.spotify.com/v1';
-    this.clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-    this.clientId = process.env.SPOTIFY_CLIENT_ID;
+    this._baseUrl = 'https://api.spotify.com/v1';
+    this._clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    this._clientId = process.env.SPOTIFY_CLIENT_ID;
   }
 
   async initialize() {
@@ -20,7 +20,7 @@ class SpotifyService {
           grant_type: 'client_credentials'
         },
         headers: {
-          Authorization: `Basic ${Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64')}`
+          Authorization: `Basic ${Buffer.from(`${this._clientId}:${this._clientSecret}`).toString('base64')}`
         }
       });
       this.token = response.data.access_token;
@@ -30,24 +30,24 @@ class SpotifyService {
     }
   }
 
-  _extractMetadata(track) {
-    console.log('Extracting metadata for:', track.name);
+  _extractMetadata(spotifyTrackMetadata) {
+    console.log('Extracting metadata for:', spotifyTrackMetadata.name);
     return {
-      trackId: track.id,
-      title: track.name,
-      artist: track.artists[0].name,
-      album: track.album.name,
-      genres: track.genres,
-      releaseDate: track.album.release_date,
-      url: track.external_urls.spotify,
-      artUrl: track.album.images[0].url
+      trackId: spotifyTrackMetadata.id,
+      title: spotifyTrackMetadata.name,
+      artist: spotifyTrackMetadata.artists[0].name,
+      album: spotifyTrackMetadata.album.name,
+      genres: spotifyTrackMetadata.genres,
+      releaseDate: spotifyTrackMetadata.album.release_date,
+      url: spotifyTrackMetadata.external_urls.spotify,
+      artUrl: spotifyTrackMetadata.album.images[0].url
     };
   }
 
   async _getArtistGenres(artistId) {
     console.log('Getting genres for artist:', artistId);
     try {
-      const artistResponse = await axios.get(`${this.baseUrl}/artists/${artistId}`, {
+      const artistResponse = await axios.get(`${this._baseUrl}/artists/${artistId}`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }
@@ -60,7 +60,7 @@ class SpotifyService {
 
   async searchTrack(query) {
     try {
-      const response = await axios.get(`${this.baseUrl}/search`, {
+      const response = await axios.get(`${this._baseUrl}/search`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         },
@@ -83,7 +83,7 @@ class SpotifyService {
 
   async getRecommendations(trackIds) {
     try {
-      const response = await axios.get(`${this.baseUrl}/recommendations`, {
+      const response = await axios.get(`${this._baseUrl}/recommendations`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         },
@@ -146,7 +146,7 @@ class SpotifyService {
   async getTrackData(trackId) {
     console.log('Getting track data from spotify for:', trackId);
     try {
-      const response = await axios.get(`${this.baseUrl}/tracks/${trackId}`, {
+      const response = await axios.get(`${this._baseUrl}/tracks/${trackId}`, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }

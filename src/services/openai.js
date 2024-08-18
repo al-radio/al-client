@@ -3,8 +3,8 @@ import fs from 'fs';
 
 class OpenAiService {
   constructor() {
-    this.baseUrl = 'https://api.openai.com/v1';
-    this.apiKey = process.env.OPENAI_API_KEY;
+    this._baseUrl = 'https://api.openai.com/v1';
+    this._apiKey = process.env.OPENAI_API_KEY;
   }
 
   async generateSongIntro(thisSongMetadata, previousSongMetadata) {
@@ -23,7 +23,7 @@ class OpenAiService {
     }
     try {
       const response = await axios.post(
-        `${this.baseUrl}/chat/completions`,
+        `${this._baseUrl}/chat/completions`,
         {
           messages: [{ role: 'user', content: prompt }],
           model: 'gpt-4o-mini',
@@ -32,7 +32,7 @@ class OpenAiService {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.apiKey}`
+            Authorization: `Bearer ${this._apiKey}`
           }
         }
       );
@@ -46,7 +46,7 @@ class OpenAiService {
     console.log('Converting text to speech:', text);
     try {
       const response = await axios.post(
-        `${this.baseUrl}/audio/speech`,
+        `${this._baseUrl}/audio/speech`,
         {
           input: text,
           model: 'tts-1',
@@ -54,7 +54,7 @@ class OpenAiService {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.apiKey}`
+            Authorization: `Bearer ${this._apiKey}`
           },
           responseType: 'arraybuffer'
         }
