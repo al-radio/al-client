@@ -5,9 +5,14 @@ class OpenAiService {
   constructor() {
     this._baseUrl = 'https://api.openai.com/v1';
     this._apiKey = process.env.OPENAI_API_KEY;
+    this._pastSongIntros = [];
   }
 
   async generateSongIntro(thisSongMetadata, previousSongMetadata) {
+    if (!thisSongMetadata.title) {
+      throw new Error('Missing song metadata');
+    }
+
     console.log('Generating song intro for', thisSongMetadata?.title);
     console.log('Previous song metadata:', previousSongMetadata?.title);
     let prompt = `You are a radio host at Al Radio, a Toronto-based radio station.
@@ -19,16 +24,19 @@ class OpenAiService {
     if (previousSongMetadata.title) {
       prompt += `\n\nYou had previously played "${previousSongMetadata.title}" by "${previousSongMetadata.artist}"
         of the album "${previousSongMetadata.album} with genres ${previousSongMetadata.genres}. Provide a smooth
-        transition between the previous song and the upcoming one, noting any similarities or contrasts in style, genre, or mood.`;
+        transition between the previous song and the upcoming one, noting any similarities or contrasts in style, genre, or mood.\n\n
+        Ensure your response varies from your previous messages, including method of introduction, transition, and tone.`;
     }
+
     try {
       const response = await axios.post(
         `${this._baseUrl}/chat/completions`,
         {
-          messages: [{ role: 'user', content: prompt }],
+          messages: [...this._pastSongIntros, { role: 'user', content: prompt }],
           model: 'gpt-4o-mini',
           n: 1,
-          max_tokens: 200
+          max_tokens: 200,
+          frequency_penalty: 1.0
         },
         {
           headers: {
@@ -36,9 +44,19 @@ class OpenAiService {
           }
         }
       );
-      return response.data.choices[0].message.content;
+      const songIntro = response.data.choices[0].message.content;
+      this._addIntroToPastIntros(songIntro);
+      return songIntro;
     } catch (error) {
       throw new Error('Failed to generate song intro:', error);
+    }
+  }
+
+  _addIntroToPastIntros(intro) {
+    const newIntro = { role: 'assistant', content: intro };
+    this._pastSongIntros.push(newIntro);
+    if (this._pastSongIntros.length > 10) {
+      this._pastSongIntros.shift();
     }
   }
 
