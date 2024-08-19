@@ -9,7 +9,7 @@ class QueueService extends EventEmitter {
     this._suggestionQueue = [];
     // Format: [{path: "path/to/audio/file", metadata: {}}]
     this._audioQueue = [];
-    this._numSongsToPreload = 2;
+    this._numSongsToPreload = 5;
   }
 
   async addToUserQueue(trackId) {
