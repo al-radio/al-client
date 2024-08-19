@@ -171,6 +171,18 @@ async function getNextSong() {
   }
 }
 
+async function getListenerCount() {
+  try {
+    const response = await fetch('/listeners');
+    if (!response.ok) throw new Error('Failed to fetch listener count');
+
+    const listenerCount = await response.json();
+    document.getElementById('listener-count').innerText = `Active Listeners: ${listenerCount.listeners}`;
+  } catch (error) {
+    console.error('Error fetching listener count:', error);
+  }
+}
+
 submitForm.addEventListener('submit', event => {
   event.preventDefault();
   const query = songQueryInput.value.trim();
@@ -193,10 +205,13 @@ albumArt.addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   getCurrentSongMetadata();
-  setInterval(getCurrentSongMetadata, 10000);
-
   getNextSong();
-  setInterval(getNextSong, 10000);
+  getListenerCount();
+  setInterval(() => {
+    getCurrentSongMetadata();
+    getListenerCount();
+    getNextSong();
+  }, 10000);
 
   if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', () => {

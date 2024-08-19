@@ -144,6 +144,10 @@ class ClientService extends EventEmitter {
 
     res.json({ success: true, metadata: this._clientifyMetadata(nextSongMetadata) });
   }
+
+  async getListeners(req, res) {
+    res.json({ listeners: this._clients.size });
+  }
 }
 
 export default new ClientService();
