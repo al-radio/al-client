@@ -95,22 +95,6 @@ async function getCurrentSongMetadata() {
   }
 }
 
-async function confirmSong(trackId) {
-  try {
-    console.log('Confirming song:', trackId);
-    const response = await fetch('/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query: trackId })
-    });
-    if (!response.ok) throw new Error(response.statusText);
-  } catch (error) {
-    console.error('Error confirming song:', error);
-  }
-}
-
 async function submitSong(query) {
   try {
     const response = await fetch('/submit', {
@@ -120,21 +104,28 @@ async function submitSong(query) {
       },
       body: JSON.stringify({ query })
     });
-    const { trackId, title, artist, album } = await response.json();
-
-    // if the result has metadata, we need to ask the user to confirm the song
-    if (!trackId) {
-      alert(`No song found for query: ${query}`);
+    const { success, message, metadata } = await response.json();
+    if (!success) {
+      console.error('Error submitting song:', message);
       return;
     }
-    const isConfirmed = confirm(
-      `Do you want to add this song to the queue?\n${title} by ${artist} from the album ${album}`
-    );
-    if (isConfirmed) {
-      confirmSong(trackId);
+
+    if (!metadata) {
+      console.log('Song Submitted');
+      return;
+    }
+
+    if (metadata.trackId) {
+      const { title, artist, album, trackId } = metadata;
+      const isConfirmed = confirm(
+        `Do you want to add this song to the queue?\n${title} by ${artist} from the album ${album}`
+      );
+      if (isConfirmed) {
+        submitSong(trackId);
+      }
     }
   } catch (error) {
-    console.error('Error submitting song:', error);
+    console.error('Error submitting song:', error.response.data);
   }
 }
 

@@ -53,34 +53,34 @@ class ClientService extends EventEmitter {
   async _handleSearchQuerySubmit(req, res, query) {
     const track = await SpotifyService.searchTrack(query);
     if (!track.trackId) {
-      res.status(404).json({ message: 'Song not found' });
+      res.json({ success: false, message: 'Song not found' });
       return;
     }
 
-    res.json(this._clientifyMetadata(track));
+    res.json({ success: true, metadata: this._clientifyMetadata(track) });
   }
 
   async _handleDirectTrackSubmit(req, res, trackId) {
     const track = await SpotifyService.getTrackData(trackId);
     if (!track.trackId) {
-      res.status(404).json({ message: 'Song not found' });
+      res.json({ success: false, message: 'Song not found' });
       return;
     }
 
     if (this._isTrackIdQueued(trackId)) {
-      res.status(400).json({ message: 'Song is already in the queue.' });
+      res.json({ success: false, message: 'Song is already in the queue.' });
       console.log('Song is already in the queue');
       return false;
     }
 
     if (await DBService.hasSongBeenPlayedRecently(trackId)) {
-      res.status(400).json({ message: 'Song has been played too recently.' });
+      res.json({ success: false, message: 'Song has been played too recently.' });
       console.log('Song has been played recently');
       return false;
     }
 
     await QueueService.addToUserQueue(trackId);
-    res.end();
+    res.json({ success: true, message: 'Song added to queue.' });
   }
 
   _isTrackIdQueued(trackId) {
@@ -93,7 +93,7 @@ class ClientService extends EventEmitter {
 
   async submitSongRequest(req, res) {
     if (QueueService.isUserQueueFull()) {
-      res.status(400).json({ message: 'The queue is full.' });
+      res.json({ success: false, message: 'The queue is full.' });
       console.log('User queue is full');
       return false;
     }

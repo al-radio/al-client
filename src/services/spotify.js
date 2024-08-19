@@ -60,6 +60,7 @@ class SpotifyService {
 
   async searchTrack(query) {
     try {
+      console.log('Searching for track:', query);
       const response = await axios.get(`${this._baseUrl}/search`, {
         headers: {
           Authorization: `Bearer ${this.token}`
@@ -70,8 +71,7 @@ class SpotifyService {
           limit: 1
         }
       });
-      const metadata = this._extractMetadata(response.data.tracks.items[0]);
-      return await this._convertAndSaveSpotifyTrackMetadata(metadata);
+      return await this._convertAndSaveSpotifyTrackMetadata(response.data.tracks.items[0]);
     } catch (error) {
       if (error.response?.status === 401) {
         await this._authenticate();
