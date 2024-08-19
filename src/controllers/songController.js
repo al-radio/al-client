@@ -169,7 +169,7 @@ class SongController extends EventEmitter {
     const audioFilePath = await this._downloadTrack(trackMetadata.urlForPlatform.spotify);
     const announcementText = await OpenAIService.generateSongIntro(
       trackMetadata,
-      QueueService.getNextSongMetadata() || this.currentSongMetadata
+      QueueService.getLastQueuedSongMetadata() || this.currentSongMetadata
     );
     const announcementAudioPath = await OpenAIService.textToSpeech(announcementText);
     if (!audioFilePath || !announcementAudioPath) {

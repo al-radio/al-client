@@ -9,17 +9,28 @@
   <body>
     <div class="container">
       <h1>AL Radio</h1>
+
       <div class="player-container">
         <img id="album-art" src="" class="album-art" />
         <audio id="audio-player">
           <source src="/stream" type="audio/mpeg" />
         </audio>
       </div>
+
       <div id="song-info">
         <h2 id="song-title"></h2>
         <p id="song-artist"></p>
         <p id="song-album"></p>
       </div>
+
+      <div id="next-song-info">
+        <h2>Up Next</h2>
+        <img id="next-album-art" src="" class="album-art" />
+        <p id="next-song-title"></p>
+        <p id="next-song-artist"></p>
+        <p id="next-song-album"></p>
+      </div>
+
       <div id="submit-container">
         <h2>Submit a Song</h2>
         <form id="submit-form">
@@ -27,10 +38,12 @@
           <button type="submit">Submit</button>
         </form>
       </div>
+
       <div id="history-container">
         <h2>Recent Song History</h2>
         <ul id="history-list"></ul>
       </div>
+
     </div>
 
     <script src="script.js"></script>

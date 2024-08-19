@@ -54,8 +54,12 @@ class QueueService extends EventEmitter {
     return this._audioQueue.length === 0;
   }
 
-  getNextSongMetadata() {
+  getLastQueuedSongMetadata() {
     return this._audioQueue[this._audioQueue.length - 1]?.metadata;
+  }
+
+  getNextQueuedSongMetadata() {
+    return this._audioQueue[0]?.metadata;
   }
 
   isUserQueueFull() {

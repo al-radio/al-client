@@ -38,6 +38,14 @@ h1 {
   margin-bottom: 10px;
 }
 
+#next-album-art {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
 audio {
   width: 100%;
   max-width: 600px;

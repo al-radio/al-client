@@ -1,12 +1,27 @@
 let CURRENT_SONG_METADATA = {};
+let NEXT_SONG_METADATA = {};
 let SONG_HISTORY = [];
+
+// current song
 const songTitle = document.getElementById('song-title');
 const songArtist = document.getElementById('song-artist');
 const songAlbum = document.getElementById('song-album');
 const albumArt = document.getElementById('album-art');
+
+// next song
+const nextSongTitle = document.getElementById('next-song-title');
+const nextSongArtist = document.getElementById('next-song-artist');
+const nextSongAlbum = document.getElementById('next-song-album');
+const nextAlbumArt = document.getElementById('next-album-art');
+
+// history
 const historyList = document.getElementById('history-list');
+
+// song submission
 const submitForm = document.getElementById('submit-form');
 const songQueryInput = document.getElementById('song-query');
+
+// audio player
 const audioPlayer = document.getElementById('audio-player');
 
 // Use this when resuming playback to ensure the stream is up to date
@@ -52,7 +67,7 @@ function updateSongHistory(songData) {
   const listItem = document.createElement('li');
   listItem.innerHTML = `
     <strong>${songData.title}</strong> by ${songData.artist} (Album: ${songData.album})
-    <br><img src="${songData.artUrl}" alt="${songData.title}" class="history-art">
+    <br><img src="${songData.artUrl}" alt="${songData.album}" class="history-art">
   `;
   historyList.appendChild(listItem);
 }
@@ -83,13 +98,14 @@ async function getCurrentSongMetadata() {
     }
 
     CURRENT_SONG_METADATA = metadata;
-    songTitle.innerText = metadata.title;
-    songArtist.innerText = metadata.artist;
-    songAlbum.innerText = metadata.album;
-    albumArt.src = metadata.artUrl;
-    albumArt.alt = metadata.title;
+    songTitle.innerText = CURRENT_SONG_METADATA.title;
+    songArtist.innerText = CURRENT_SONG_METADATA.artist;
+    songAlbum.innerText = CURRENT_SONG_METADATA.album;
+    albumArt.src = CURRENT_SONG_METADATA.artUrl;
+    albumArt.alt = CURRENT_SONG_METADATA.album;
     getSongHistory();
     updateMediaSessionMetadata();
+    getNextSong();
   } catch (error) {
     console.error('Error fetching current song metadata:', error);
   }
@@ -129,6 +145,32 @@ async function submitSong(query) {
   }
 }
 
+async function getNextSong() {
+  try {
+    const response = await (await fetch('/next')).json();
+    console.log('next song response', response);
+
+    const metadata = response.metadata;
+    console.log('next song metadata', metadata);
+    if (!metadata) {
+      console.log('No more songs in queue');
+      return;
+    }
+
+    if (metadata.trackId === NEXT_SONG_METADATA.trackId) {
+      return;
+    }
+    NEXT_SONG_METADATA = metadata;
+    nextSongTitle.innerText = NEXT_SONG_METADATA.title;
+    nextSongArtist.innerText = NEXT_SONG_METADATA.artist;
+    nextSongAlbum.innerText = NEXT_SONG_METADATA.album;
+    nextAlbumArt.src = NEXT_SONG_METADATA.artUrl;
+    nextAlbumArt.alt = NEXT_SONG_METADATA.album;
+  } catch (error) {
+    console.error('Error getting next song:', error);
+  }
+}
+
 submitForm.addEventListener('submit', event => {
   event.preventDefault();
   const query = songQueryInput.value.trim();
@@ -152,6 +194,9 @@ albumArt.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
   getCurrentSongMetadata();
   setInterval(getCurrentSongMetadata, 10000);
+
+  getNextSong();
+  setInterval(getNextSong, 10000);
 
   if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', () => {

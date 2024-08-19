@@ -134,6 +134,16 @@ class ClientService extends EventEmitter {
     const clientifiedHistory = songHistory.map(song => this._clientifyMetadata(song));
     res.json(clientifiedHistory);
   }
+
+  async getNextSong(req, res) {
+    const nextSongMetadata = QueueService.getNextQueuedSongMetadata();
+    if (!nextSongMetadata) {
+      res.json({ success: false, message: 'No songs in queue.' });
+      return;
+    }
+
+    res.json({ success: true, metadata: this._clientifyMetadata(nextSongMetadata) });
+  }
 }
 
 export default new ClientService();
