@@ -1,13 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Window, WindowHeader, WindowContent } from 'react95';
-import { fetchNextSong } from '../services/api'; // Ensure this function exists in your api service
-import styled from 'styled-components';
-
-const AlbumArt = styled.img`
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-`;
+import { useEffect, useState } from "react";
+import { Window, WindowHeader, WindowContent, Avatar } from "react95";
+import { fetchNextSong } from "../services/api"; // Ensure this function exists in your api service
 
 const NextSong = () => {
   const [nextSong, setNextSong] = useState(null);
@@ -18,7 +11,7 @@ const NextSong = () => {
         const songData = await fetchNextSong();
         setNextSong(songData);
       } catch (error) {
-        console.error('Error fetching next song:', error);
+        console.error("Error fetching next song:", error);
       }
     };
 
@@ -28,12 +21,12 @@ const NextSong = () => {
   }, []);
 
   return (
-    <Window style={{ width: 300, height: 250 }}>
+    <Window>
       <WindowHeader>Next Song</WindowHeader>
       <WindowContent>
-        {nextSong ? (
+        {nextSong?.title ? (
           <>
-            <AlbumArt src={nextSong.artUrl} alt={`${nextSong.album} album art`} />
+            <Avatar square size={200} src={nextSong.artUrl} />
             <h2>{nextSong.title}</h2>
             <p>{nextSong.artist}</p>
             <p>{nextSong.album}</p>

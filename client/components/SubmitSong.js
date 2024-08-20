@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { Button, TextField, Window, WindowHeader, WindowContent } from 'react95';
-import { API_URL } from '../services/api';
+import { useState } from "react";
+import {
+  Button,
+  TextInput,
+  Window,
+  WindowHeader,
+  WindowContent,
+} from "react95";
+import { API_URL } from "../services/api";
 
 const SubmitSong = () => {
-  const [query, setQuery] = useState('');
-  const [trackId, setTrackId] = useState('');
+  const [query, setQuery] = useState("");
+  const [trackId, setTrackId] = useState("");
   const [songMetadata, setSongMetadata] = useState(null);
   const [isConfirming, setIsConfirming] = useState(false);
 
@@ -15,8 +21,8 @@ const SubmitSong = () => {
 
     try {
       const response = await fetch(`${API_URL}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
       });
 
@@ -29,52 +35,53 @@ const SubmitSong = () => {
         setTrackId(result.metadata.trackId);
       } else if (result.success) {
         // If submission is successful
-        alert('Song added successfully!');
-        setQuery('');
+        alert("Song added successfully!");
+        setQuery("");
         setSongMetadata(null);
         setIsConfirming(false);
       }
     } catch (error) {
-      console.error('Error submitting song:', error);
+      console.error("Error submitting song:", error);
     }
   };
 
   const handleConfirm = async () => {
     try {
       const response = await fetch(`${API_URL}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: trackId }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        alert('Song added successfully!');
-        setQuery('');
-        setTrackId('');
+        alert("Song added successfully!");
+        setQuery("");
+        setTrackId("");
         setSongMetadata(null);
         setIsConfirming(false);
       }
     } catch (error) {
-      console.error('Error confirming song:', error);
+      console.error("Error confirming song:", error);
     }
   };
 
   return (
-    <Window style={{ width: 300, padding: '1rem' }}>
+    <Window>
       <WindowHeader>Submit a Song</WindowHeader>
       <WindowContent>
-        <form onSubmit={handleSubmit}>
-          <TextField
+        <div style={{ display: "flex" }}>
+          <TextInput
             value={query}
             onChange={handleQueryChange}
-            placeholder="Input search query or Spotify TrackID/Url"
+            placeholder="Search for a song..."
             fullWidth
           />
-          <Button type="submit">Submit</Button>
-        </form>
-
+          <Button onClick={handleSubmit} type="submit">
+            Request
+          </Button>
+        </div>
         {isConfirming && songMetadata && (
           <div>
             <h3>Confirm Song</h3>

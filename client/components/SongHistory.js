@@ -1,7 +1,18 @@
-import { useEffect, useState } from 'react';
-import { Window, WindowHeader, WindowContent } from 'react95';
-import { fetchSongHistory } from '../services/api';
-import { Image } from 'next/image';
+import { useEffect, useState } from "react";
+import {
+  Window,
+  WindowHeader,
+  WindowContent,
+  Table,
+  TableHead,
+  TableHeadCell,
+  TableBody,
+  TableRow,
+  TableDataCell,
+  Avatar,
+} from "react95";
+import { fetchSongHistory } from "../services/api";
+import Image from "next/image";
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([]);
@@ -12,7 +23,7 @@ const SongHistory = () => {
         const historyData = await fetchSongHistory();
         setSongHistory(historyData);
       } catch (error) {
-        console.error('Error fetching song history:', error);
+        console.error("Error fetching song history:", error);
       }
     };
 
@@ -22,21 +33,29 @@ const SongHistory = () => {
   }, []);
 
   return (
-    <Window style={{ width: 300, height: 250 }}>
-      <WindowHeader>Song History</WindowHeader>
+    <Window>
+      <WindowHeader>History</WindowHeader>
       <WindowContent>
-        <ul>
-          {songHistory.length > 0 ? (
-            songHistory.map((song, index) => (
-              <li key={index}>
-                <Image src={song.artUrl} alt={song.album} style={{ width: 50, height: 50 }} />
-                <strong>{song.title}</strong> by {song.artist} ({song.album})
-              </li>
-            ))
-          ) : (
-            <p>No history available.</p>
-          )}
-        </ul>
+        <Table>
+          <TableHead>
+            <TableHeadCell></TableHeadCell>
+            <TableHeadCell>Artist</TableHeadCell>
+            <TableHeadCell>Title</TableHeadCell>
+            <TableHeadCell>Album</TableHeadCell>
+          </TableHead>
+          <TableBody>
+            {songHistory.map((song, index) => (
+              <TableRow key={index}>
+                <TableDataCell>
+                  <Avatar square size={50} src={song.artUrl} />
+                </TableDataCell>
+                <TableDataCell>{song.title}</TableDataCell>
+                <TableDataCell>{song.artist}</TableDataCell>
+                <TableDataCell>{song.album}</TableDataCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </WindowContent>
     </Window>
   );

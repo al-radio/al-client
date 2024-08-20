@@ -1,14 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Window, WindowHeader, WindowContent } from 'react95';
-import styled from 'styled-components';
-import { API_URL, fetchCurrentSong } from '../services/api';
-import { useGlobalAudioPlayer } from 'react-use-audio-player';
-
-const AlbumArt = styled.img`
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-`;
+import { useEffect, useState } from "react";
+import { Window, WindowHeader, WindowContent, Button, Avatar } from "react95";
+import { API_URL, fetchCurrentSong } from "../services/api";
+import { useGlobalAudioPlayer } from "react-use-audio-player";
+import Image from "next/image";
 
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
@@ -22,7 +16,7 @@ const AudioPlayer = () => {
         const songData = await fetchCurrentSong();
         setCurrentSong(songData);
       } catch (error) {
-        console.error('Error fetching current song:', error);
+        console.error("Error fetching current song:", error);
       }
       const intervalId = setInterval(getCurrentSong, 10000);
       return () => clearInterval(intervalId);
@@ -32,7 +26,7 @@ const AudioPlayer = () => {
   }, []);
 
   useEffect(() => {
-    if (currentSong && 'mediaSession' in navigator) {
+    if (currentSong && "mediaSession" in navigator) {
       const { mediaSession } = navigator;
       mediaSession.metadata = new MediaMetadata({
         title: currentSong.title,
@@ -40,51 +34,44 @@ const AudioPlayer = () => {
         album: currentSong.album,
         artwork: [
           {
-            src: currentSong.artUrl,
-            sizes: '100x100',
-            type: 'image/png',
+            src: currentSong.artUrl || "@public/album-art-placeholder.png",
+            sizes: "100x100",
+            type: "image/png",
           },
         ],
       });
     }
   }, [currentSong]);
 
-
   const handlePlay = () => {
-    const audioElements = document.querySelectorAll('audio');
+    const audioElements = document.querySelectorAll("audio");
     audioElements.forEach((el) => el.remove());
 
     load(`${audioUrl}?t=${new Date().getTime()}`, {
       autoplay: true,
       html5: true,
-      format: 'mp3',
+      format: "mp3",
       onpause: () => setIsPlaying(false),
     });
     setIsPlaying(true);
   };
-
-  if (!currentSong) {
-    return (
-      <Window style={{ width: 300, height: 250 }}>
-        <WindowHeader>Audio Player</WindowHeader>
-        <WindowContent>
-          <p>Loading song data...</p>
-        </WindowContent>
-      </Window>
-    );
-  }
-
   return (
-    <Window style={{ width: 300, height: 250 }}>
-      <WindowHeader>Audio Player</WindowHeader>
+    <Window>
+      <WindowHeader>Now Playing</WindowHeader>
       <WindowContent>
-        <AlbumArt src={currentSong.artUrl} alt={`${currentSong.album} album art`} />
-        <h2>{currentSong.title}</h2>
-        <p>{currentSong.artist}</p>
-        <p>{currentSong.album}</p>
-        {!isPlaying && (
-          <button onClick={handlePlay}>Play</button>
+        {currentSong?.title ? (
+          <>
+            <Avatar square size={300} src={currentSong.artUrl} noBorder />
+            <h2>{currentSong.title}</h2>
+            <p>{currentSong.artist}</p>
+            <p>{currentSong.album}</p>
+          </>
+        ) : (
+          <p>Loading song data...</p>
         )}
+        {!isPlaying ? (
+          <Button onClick={handlePlay}>Start Listening</Button>
+        ) : null}
       </WindowContent>
     </Window>
   );
