@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'; // Import useState and useEffect
+import { useEffect, useState } from 'react';
 import { Window, WindowHeader, WindowContent } from 'react95';
 import styled from 'styled-components';
 import { API_URL, fetchCurrentSong } from '../services/api';
+import { useGlobalAudioPlayer } from 'react-use-audio-player';
 
 const AlbumArt = styled.img`
   width: 100px;
@@ -11,6 +12,9 @@ const AlbumArt = styled.img`
 
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioUrl = `${API_URL}/stream`;
+  const { load } = useGlobalAudioPlayer();
 
   useEffect(() => {
     const getCurrentSong = async () => {
@@ -20,17 +24,44 @@ const AudioPlayer = () => {
       } catch (error) {
         console.error('Error fetching current song:', error);
       }
-      // Timer to check for a new song every 10 seconds
       const intervalId = setInterval(getCurrentSong, 10000);
-
-      // Cleanup on component unmount
       return () => clearInterval(intervalId);
     };
 
     getCurrentSong();
   }, []);
 
-  const audioUrl = `${API_URL}/stream`;
+  useEffect(() => {
+    if (currentSong && 'mediaSession' in navigator) {
+      const { mediaSession } = navigator;
+      mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist,
+        album: currentSong.album,
+        artwork: [
+          {
+            src: currentSong.artUrl,
+            sizes: '100x100',
+            type: 'image/png',
+          },
+        ],
+      });
+    }
+  }, [currentSong]);
+
+
+  const handlePlay = () => {
+    const audioElements = document.querySelectorAll('audio');
+    audioElements.forEach((el) => el.remove());
+
+    load(`${audioUrl}?t=${new Date().getTime()}`, {
+      autoplay: true,
+      html5: true,
+      format: 'mp3',
+      onpause: () => setIsPlaying(false),
+    });
+    setIsPlaying(true);
+  };
 
   if (!currentSong) {
     return (
@@ -51,7 +82,9 @@ const AudioPlayer = () => {
         <h2>{currentSong.title}</h2>
         <p>{currentSong.artist}</p>
         <p>{currentSong.album}</p>
-        <audio controls src={audioUrl} />
+        {!isPlaying && (
+          <button onClick={handlePlay}>Play</button>
+        )}
       </WindowContent>
     </Window>
   );

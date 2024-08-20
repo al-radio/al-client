@@ -1,10 +1,10 @@
-import DBService from './db.js';
-import axios from 'axios';
-import QueueService from './queue.js';
+import DBService from "./db.js";
+import axios from "axios";
+import QueueService from "./queue.js";
 
 class SpotifyService {
   constructor() {
-    this._baseUrl = 'https://api.spotify.com/v1';
+    this._baseUrl = "https://api.spotify.com/v1";
     this._clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
     this._clientId = process.env.SPOTIFY_CLIENT_ID;
   }
@@ -15,23 +15,27 @@ class SpotifyService {
 
   async _authenticate() {
     try {
-      const response = await axios.post('https://accounts.spotify.com/api/token', null, {
-        params: {
-          grant_type: 'client_credentials'
+      const response = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        null,
+        {
+          params: {
+            grant_type: "client_credentials",
+          },
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${this._clientId}:${this._clientSecret}`).toString("base64")}`,
+          },
         },
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${this._clientId}:${this._clientSecret}`).toString('base64')}`
-        }
-      });
+      );
       this.token = response.data.access_token;
-      console.log('Authenticated with Spotify API');
+      console.log("Authenticated with Spotify API");
     } catch (error) {
-      throw new Error('Failed to authenticate with Spotify API:', error);
+      throw new Error("Failed to authenticate with Spotify API:", error);
     }
   }
 
   _extractMetadata(spotifyTrackMetadata) {
-    console.log('Extracting metadata for:', spotifyTrackMetadata.name);
+    console.log("Extracting metadata for:", spotifyTrackMetadata.name);
     return {
       trackId: spotifyTrackMetadata.id,
       title: spotifyTrackMetadata.name,
@@ -40,44 +44,49 @@ class SpotifyService {
       genres: spotifyTrackMetadata.genres,
       releaseDate: spotifyTrackMetadata.album.release_date,
       url: spotifyTrackMetadata.external_urls.spotify,
-      artUrl: spotifyTrackMetadata.album.images[0].url
+      artUrl: spotifyTrackMetadata.album.images[0].url,
     };
   }
 
   async _getArtistGenres(artistId) {
-    console.log('Getting genres for artist:', artistId);
+    console.log("Getting genres for artist:", artistId);
     try {
-      const artistResponse = await axios.get(`${this._baseUrl}/artists/${artistId}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      });
+      const artistResponse = await axios.get(
+        `${this._baseUrl}/artists/${artistId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        },
+      );
       return artistResponse.data.genres;
     } catch (error) {
-      throw new Error('Failed to get artist genres:', error);
+      throw new Error("Failed to get artist genres:", error);
     }
   }
 
   async searchTrack(query) {
     try {
-      console.log('Searching for track:', query);
+      console.log("Searching for track:", query);
       const response = await axios.get(`${this._baseUrl}/search`, {
         headers: {
-          Authorization: `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`,
         },
         params: {
           q: query,
-          type: 'track',
-          limit: 1
-        }
+          type: "track",
+          limit: 1,
+        },
       });
-      return await this._convertAndSaveSpotifyTrackMetadata(response.data.tracks.items[0]);
+      return await this._convertAndSaveSpotifyTrackMetadata(
+        response.data.tracks.items[0],
+      );
     } catch (error) {
       if (error.response?.status === 401) {
         await this._authenticate();
         return this.searchTrack(query);
       }
-      throw new Error('Failed to search for track:', error);
+      throw new Error("Failed to search for track:", error);
     }
   }
 
@@ -85,21 +94,21 @@ class SpotifyService {
     try {
       const response = await axios.get(`${this._baseUrl}/recommendations`, {
         headers: {
-          Authorization: `Bearer ${this.token}`
+          Authorization: `Bearer ${this.token}`,
         },
         params: {
-          seed_tracks: trackIds.join(','),
-          limit: 15
-        }
+          seed_tracks: trackIds.join(","),
+          limit: 15,
+        },
       });
-      const recommendations = response.data.tracks.map(track => track.id);
+      const recommendations = response.data.tracks.map((track) => track.id);
       return recommendations;
     } catch (error) {
       if (error.response?.status === 401) {
         await this._authenticate();
         return this.getRecommendations(trackIds);
       }
-      throw new Error('Failed to get recommendations:', error);
+      throw new Error("Failed to get recommendations:", error);
     }
   }
 
@@ -115,13 +124,15 @@ class SpotifyService {
   }
 
   async _getUrlForAllPlatforms(trackUrl) {
-    console.log('Getting other platform links for:', trackUrl);
+    console.log("Getting other platform links for:", trackUrl);
     try {
-      const response = await axios.get(`https://api.song.link/v1-alpha.1/links?url=${trackUrl}`);
+      const response = await axios.get(
+        `https://api.song.link/v1-alpha.1/links?url=${trackUrl}`,
+      );
       const link = response.data.linksByPlatform;
       return this._cleanOtherPlatformLinks(link);
     } catch (error) {
-      throw new Error('Failed to get other platform links:', error);
+      throw new Error("Failed to get other platform links:", error);
     }
   }
 
@@ -136,7 +147,7 @@ class SpotifyService {
     const metadata = {
       ...cleanedTrackMetadata,
       genres,
-      urlForPlatform
+      urlForPlatform,
     };
 
     await DBService.saveSongMetadata(metadata);
@@ -144,12 +155,12 @@ class SpotifyService {
   }
 
   async getTrackData(trackId) {
-    console.log('Getting track data from spotify for:', trackId);
+    console.log("Getting track data from spotify for:", trackId);
     try {
       const response = await axios.get(`${this._baseUrl}/tracks/${trackId}`, {
         headers: {
-          Authorization: `Bearer ${this.token}`
-        }
+          Authorization: `Bearer ${this.token}`,
+        },
       });
       return await this._convertAndSaveSpotifyTrackMetadata(response.data);
     } catch (error) {
@@ -157,24 +168,26 @@ class SpotifyService {
         await this._authenticate();
         return this.getTrackData(trackId);
       }
-      throw new Error('Failed to get track data:', error);
+      throw new Error("Failed to get track data:", error);
     }
   }
 
   async populateSuggestionQueue(numberOfSuggestions = 2) {
     // Get recommendations based on last five played
     const lastFiveSongs = await DBService.getLastPlayedSongs(5);
-    const lastFiveTrackIds = lastFiveSongs.map(track => track.trackId);
+    const lastFiveTrackIds = lastFiveSongs.map((track) => track.trackId);
     let suggestions = await this.getRecommendations(lastFiveTrackIds);
 
     // Do not suggest songs that have been played in the last two hours
     const tooRecentlyPlayed = await DBService.getRecentlyPlayedSongs(2);
-    const tooRecentlyTrackIds = tooRecentlyPlayed.map(track => track.trackId);
-    suggestions = suggestions.filter(track => !tooRecentlyTrackIds.includes(track));
+    const tooRecentlyTrackIds = tooRecentlyPlayed.map((track) => track.trackId);
+    suggestions = suggestions.filter(
+      (track) => !tooRecentlyTrackIds.includes(track),
+    );
 
     // Limit to 5 suggestions
     suggestions = suggestions.slice(0, numberOfSuggestions);
-    suggestions.forEach(track => QueueService.addToSuggestionQueue(track));
+    suggestions.forEach((track) => QueueService.addToSuggestionQueue(track));
   }
 }
 

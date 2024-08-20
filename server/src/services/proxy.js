@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { NoProxyError } from '../errors.js';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import axios from "axios";
+import { NoProxyError } from "../errors.js";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 class ProxyService {
   constructor() {
@@ -13,11 +13,11 @@ class ProxyService {
     if (!this._apiUrl) return;
     try {
       const response = await axios.get(this._apiUrl);
-      let proxyList = response.data.split('\r\n');
+      let proxyList = response.data.split("\r\n");
       this._proxyList.pop();
-      this._proxyList = proxyList.map(proxy => this._parseProxy(proxy));
+      this._proxyList = proxyList.map((proxy) => this._parseProxy(proxy));
     } catch (error) {
-      console.error('Failed to refresh proxy list.');
+      console.error("Failed to refresh proxy list.");
     }
   }
 
@@ -29,14 +29,14 @@ class ProxyService {
 
   _parseProxy(proxy) {
     if (!this._apiUrl) return;
-    proxy = proxy.replace('http://', '');
-    const [host, port] = proxy.split(':');
+    proxy = proxy.replace("http://", "");
+    const [host, port] = proxy.split(":");
     return { host: host, port: +port };
   }
 
   unsetProxy() {
     if (!this._apiUrl) return;
-    process.env.http_proxy = '';
+    process.env.http_proxy = "";
   }
 
   markActiveProxyBad() {
@@ -47,18 +47,18 @@ class ProxyService {
 
   async _testProxy(proxy) {
     if (!this._apiUrl) return;
-    const testUrl = 'https://httpbin.org/ip';
+    const testUrl = "https://httpbin.org/ip";
     try {
-      console.log('Testing proxy:', proxy);
+      console.log("Testing proxy:", proxy);
       const agent = new HttpsProxyAgent(`http://${proxy.host}:${proxy.port}`);
       await axios.get(testUrl, {
         agent,
-        timeout: 5000
+        timeout: 5000,
       });
-      console.log('Proxy passed test');
+      console.log("Proxy passed test");
       return true;
     } catch (error) {
-      console.error('Proxy failed test:', error);
+      console.error("Proxy failed test:", error);
       return false;
     }
   }
@@ -88,7 +88,7 @@ class ProxyService {
 
     if (raise) {
       // No working proxies means we can't continue. End the program.
-      throw new NoProxyError('No working proxies found');
+      throw new NoProxyError("No working proxies found");
     }
 
     await this.refreshProxyList();
@@ -97,7 +97,7 @@ class ProxyService {
 
   _markProxyBad(proxy) {
     if (!this._apiUrl) return;
-    this._proxyList = this._proxyList.filter(p => p !== proxy);
+    this._proxyList = this._proxyList.filter((p) => p !== proxy);
   }
 }
 

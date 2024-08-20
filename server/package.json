@@ -9,6 +9,7 @@
     "start:local": "npm run setup-audio && node --expose-gc --env-file=.env src/index.js",
     "start": "npm run setup-audio && node --expose-gc --optimize_for_size --max_old_space_size=460 src/index.js",
     "mongo:local": "mkdir -p db && mongod --dbpath db --port 28017",
+    "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,json,css,md}\""
   },
@@ -27,8 +28,9 @@
     "warn": "^1.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "dotenv-cli": "^7.4.2",
-    "eslint": "^8",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",

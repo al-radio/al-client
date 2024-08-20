@@ -1,9 +1,9 @@
-import axios from 'axios';
-import fs from 'fs';
+import axios from "axios";
+import fs from "fs";
 
 class OpenAiService {
   constructor() {
-    this._baseUrl = 'https://api.openai.com/v1';
+    this._baseUrl = "https://api.openai.com/v1";
     this._apiKey = process.env.OPENAI_API_KEY;
     this._chatHistory = [];
     this._systemPrompt = `
@@ -44,7 +44,7 @@ class OpenAiService {
   _getTodaysDateAndTimeEST() {
     const date = new Date();
     date.setHours(date.getHours() - 4);
-    return date.toLocaleString('en-US', { timeZone: 'America/New_York' });
+    return date.toLocaleString("en-US", { timeZone: "America/New_York" });
   }
 
   _generateUserPrompt(thisSongMetadata, previousSongMetadata) {
@@ -53,7 +53,7 @@ class OpenAiService {
     - Title: ${thisSongMetadata.title}
     - Artist: ${thisSongMetadata.artist}
     - Album: ${thisSongMetadata.album}
-    - Genres: ${thisSongMetadata.genres.join(', ')}
+    - Genres: ${thisSongMetadata.genres.join(", ")}
     - Release date: ${thisSongMetadata.releaseDate}`;
 
     const previousSongPrompt = previousSongMetadata.title
@@ -62,78 +62,81 @@ class OpenAiService {
     - Title: ${previousSongMetadata.title}
     - Artist: ${previousSongMetadata.artist}
     - Album: ${previousSongMetadata.album}
-    - Genres: ${previousSongMetadata.genres.join(', ')}
+    - Genres: ${previousSongMetadata.genres.join(", ")}
     - Release date: ${previousSongMetadata.releaseDate}`
-      : '';
+      : "";
 
     return `${currentSongPrompt}\n\n${previousSongPrompt}`;
   }
 
   async generateSongIntro(thisSongMetadata, previousSongMetadata) {
     if (!thisSongMetadata.title) {
-      throw new Error('Missing song metadata');
+      throw new Error("Missing song metadata");
     }
 
     try {
-      const userPrompt = this._generateUserPrompt(thisSongMetadata, previousSongMetadata);
+      const userPrompt = this._generateUserPrompt(
+        thisSongMetadata,
+        previousSongMetadata,
+      );
       const response = await axios.post(
         `${this._baseUrl}/chat/completions`,
         {
           messages: [
-            { role: 'system', content: this._systemPrompt },
+            { role: "system", content: this._systemPrompt },
             ...this._chatHistory,
-            { role: 'user', content: userPrompt }
+            { role: "user", content: userPrompt },
           ],
-          model: 'gpt-4o-mini',
+          model: "gpt-4o-mini",
           n: 1,
           max_tokens: 200,
           frequency_penalty: 0.6,
-          presence_penalty: 0.6
+          presence_penalty: 0.6,
         },
         {
           headers: {
-            Authorization: `Bearer ${this._apiKey}`
-          }
-        }
+            Authorization: `Bearer ${this._apiKey}`,
+          },
+        },
       );
       const songIntro = response.data.choices[0].message.content;
       this._addToChatHistory(userPrompt, songIntro);
       return songIntro;
     } catch (error) {
-      throw new Error('Failed to generate song intro:', error);
+      throw new Error("Failed to generate song intro:", error);
     }
   }
 
   _addToChatHistory(userPrompt, songIntro) {
-    this._chatHistory.push({ role: 'user', content: userPrompt });
-    this._chatHistory.push({ role: 'assistant', content: songIntro });
+    this._chatHistory.push({ role: "user", content: userPrompt });
+    this._chatHistory.push({ role: "assistant", content: songIntro });
     if (this._chatHistory.length % 2 > 5) {
       this._chatHistory.shift();
     }
   }
 
   async textToSpeech(text) {
-    console.log('Converting text to speech:', text);
+    console.log("Converting text to speech:", text);
     try {
       const response = await axios.post(
         `${this._baseUrl}/audio/speech`,
         {
           input: text,
-          model: 'tts-1',
-          voice: 'fable'
+          model: "tts-1",
+          voice: "fable",
         },
         {
           headers: {
-            Authorization: `Bearer ${this._apiKey}`
+            Authorization: `Bearer ${this._apiKey}`,
           },
-          responseType: 'arraybuffer'
-        }
+          responseType: "arraybuffer",
+        },
       );
       const audioPath = `./audio/${Date.now()}.mp3`;
       fs.writeFileSync(audioPath, response.data);
       return audioPath;
     } catch (error) {
-      throw new Error('Failed to convert text to speech:', error);
+      throw new Error("Failed to convert text to speech:", error);
     }
   }
 }

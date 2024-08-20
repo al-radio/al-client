@@ -1,10 +1,10 @@
-import SpotifyService from './spotify.js';
-import QueueService from './queue.js';
-import DBService from './db.js';
-import SongController from '../controllers/songController.js';
+import SpotifyService from "./spotify.js";
+import QueueService from "./queue.js";
+import DBService from "./db.js";
+import SongController from "../controllers/songController.js";
 
-import path from 'path';
-import EventEmitter from 'events';
+import path from "path";
+import EventEmitter from "events";
 class ClientService extends EventEmitter {
   // eslint-disable-next-line constructor-super
   constructor() {
@@ -19,7 +19,7 @@ class ClientService extends EventEmitter {
       artist: metadata.artist,
       album: metadata.album,
       urlForPlatform: metadata.urlForPlatform,
-      artUrl: metadata.artUrl
+      artUrl: metadata.artUrl,
     };
   }
 
@@ -28,32 +28,32 @@ class ClientService extends EventEmitter {
   }
 
   serveWebpage(req, res) {
-    res.sendFile('index.html', { root: path.join(process.cwd(), 'public') });
+    res.sendFile("index.html", { root: path.join(process.cwd(), "public") });
   }
 
   addClientToStream(req, res) {
     res.writeHead(200, {
-      'Content-Type': 'audio/mpeg',
-      Connection: 'keep-alive',
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      Pragma: 'no-cache',
-      Expires: '0',
-      'Surrogate-Control': 'no-store'
+      "Content-Type": "audio/mpeg",
+      Connection: "keep-alive",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+      "Surrogate-Control": "no-store",
     });
 
     this._clients.add(res);
-    console.log('Client connected to stream');
-    this.emit('clientConnected');
-    res.on('close', () => {
+    console.log("Client connected to stream");
+    this.emit("clientConnected");
+    res.on("close", () => {
       this._clients.delete(res);
-      console.log('Client disconnected from stream');
+      console.log("Client disconnected from stream");
     });
   }
 
   async _handleSearchQuerySubmit(req, res, query) {
     const track = await SpotifyService.searchTrack(query);
     if (!track.trackId) {
-      res.json({ success: false, message: 'Song not found' });
+      res.json({ success: false, message: "Song not found" });
       return;
     }
 
@@ -63,24 +63,27 @@ class ClientService extends EventEmitter {
   async _handleDirectTrackSubmit(req, res, trackId) {
     const track = await SpotifyService.getTrackData(trackId);
     if (!track.trackId) {
-      res.json({ success: false, message: 'Song not found' });
+      res.json({ success: false, message: "Song not found" });
       return;
     }
 
     if (this._isTrackIdQueued(trackId)) {
-      res.json({ success: false, message: 'Song is already in the queue.' });
-      console.log('Song is already in the queue');
+      res.json({ success: false, message: "Song is already in the queue." });
+      console.log("Song is already in the queue");
       return false;
     }
 
     if (await DBService.hasSongBeenPlayedRecently(trackId)) {
-      res.json({ success: false, message: 'Song has been played too recently.' });
-      console.log('Song has been played recently');
+      res.json({
+        success: false,
+        message: "Song has been played too recently.",
+      });
+      console.log("Song has been played recently");
       return false;
     }
 
     await QueueService.addToUserQueue(trackId);
-    res.json({ success: true, message: 'Song added to queue.' });
+    res.json({ success: true, message: "Song added to queue." });
   }
 
   _isTrackIdQueued(trackId) {
@@ -93,19 +96,21 @@ class ClientService extends EventEmitter {
 
   async submitSongRequest(req, res) {
     if (QueueService.isUserQueueFull()) {
-      res.json({ success: false, message: 'The queue is full.' });
-      console.log('User queue is full');
+      res.json({ success: false, message: "The queue is full." });
+      console.log("User queue is full");
       return false;
     }
 
     const query = req.body.query;
     if (!query) {
-      return res.status(400).json({ message: 'Invalid Request. Expected 1 parameter "query".' });
+      return res
+        .status(400)
+        .json({ message: 'Invalid Request. Expected 1 parameter "query".' });
     }
 
     let trackId;
-    if (query.includes('spotify.com/track/')) {
-      trackId = query.split('/').pop();
+    if (query.includes("spotify.com/track/")) {
+      trackId = query.split("/").pop();
     } else if (/^[a-zA-Z0-9]{22}$/.test(query)) {
       trackId = query;
     }
@@ -119,7 +124,9 @@ class ClientService extends EventEmitter {
   }
 
   async getCurrentSongMetadata(req, res) {
-    const metadata = this._clientifyMetadata(SongController.currentSongMetadata);
+    const metadata = this._clientifyMetadata(
+      SongController.currentSongMetadata,
+    );
     res.json(metadata);
   }
 
@@ -131,22 +138,24 @@ class ClientService extends EventEmitter {
     if (songHistory.length && songHistory[0].trackId === currentTrackId) {
       songHistory.shift();
     }
-    const clientifiedHistory = songHistory.map(song => this._clientifyMetadata(song));
+    const clientifiedHistory = songHistory.map((song) =>
+      this._clientifyMetadata(song),
+    );
     res.json(clientifiedHistory);
   }
 
   async getNextSong(req, res) {
     const nextSongMetadata = QueueService.getNextQueuedSongMetadata();
     if (!nextSongMetadata) {
-      res.json({ success: false, message: 'No songs in queue.' });
+      res.json({ success: false, message: "No songs in queue." });
       return;
     }
 
-    res.json({ success: true, metadata: this._clientifyMetadata(nextSongMetadata) });
+    res.json(this._clientifyMetadata(nextSongMetadata));
   }
 
   async getListeners(req, res) {
-    res.json({ listeners: this._clients.size });
+    res.json(this._clients.size);
   }
 }
 

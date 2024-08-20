@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Window, WindowHeader, WindowContent } from 'react95';
 import { fetchSongHistory } from '../services/api';
+import { Image } from 'next/image';
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([]);
@@ -28,7 +29,7 @@ const SongHistory = () => {
           {songHistory.length > 0 ? (
             songHistory.map((song, index) => (
               <li key={index}>
-                <img src={song.artUrl} alt={song.album} style={{ width: 50, height: 50 }} />
+                <Image src={song.artUrl} alt={song.album} style={{ width: 50, height: 50 }} />
                 <strong>{song.title}</strong> by {song.artist} ({song.album})
               </li>
             ))

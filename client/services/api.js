@@ -7,7 +7,6 @@ export const fetchCurrentSong = async () => {
 
 export const fetchNextSong = async () => {
   const response = await fetch(`${API_URL}/next`);
-  console.log('response', response);
   return response.json();
 };
 
@@ -16,7 +15,7 @@ export const fetchSongHistory = async () => {
   return response.json();
 };
 
-export const fetchListenersCount = async () => {
+export const fetchListenerCount = async () => {
   const response = await fetch(`${API_URL}/listeners`);
   return response.json();
 };

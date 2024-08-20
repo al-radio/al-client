@@ -1,6 +1,8 @@
 import AudioPlayer from '../components/AudioPlayer';
 import SongHistory from '@/components/SongHistory';
 import NextSong from '@/components/NextSong';
+import ListenerCount from '@/components/ListenerCount';
+import SubmitSong from '@/components/SubmitSong';
 
 export default function Home() {
   return (
@@ -9,7 +11,8 @@ export default function Home() {
         <AudioPlayer />
         <SongHistory />
         <NextSong />
-      {/* Other components */}
+        <ListenerCount />
+        <SubmitSong />
     </div>
   );
 }

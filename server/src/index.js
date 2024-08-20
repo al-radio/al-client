@@ -1,20 +1,20 @@
-import express from 'express';
-import songRoutes from './routes/routes.js';
-import SpotifyService from './services/spotify.js';
-import ProxyService from './services/proxy.js';
-import QueueService from './services/queue.js';
-import SongController from './controllers/songController.js';
-import cors from 'cors';
+import express from "express";
+import songRoutes from "./routes/routes.js";
+import SpotifyService from "./services/spotify.js";
+import ProxyService from "./services/proxy.js";
+import QueueService from "./services/queue.js";
+import SongController from "./controllers/songController.js";
+import cors from "cors";
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || '*',
-  optionsSuccessStatus: 200
+  origin: process.env.CORS_ORIGIN || "*",
+  optionsSuccessStatus: 200,
 };
 
 const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use('/', songRoutes);
+app.use("/", songRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
@@ -22,19 +22,21 @@ app.listen(PORT, async () => {
 
   // Circumvent youtube ip blocking
   if (process.env.PROXY_LIST_URL) {
-    console.log('Using proxies');
+    console.log("Using proxies");
     await ProxyService.refreshProxyList();
   }
 
   // Choose initial songs
   if (process.env.INITIAL_TRACK_IDS) {
-    const initialTrackIds = process.env.INITIAL_TRACK_IDS.split(',');
-    console.log('Using initial songs:', initialTrackIds);
+    const initialTrackIds = process.env.INITIAL_TRACK_IDS.split(",");
+    console.log("Using initial songs:", initialTrackIds);
     for (const trackId of initialTrackIds) {
       QueueService.addToSuggestionQueue(trackId);
     }
   } else {
-    console.error('No initial songs provided. Gathering suggested tracks from Spotify instead.');
+    console.error(
+      "No initial songs provided. Gathering suggested tracks from Spotify instead.",
+    );
   }
 
   await SpotifyService.initialize();
