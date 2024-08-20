@@ -2,9 +2,8 @@ import SpotifyService from "./spotify.js";
 import QueueService from "./queue.js";
 import DBService from "./db.js";
 import SongController from "../controllers/songController.js";
-
-import path from "path";
 import EventEmitter from "events";
+
 class ClientService extends EventEmitter {
   // eslint-disable-next-line constructor-super
   constructor() {
@@ -25,10 +24,6 @@ class ClientService extends EventEmitter {
 
   hasActiveClients() {
     return this._clients.size > 0;
-  }
-
-  serveWebpage(req, res) {
-    res.sendFile("index.html", { root: path.join(process.cwd(), "public") });
   }
 
   addClientToStream(req, res) {
