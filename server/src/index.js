@@ -4,10 +4,15 @@ import SpotifyService from './services/spotify.js';
 import ProxyService from './services/proxy.js';
 import QueueService from './services/queue.js';
 import SongController from './controllers/songController.js';
-import path from 'path';
+import cors from 'cors';
+
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || '*',
+  optionsSuccessStatus: 200
+};
 
 const app = express();
-app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use('/', songRoutes);
 
