@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Window, WindowHeader, WindowContent, Button, Avatar } from "react95";
 import { API_URL, fetchCurrentSong } from "../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
-import Image from "next/image";
 
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
@@ -18,8 +17,7 @@ const AudioPlayer = () => {
       } catch (error) {
         console.error("Error fetching current song:", error);
       }
-      const intervalId = setInterval(getCurrentSong, 10000);
-      return () => clearInterval(intervalId);
+      setInterval(getCurrentSong, 10000);
     };
 
     getCurrentSong();

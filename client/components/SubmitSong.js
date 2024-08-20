@@ -13,6 +13,7 @@ const SubmitSong = () => {
   const [trackId, setTrackId] = useState("");
   const [songMetadata, setSongMetadata] = useState(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [notification, setNotification] = useState("");
 
   const handleQueryChange = (e) => setQuery(e.target.value);
 
@@ -27,18 +28,18 @@ const SubmitSong = () => {
       });
 
       const result = await response.json();
+      console.log(result);
 
       if (result.metadata) {
-        // If metadata is returned, ask for confirmation
         setSongMetadata(result.metadata);
         setIsConfirming(true);
         setTrackId(result.metadata.trackId);
       } else if (result.success) {
-        // If submission is successful
-        alert("Song added successfully!");
         setQuery("");
         setSongMetadata(null);
         setIsConfirming(false);
+        setNotification("Song submitted successfully!");
+        setTimeout(() => setNotification(""), 5000);
       }
     } catch (error) {
       console.error("Error submitting song:", error);
@@ -54,17 +55,29 @@ const SubmitSong = () => {
       });
 
       const result = await response.json();
-
       if (result.success) {
-        alert("Song added successfully!");
+        setNotification("Song confirmed successfully!");
+        setTimeout(() => setNotification(""), 5000);
+      } else {
         setQuery("");
-        setTrackId("");
-        setSongMetadata(null);
-        setIsConfirming(false);
+        setNotification(result.message);
+        setTimeout(() => setNotification(""), 5000);
       }
     } catch (error) {
       console.error("Error confirming song:", error);
+      setNotification("Error confirming song. Please try again.");
     }
+
+    setQuery("");
+    setTrackId("");
+    setSongMetadata(null);
+    setIsConfirming(false);
+  };
+
+  const handleCancel = () => {
+    setIsConfirming(false);
+    setNotification("Song submission canceled.");
+    setTimeout(() => setNotification(""), 5000);
   };
 
   return (
@@ -89,8 +102,11 @@ const SubmitSong = () => {
             <p>Artist: {songMetadata.artist}</p>
             <p>Album: {songMetadata.album}</p>
             <Button onClick={() => handleConfirm()}>Confirm</Button>
-            <Button onClick={() => setIsConfirming(false)}>Cancel</Button>
+            <Button onClick={handleCancel}>Cancel</Button>
           </div>
+        )}
+        {notification && (
+          <div style={{ marginTop: 10, color: "magenta" }}>{notification}</div>
         )}
       </WindowContent>
     </Window>

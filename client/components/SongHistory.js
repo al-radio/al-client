@@ -28,8 +28,7 @@ const SongHistory = () => {
     };
 
     getSongHistory();
-    const historyIntervalId = setInterval(getSongHistory, 10000);
-    return () => clearInterval(historyIntervalId);
+    setInterval(getSongHistory, 10000);
   }, []);
 
   return (
