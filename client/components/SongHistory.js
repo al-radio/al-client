@@ -12,10 +12,12 @@ import {
   Avatar,
 } from "react95";
 import { fetchSongHistory } from "../services/api";
-import Image from "next/image";
+import GetSong from "./GetSong";
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([]);
+  const [selectedSong, setSelectedSong] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const getSongHistory = async () => {
@@ -28,35 +30,54 @@ const SongHistory = () => {
     };
 
     getSongHistory();
-    setInterval(getSongHistory, 10000);
+    const intervalId = setInterval(getSongHistory, 10000);
+    return () => clearInterval(intervalId); // Clean up interval on unmount
   }, []);
 
+  const handleRowClick = (song) => {
+    setSelectedSong(song);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedSong(null);
+  };
+
   return (
-    <Window>
-      <WindowHeader>History</WindowHeader>
-      <WindowContent>
-        <Table>
-          <TableHead>
-            <TableHeadCell></TableHeadCell>
-            <TableHeadCell>Artist</TableHeadCell>
-            <TableHeadCell>Title</TableHeadCell>
-            <TableHeadCell>Album</TableHeadCell>
-          </TableHead>
-          <TableBody>
-            {songHistory.map((song, index) => (
-              <TableRow key={index}>
-                <TableDataCell>
-                  <Avatar square size={50} src={song.artUrl} />
-                </TableDataCell>
-                <TableDataCell>{song.title}</TableDataCell>
-                <TableDataCell>{song.artist}</TableDataCell>
-                <TableDataCell>{song.album}</TableDataCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </WindowContent>
-    </Window>
+    <>
+      <Window>
+        <WindowHeader>History</WindowHeader>
+        <WindowContent>
+          <Table>
+            <TableHead>
+              <TableHeadCell></TableHeadCell>
+              <TableHeadCell>Title</TableHeadCell>
+              <TableHeadCell>Artist</TableHeadCell>
+            </TableHead>
+            <TableBody>
+              {songHistory.map((song, index) => (
+                <TableRow key={index} onClick={() => handleRowClick(song)}>
+                  <TableDataCell>
+                    <Avatar square size={50} src={song.artUrl} />
+                  </TableDataCell>
+                  <TableDataCell>{song.title}</TableDataCell>
+                  <TableDataCell>{song.artist}</TableDataCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </WindowContent>
+      </Window>
+
+      {selectedSong && (
+        <GetSong
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          urlForPlatform={selectedSong.urlForPlatform}
+        />
+      )}
+    </>
   );
 };
 

@@ -48,7 +48,7 @@ const Container = styled(Window)`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  overflow: hidden; /* Hide overflow on the container */
+  overflow: hidden;
 
   @media (max-height: 750px) {
     height: 100%;
@@ -60,9 +60,11 @@ const Container = styled(Window)`
   }
 `;
 
+// prevent horizontal scrolling, even when the content is too wide
 const StyledScrollView = styled(ScrollView)`
   height: calc(100% - 30px);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   &::-webkit-scrollbar {
     display: none;
@@ -83,8 +85,7 @@ export default function Home() {
             <AudioPlayer />
             <NextSong />
             <SubmitSong />
-
-            <SongHistory />
+            <SongHistory style={{ width: "100%" }} />
           </StyledScrollView>
         </Container>
       </ThemeProvider>

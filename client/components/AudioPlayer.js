@@ -13,15 +13,17 @@ const AudioPlayer = () => {
     const getCurrentSong = async () => {
       try {
         const songData = await fetchCurrentSong();
-        setCurrentSong(songData);
+        if (songData.title !== currentSong?.title) {
+          setCurrentSong(songData);
+        }
       } catch (error) {
         console.error("Error fetching current song:", error);
       }
-      setInterval(getCurrentSong, 10000);
     };
 
     getCurrentSong();
-  }, []);
+    setInterval(getCurrentSong, 10000);
+  });
 
   useEffect(() => {
     if (currentSong && "mediaSession" in navigator) {
@@ -59,7 +61,7 @@ const AudioPlayer = () => {
       <WindowContent>
         {currentSong?.title ? (
           <>
-            <Avatar square size={300} src={currentSong.artUrl} noBorder />
+            <Avatar square size={300} src={currentSong.artUrl} />
             <h2>{currentSong.title}</h2>
             <p>{currentSong.artist}</p>
             <p>{currentSong.album}</p>
