@@ -23,6 +23,7 @@ const AudioPlayer = () => {
 
     getCurrentSong();
     setInterval(getCurrentSong, 10000);
+    return () => clearInterval(intervalId);
   });
 
   useEffect(() => {

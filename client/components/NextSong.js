@@ -17,6 +17,7 @@ const NextSong = () => {
 
     getNextSong();
     setInterval(getNextSong, 10000);
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

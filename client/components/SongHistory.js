@@ -31,7 +31,7 @@ const SongHistory = () => {
 
     getSongHistory();
     const intervalId = setInterval(getSongHistory, 10000);
-    return () => clearInterval(intervalId); // Clean up interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleRowClick = (song) => {

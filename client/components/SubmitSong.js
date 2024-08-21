@@ -28,7 +28,6 @@ const SubmitSong = () => {
       });
 
       const result = await response.json();
-      console.log(result);
 
       if (result.metadata) {
         setSongMetadata(result.metadata);
