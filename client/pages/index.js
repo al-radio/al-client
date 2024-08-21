@@ -39,6 +39,25 @@ const GlobalStyles = createGlobalStyle`
   body {
     background-color: #C25F9C;
   }
+
+    /* Scanline effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.05) 1px,
+      rgba(255, 255, 255, 0.1) 1px,
+      rgba(255, 255, 255, 0.1) 2px
+    );
+    z-index: 10; /* Ensure it is above the body but below the content */
+    pointer-events: none; /* Allow interaction with underlying content */
+  }
 `;
 
 const Container = styled(Window)`
@@ -85,7 +104,7 @@ export default function Home() {
             <AudioPlayer />
             <NextSong />
             <SubmitSong />
-            <SongHistory style={{ width: "100%" }} />
+            <SongHistory />
           </StyledScrollView>
         </Container>
       </ThemeProvider>

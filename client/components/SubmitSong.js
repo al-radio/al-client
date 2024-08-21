@@ -81,7 +81,7 @@ const SubmitSong = () => {
   };
 
   return (
-    <Window>
+    <Window style={{ width: "100%" }}>
       <WindowHeader>Submit a Song</WindowHeader>
       <WindowContent>
         <div style={{ display: "flex" }}>

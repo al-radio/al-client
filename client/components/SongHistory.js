@@ -46,7 +46,7 @@ const SongHistory = () => {
 
   return (
     <>
-      <Window>
+      <Window style={{ width: "100%" }}>
         <WindowHeader>History</WindowHeader>
         <WindowContent>
           <Table>
