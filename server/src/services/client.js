@@ -126,7 +126,7 @@ class ClientService extends EventEmitter {
   }
 
   async getSongHistory(req, res) {
-    const songHistory = await DBService.getLastPlayedSongs(10);
+    const songHistory = await DBService.getLastPlayedSongs(16);
 
     // Do not send the current song in the history
     const currentTrackId = SongController.currentSongMetadata?.trackId;

@@ -22,7 +22,7 @@ const AudioPlayer = () => {
     };
 
     getCurrentSong();
-    setInterval(getCurrentSong, 10000);
+    const intervalId = setInterval(getCurrentSong, 10000);
     return () => clearInterval(intervalId);
   });
 

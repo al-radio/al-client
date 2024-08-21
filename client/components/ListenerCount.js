@@ -22,7 +22,7 @@ const ListenerCount = () => {
     };
 
     getListenerCount();
-    setInterval(getListenerCount, 10000);
+    const intervalId = setInterval(getListenerCount, 10000);
     return () => clearInterval(intervalId);
   }, []);
 

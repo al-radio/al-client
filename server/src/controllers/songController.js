@@ -140,7 +140,7 @@ class SongController extends EventEmitter {
   async _streamToClients(path) {
     const bitrate = await this._getBitrateFromAudioFile(path);
     const readable = fs.createReadStream(path);
-    const throttle = new Throttle(bitrate / 8);
+    const throttle = new Throttle(Math.floor(bitrate / 8));
 
     throttle
       .on("data", (data) => {
