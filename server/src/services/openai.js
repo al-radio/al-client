@@ -125,7 +125,7 @@ class OpenAiService {
         `${this._baseUrl}/audio/speech`,
         {
           input: text,
-          model: "tts-1-hd",
+          model: "tts-1",
           voice: "nova",
         },
         {
