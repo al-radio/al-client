@@ -39,7 +39,7 @@ class OpenAiService {
 
     return Math.random() < 0.25
       ? `${this._systemPrompt}\n\n${jokePrefix + jokeFormats[Math.floor(Math.random() * jokeFormats.length)]}`
-      : this._systemPrompt;
+      : this._systemPrompt + " Do not add jokes.";
   }
 
   _getTodaysDateAndTimeEST() {
@@ -141,7 +141,7 @@ class OpenAiService {
       fs.writeFileSync(tempAudioPath, response.data);
 
       try {
-        const command = `ffmpeg -i "${tempAudioPath}" -filter:a "volume=2" "${audioPath}"`;
+        const command = `ffmpeg -i "${tempAudioPath}" -filter:a "volume=2.3" "${audioPath}"`;
         const execAsync = promisify(exec);
         await execAsync(command);
       } catch (error) {
