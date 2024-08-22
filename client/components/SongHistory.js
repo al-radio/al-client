@@ -10,6 +10,7 @@ import {
   TableRow,
   TableDataCell,
   Avatar,
+  ScrollView,
 } from "react95";
 import { fetchSongHistory } from "../services/api";
 import GetSong from "./GetSong";
@@ -56,27 +57,29 @@ const SongHistory = () => {
 
   return (
     <>
-      <Window style={{ width: "100%" }}>
-        <WindowHeader>History</WindowHeader>
+      <Window>
+        <WindowHeader className="window-header">History</WindowHeader>
         <WindowContent>
-          <Table>
-            <TableHead>
-              <TableHeadCell></TableHeadCell>
-              <TableHeadCell>Title</TableHeadCell>
-              <TableHeadCell>Artist</TableHeadCell>
-            </TableHead>
-            <TableBody>
-              {songHistory.map((song, index) => (
-                <TableRow key={index} onClick={() => handleRowClick(song)}>
-                  <TableDataCell>
-                    <Avatar square size={50} src={song.artUrl} />
-                  </TableDataCell>
-                  <TableDataCell>{song.title}</TableDataCell>
-                  <TableDataCell>{song.artist}</TableDataCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ScrollView style={{ height: "400px" }} scrollable>
+            <Table>
+              <TableHead>
+                <TableHeadCell></TableHeadCell>
+                <TableHeadCell>Title</TableHeadCell>
+                <TableHeadCell>Artist</TableHeadCell>
+              </TableHead>
+              <TableBody>
+                {songHistory.map((song, index) => (
+                  <TableRow key={index} onClick={() => handleRowClick(song)}>
+                    <TableDataCell>
+                      <Avatar square size={50} src={song.artUrl} />
+                    </TableDataCell>
+                    <TableDataCell>{song.title}</TableDataCell>
+                    <TableDataCell>{song.artist}</TableDataCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollView>
         </WindowContent>
       </Window>
 

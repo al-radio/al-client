@@ -1,12 +1,6 @@
-// components/ListenerCount.js
 import { useEffect, useState } from "react";
 import { fetchListenerCount } from "../services/api";
 import { Window, WindowHeader, WindowContent, Counter } from "react95";
-import styled from "styled-components";
-
-const ListenerCountWrapper = styled.div`
-  padding: 10px;
-`;
 
 const ListenerCount = () => {
   const [listenerCount, setListenerCount] = useState(0);
@@ -26,11 +20,12 @@ const ListenerCount = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // center the counter
   return (
     <Window>
-      <WindowHeader>Listeners</WindowHeader>
-      <WindowContent>
-        <Counter value={listenerCount} />
+      <WindowHeader className="window-header">Listeners</WindowHeader>
+      <WindowContent style={{ display: "flex", justifyContent: "center" }}>
+        <Counter value={listenerCount} minLength={12} />
       </WindowContent>
     </Window>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Window, WindowHeader, WindowContent, Avatar } from "react95";
 import styled from "styled-components";
-import { fetchNextSong } from "../services/api"; // Ensure this function exists in your api service
+import { fetchNextSong } from "../services/api";
 
 const StyledWindowContent = styled(WindowContent)`
   display: flex;
@@ -43,8 +43,8 @@ const NextSong = () => {
   }, []);
 
   return (
-    <Window style={{ width: "100%" }}>
-      <WindowHeader>Next Song</WindowHeader>
+    <Window>
+      <WindowHeader className="window-header">Next Song</WindowHeader>
       <StyledWindowContent>
         {nextSong?.title ? (
           <>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Window,
   WindowHeader,
@@ -19,6 +19,27 @@ const AudioPlayer = () => {
   const [bufferingProgress, setBufferingProgress] = useState(0);
   const audioUrl = `${API_URL}/stream`;
   const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
+
+  // Forces stream to be live on play instead of playing from cache
+  const handlePlay = useCallback(() => {
+    setIsBuffering(true);
+    load(`${audioUrl}?t=${new Date().getTime()}`, {
+      autoplay: true,
+      html5: true,
+      format: "mp3",
+    });
+  }, [load, audioUrl]);
+
+  const handleTuneIn = useCallback(() => {
+    handlePlay();
+    setIsPlaying(true);
+  }, [handlePlay]);
+
+  const handleTuneOut = useCallback(() => {
+    pause();
+    setIsPlaying(false);
+    setIsBuffering(false);
+  }, [pause]);
 
   // Fetch current song every 10 seconds
   useEffect(() => {
@@ -61,7 +82,7 @@ const AudioPlayer = () => {
       mediaSession.setActionHandler("seekbackward", null);
       mediaSession.setActionHandler("seekforward", null);
     }
-  }, [currentSong]);
+  }, [currentSong, handleTuneIn, handleTuneOut]);
 
   // Buffering effect when starting to play
   useEffect(() => {
@@ -94,34 +115,13 @@ const AudioPlayer = () => {
     }
   }, [isPlaying, getPosition]);
 
-  // Forces stream to be live on play instead of playing from cache
-  const handlePlay = () => {
-    setIsBuffering(true);
-    load(`${audioUrl}?t=${new Date().getTime()}`, {
-      autoplay: true,
-      html5: true,
-      format: "mp3",
-    });
-  };
-
-  const handleTuneIn = () => {
-    handlePlay();
-    setIsPlaying(true);
-  };
-
-  const handleTuneOut = () => {
-    pause();
-    setIsPlaying(false);
-    setIsBuffering(false);
-  };
-
   const handleVolumeChange = (value) => {
     setVolume(value / 100);
   };
 
   return (
-    <Window style={{ width: "100%" }}>
-      <WindowHeader>Now Playing</WindowHeader>
+    <Window>
+      <WindowHeader className="window-header">Now Playing</WindowHeader>
       <WindowContent
         style={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
