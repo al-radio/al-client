@@ -13,11 +13,20 @@ import { API_URL, fetchCurrentSong } from "../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
 import ResponsiveLayout from "./ResponsiveLayout";
 
+// Function to detect iOS or iPadOS
+const isIOSOrIPadOS = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  console.log(userAgent);
+  return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+};
+
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [bufferingProgress, setBufferingProgress] = useState(0);
+  const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS()); // Detect iOS/iPadOS
+
   const audioUrl = `${API_URL}/stream`;
   const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
 
@@ -41,6 +50,11 @@ const AudioPlayer = () => {
     setIsPlaying(false);
     setIsBuffering(false);
   }, [pause]);
+
+  useEffect(() => {
+    // detect iOS/iPadOS
+    setIsIOSDevice(isIOSOrIPadOS());
+  }, []);
 
   // Fetch current song every 10 seconds
   useEffect(() => {
@@ -121,9 +135,12 @@ const AudioPlayer = () => {
   };
 
   return (
-    <ResponsiveLayout>
+    <ResponsiveLayout
+      uniqueKey="audioPlayer"
+      defaultPosition={{ x: 840, y: 400 }}
+    >
       <Window>
-        <WindowHeader>Now Playing</WindowHeader>
+        <WindowHeader className="window-header">Now Playing</WindowHeader>
         <WindowContent
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
@@ -180,6 +197,7 @@ const AudioPlayer = () => {
                   max={100}
                   defaultValue={75}
                   onChange={handleVolumeChange}
+                  disabled={isIOSDevice}
                 />
               </div>
             </div>

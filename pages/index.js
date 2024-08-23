@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createGlobalStyle, ThemeProvider } from "styled-components";
+import { createGlobalStyle } from "styled-components";
 import { styleReset } from "react95";
 import { ZIndexProvider, useZIndex } from "../contexts/ZIndexContext";
 import candy from "react95/dist/themes/candy";
@@ -7,6 +7,8 @@ import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 import styled from "styled-components";
 import { ScrollView, Window } from "react95";
+import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 import AudioPlayer from "@/components/AudioPlayer";
 import SongHistory from "@/components/SongHistory";
@@ -14,7 +16,6 @@ import NextSong from "@/components/NextSong";
 import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
-import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 
 // Global Styles with scanline effect
 const GlobalStyles = createGlobalStyle`
@@ -110,17 +111,12 @@ const TopBarContainer = styled.div`
 `;
 
 export default function Home() {
-  const [theme, setTheme] = useState(candy);
   const isMobile = useIsMobile();
-
-  const toggleTheme = (newTheme) => {
-    setTheme(newTheme);
-  };
 
   const Content = () => (
     <>
       <TopBarContainer>
-        <TopBar style={{ zIndex: "3000" }} onToggleTheme={toggleTheme} />
+        <TopBar />
       </TopBarContainer>
       <ContentContainer>
         <RadioTitle>AL Radio</RadioTitle>
@@ -134,21 +130,23 @@ export default function Home() {
   );
 
   return (
-    <IsMobileProvider>
-      <ZIndexProvider>
-        <ThemeProvider theme={theme}>
-          <GlobalStyles />
-          {isMobile ? (
-            <Window>
-              <MobileScrollView>
-                <Content />
-              </MobileScrollView>
-            </Window>
-          ) : (
-            <Content />
-          )}
-        </ThemeProvider>
-      </ZIndexProvider>
-    </IsMobileProvider>
+    <>
+      <ThemeProvider>
+        <GlobalStyles />
+        <IsMobileProvider>
+          <ZIndexProvider>
+            {isMobile ? (
+              <Window>
+                <MobileScrollView>
+                  <Content />
+                </MobileScrollView>
+              </Window>
+            ) : (
+              <Content />
+            )}
+          </ZIndexProvider>
+        </IsMobileProvider>{" "}
+      </ThemeProvider>
+    </>
   );
 }

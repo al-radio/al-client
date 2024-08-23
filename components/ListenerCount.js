@@ -23,9 +23,12 @@ const ListenerCount = () => {
 
   // center the counter
   return (
-    <ResponsiveLayout>
+    <ResponsiveLayout
+      uniqueKey="listeners"
+      defaultPosition={{ x: 200, y: 600 }}
+    >
       <Window>
-        <WindowHeader>Listeners</WindowHeader>
+        <WindowHeader className="window-header">Listeners</WindowHeader>
         <WindowContent style={{ display: "flex", justifyContent: "center" }}>
           <Counter value={listenerCount} minLength={12} />
         </WindowContent>

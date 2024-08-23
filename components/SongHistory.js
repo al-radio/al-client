@@ -57,7 +57,10 @@ const SongHistory = () => {
   };
 
   return (
-    <ResponsiveLayout>
+    <ResponsiveLayout
+      uniqueKey="songHistory"
+      defaultPosition={{ x: 1500, y: 550 }}
+    >
       <Window>
         <WindowHeader className="window-header">History</WindowHeader>
         <WindowContent>

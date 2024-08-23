@@ -81,7 +81,10 @@ const SubmitSong = () => {
   };
 
   return (
-    <ResponsiveLayout>
+    <ResponsiveLayout
+      uniqueKey="submitSong"
+      defaultPosition={{ x: 1200, y: 170 }}
+    >
       <Window>
         <WindowHeader className="window-header">Submit a Song</WindowHeader>
         <WindowContent>

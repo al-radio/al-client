@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import { styled } from "styled-components";
 import { Button, AppBar, MenuList, MenuListItem, Toolbar } from "react95";
+import { useTheme } from "@/contexts/ThemeContext";
 import original from "react95/dist/themes/original";
-import candy from "react95/dist/themes/candy";
 import spruce from "react95/dist/themes/spruce";
 import vaporTeal from "react95/dist/themes/vaporTeal";
 import highContrast from "react95/dist/themes/highContrast";
@@ -11,6 +11,7 @@ import maple from "react95/dist/themes/maple";
 import pamelaAnderson from "react95/dist/themes/pamelaAnderson";
 import theSixtiesUSA from "react95/dist/themes/theSixtiesUSA";
 import violetDark from "react95/dist/themes/violetDark";
+import candy from "react95/dist/themes/candy";
 
 // Styled component for menu list
 const StyledMenuList = styled(MenuList)`
@@ -20,26 +21,28 @@ const StyledMenuList = styled(MenuList)`
   z-index: 2000;
 `;
 
-const TopBar = ({ onToggleTheme }) => {
-  const themes = {
-    original,
-    candy,
-    spruce,
-    vaporTeal,
-    highContrast,
-    lilac,
-    maple,
-    pamelaAnderson,
-    theSixtiesUSA,
-    violetDark,
+const TopBar = () => {
+  const themeMap = {
+    Original: original,
+    Candy: candy,
+    Spruce: spruce,
+    "Vapor Teal": vaporTeal,
+    "High Contrast": highContrast,
+    Lilac: lilac,
+    Maple: maple,
+    "Blind Pink": pamelaAnderson,
+    "The Sixties": theSixtiesUSA,
+    "Violet Dark": violetDark,
   };
 
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
-  const handleThemeChange = (themeKey) => {
-    onToggleTheme(themes[themeKey]);
+  const { toggleTheme } = useTheme();
+
+  const handleThemeChange = (themeName) => {
+    toggleTheme(themeMap[themeName]);
     setThemeDropdownOpen(false);
   };
 
@@ -61,7 +64,7 @@ const TopBar = ({ onToggleTheme }) => {
   }, []);
 
   return (
-    <AppBar>
+    <AppBar style={{ zIndex: "3000" }}>
       <Toolbar
         style={{ justifyContent: "space-between", position: "relative" }}
       >
@@ -78,12 +81,12 @@ const TopBar = ({ onToggleTheme }) => {
               ref={menuRef}
               onClick={() => setThemeDropdownOpen(false)}
             >
-              {Object.keys(themes).map((themeKey) => (
+              {Object.keys(themeMap).map((theme) => (
                 <MenuListItem
-                  key={themeKey}
-                  onClick={() => handleThemeChange(themeKey)}
+                  key={theme}
+                  onClick={() => handleThemeChange(theme)}
                 >
-                  {themeKey.charAt(0).toUpperCase() + themeKey.slice(1)}
+                  {theme}
                 </MenuListItem>
               ))}
             </StyledMenuList>
