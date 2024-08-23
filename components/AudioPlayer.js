@@ -15,9 +15,10 @@ import ResponsiveLayout from "./ResponsiveLayout";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  console.log(userAgent);
-  return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+  if (typeof window !== "undefined") {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+  }
 };
 
 const AudioPlayer = () => {
