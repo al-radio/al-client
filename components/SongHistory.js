@@ -14,6 +14,7 @@ import {
 } from "react95";
 import { fetchSongHistory } from "../services/api";
 import GetSong from "./GetSong";
+import ResponsiveLayout from "./ResponsiveLayout";
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([
@@ -56,7 +57,7 @@ const SongHistory = () => {
   };
 
   return (
-    <>
+    <ResponsiveLayout>
       <Window>
         <WindowHeader className="window-header">History</WindowHeader>
         <WindowContent>
@@ -90,7 +91,7 @@ const SongHistory = () => {
           urlForPlatform={selectedSong.urlForPlatform}
         />
       )}
-    </>
+    </ResponsiveLayout>
   );
 };
 

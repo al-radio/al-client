@@ -11,6 +11,7 @@ import {
 } from "react95";
 import { API_URL, fetchCurrentSong } from "../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
+import ResponsiveLayout from "./ResponsiveLayout";
 
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
@@ -120,96 +121,98 @@ const AudioPlayer = () => {
   };
 
   return (
-    <Window>
-      <WindowHeader className="window-header">Now Playing</WindowHeader>
-      <WindowContent
-        style={{ display: "flex", flexDirection: "column", height: "100%" }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
+    <ResponsiveLayout>
+      <Window>
+        <WindowHeader>Now Playing</WindowHeader>
+        <WindowContent
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
           <div
             style={{
-              width: "100%",
-              maxWidth: "300px", // Maximum size for larger screens
-              aspectRatio: "1", // Maintains 1:1 aspect ratio
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <Avatar
-              square
-              src={currentSong?.artUrl}
+            <div
               style={{
                 width: "100%",
-                height: "auto", // Maintain aspect ratio
-                display: "block",
+                maxWidth: "300px", // Maximum size for larger screens
+                aspectRatio: "1", // Maintains 1:1 aspect ratio
               }}
-            />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 16,
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              {currentSong?.title ? (
-                <>
-                  <h2>{currentSong.title}</h2>
-                  <p>{currentSong.artist}</p>
-                  <p>{currentSong.album}</p>
-                </>
-              ) : (
-                <>
-                  <h2>Not Playing</h2>
-                  <p>Not Playing</p>
-                  <p>Not Playing</p>
-                </>
-              )}
-            </div>
-            <div style={{ width: 150, marginLeft: 16 }}>
-              <Slider
-                min={0}
-                max={100}
-                defaultValue={75}
-                onChange={handleVolumeChange}
+            >
+              <Avatar
+                square
+                src={currentSong?.artUrl}
+                style={{
+                  width: "100%",
+                  height: "auto", // Maintain aspect ratio
+                  display: "block",
+                }}
               />
             </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 16,
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                {currentSong?.title ? (
+                  <>
+                    <h2>{currentSong.title}</h2>
+                    <p>{currentSong.artist}</p>
+                    <p>{currentSong.album}</p>
+                  </>
+                ) : (
+                  <>
+                    <h2>Not Playing</h2>
+                    <p>Not Playing</p>
+                    <p>Not Playing</p>
+                  </>
+                )}
+              </div>
+              <div style={{ width: 150, marginLeft: 16 }}>
+                <Slider
+                  min={0}
+                  max={100}
+                  defaultValue={75}
+                  onChange={handleVolumeChange}
+                />
+              </div>
+            </div>
+            {isBuffering && (
+              <ProgressBar
+                variant="tile"
+                value={bufferingProgress}
+                style={{ marginTop: 16, width: "100%" }}
+              />
+            )}
           </div>
-          {isBuffering && (
-            <ProgressBar
-              variant="tile"
-              value={bufferingProgress}
-              style={{ marginTop: 16, width: "100%" }}
-            />
-          )}
-        </div>
-        <div style={{ flex: 1 }}></div>
-        <Toolbar style={{ display: "flex", padding: 8 }}>
-          <Button
-            onClick={handleTuneIn}
-            active={isPlaying}
-            disabled={isPlaying}
-            style={{ flex: 1, marginRight: 4 }}
-          >
-            Tune In
-          </Button>
-          <Button
-            onClick={handleTuneOut}
-            active={!isPlaying}
-            disabled={!isPlaying}
-            style={{ flex: 1, marginLeft: 4 }}
-          >
-            Tune Out
-          </Button>
-        </Toolbar>
-      </WindowContent>
-    </Window>
+          <div style={{ flex: 1 }}></div>
+          <Toolbar style={{ display: "flex", padding: 8 }}>
+            <Button
+              onClick={handleTuneIn}
+              active={isPlaying}
+              disabled={isPlaying}
+              style={{ flex: 1, marginRight: 4 }}
+            >
+              Tune In
+            </Button>
+            <Button
+              onClick={handleTuneOut}
+              active={!isPlaying}
+              disabled={!isPlaying}
+              style={{ flex: 1, marginLeft: 4 }}
+            >
+              Tune Out
+            </Button>
+          </Toolbar>
+        </WindowContent>
+      </Window>
+    </ResponsiveLayout>
   );
 };
 

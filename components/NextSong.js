@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Window, WindowHeader, WindowContent, Avatar } from "react95";
 import styled from "styled-components";
 import { fetchNextSong } from "../services/api";
+import ResponsiveLayout from "./ResponsiveLayout";
 
 const StyledWindowContent = styled(WindowContent)`
   display: flex;
@@ -43,30 +44,32 @@ const NextSong = () => {
   }, []);
 
   return (
-    <Window>
-      <WindowHeader className="window-header">Next Song</WindowHeader>
-      <StyledWindowContent>
-        {nextSong?.title ? (
-          <>
-            <StyledAvatar square src={nextSong.artUrl} />
-            <SongDetails>
-              <h2>{nextSong.title}</h2>
-              <p>{nextSong.artist}</p>
-              <p>{nextSong.album}</p>
-            </SongDetails>
-          </>
-        ) : (
-          <>
-            <StyledAvatar square />
-            <SongDetails>
-              <h2>Nothing Queued</h2>
-              <p>Nothing Queued</p>
-              <p>Nothing Queued</p>
-            </SongDetails>
-          </>
-        )}
-      </StyledWindowContent>
-    </Window>
+    <ResponsiveLayout>
+      <Window>
+        <WindowHeader className="window-header">Next Song</WindowHeader>
+        <StyledWindowContent>
+          {nextSong?.title ? (
+            <>
+              <StyledAvatar square src={nextSong.artUrl} />
+              <SongDetails>
+                <h2>{nextSong.title}</h2>
+                <p>{nextSong.artist}</p>
+                <p>{nextSong.album}</p>
+              </SongDetails>
+            </>
+          ) : (
+            <>
+              <StyledAvatar square />
+              <SongDetails>
+                <h2>Nothing Queued</h2>
+                <p>Nothing Queued</p>
+                <p>Nothing Queued</p>
+              </SongDetails>
+            </>
+          )}
+        </StyledWindowContent>
+      </Window>
+    </ResponsiveLayout>
   );
 };
 

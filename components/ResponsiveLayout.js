@@ -1,6 +1,8 @@
 import React from "react";
 import { Rnd } from "react-rnd";
 import styled from "styled-components";
+import { useZIndex } from "@/contexts/ZIndexContext";
+import { useIsMobile } from "@/contexts/isMobileContext";
 
 const MobileWindow = styled.div`
   width: 100%;
@@ -9,24 +11,27 @@ const MobileWindow = styled.div`
   }
 `;
 
-const ResponsiveLayout = ({
-  isMobile,
-  children,
-  header,
-  defaultPosition,
-  zIndex,
-}) => {
+const ResponsiveLayout = ({ children }) => {
+  const [zIndex, setZIndex] = React.useState(1);
+  const bringToFront = useZIndex();
+  const isMobile = useIsMobile();
+
   if (isMobile) {
     return <MobileWindow>{children}</MobileWindow>;
   }
 
+  const handleInteraction = () => {
+    setZIndex(bringToFront());
+  };
+
   return (
     <Rnd
       bounds="parent"
-      dragHandleClassName="window-header"
       enableResizing={false}
-      default={defaultPosition}
       style={{ zIndex }}
+      onDragStart={handleInteraction}
+      onResizeStart={handleInteraction}
+      onMouseDown={handleInteraction}
     >
       {children}
     </Rnd>

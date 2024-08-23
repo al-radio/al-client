@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createGlobalStyle, ThemeProvider } from "styled-components";
 import { styleReset } from "react95";
-import { ZIndexProvider } from "../contexts/ZIndexContext";
+import { ZIndexProvider, useZIndex } from "../contexts/ZIndexContext";
 import candy from "react95/dist/themes/candy";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
@@ -14,7 +14,7 @@ import NextSong from "@/components/NextSong";
 import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
-import ResponsiveLayout from "@/components/ResponsiveLayout";
+import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 
 // Global Styles with scanline effect
 const GlobalStyles = createGlobalStyle`
@@ -78,7 +78,7 @@ const RadioTitle = styled.h1`
 `;
 
 const ContentContainer = styled.div`
-  margin-top: 40px;
+  margin-top: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -111,21 +111,11 @@ const TopBarContainer = styled.div`
 
 export default function Home() {
   const [theme, setTheme] = useState(candy);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
 
   const toggleTheme = (newTheme) => {
     setTheme(newTheme);
   };
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Check size on initial render
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const Content = () => (
     <>
@@ -134,64 +124,31 @@ export default function Home() {
       </TopBarContainer>
       <ContentContainer>
         <RadioTitle>AL Radio</RadioTitle>
-        <ResponsiveLayout
-          isMobile={isMobile}
-          header="Listeners"
-          defaultPosition={{ x: 100, y: 150 }}
-          zIndex={1}
-        >
-          <ListenerCount />
-        </ResponsiveLayout>
-        <ResponsiveLayout
-          isMobile={isMobile}
-          header="Audio Player"
-          defaultPosition={{ x: 700, y: 300 }}
-          zIndex={5}
-        >
-          <AudioPlayer />
-        </ResponsiveLayout>
-        <ResponsiveLayout
-          isMobile={isMobile}
-          header="Next Song"
-          defaultPosition={{ x: 100, y: 500 }}
-          zIndex={2}
-        >
-          <NextSong />
-        </ResponsiveLayout>
-        <ResponsiveLayout
-          isMobile={isMobile}
-          header="Submit Song"
-          defaultPosition={{ x: 600, y: 100 }}
-          zIndex={3}
-        >
-          <SubmitSong />
-        </ResponsiveLayout>
-        <ResponsiveLayout
-          isMobile={isMobile}
-          header="Song History"
-          defaultPosition={{ x: 1200, y: 200 }}
-          zIndex={4}
-        >
-          <SongHistory />
-        </ResponsiveLayout>
+        <ListenerCount />
+        <AudioPlayer />
+        <NextSong />
+        <SubmitSong />
+        <SongHistory />
       </ContentContainer>
     </>
   );
 
   return (
-    <ZIndexProvider>
-      <ThemeProvider theme={theme}>
-        <GlobalStyles />
-        {isMobile ? (
-          <Window>
-            <MobileScrollView>
-              <Content />
-            </MobileScrollView>
-          </Window>
-        ) : (
-          <Content />
-        )}
-      </ThemeProvider>
-    </ZIndexProvider>
+    <IsMobileProvider>
+      <ZIndexProvider>
+        <ThemeProvider theme={theme}>
+          <GlobalStyles />
+          {isMobile ? (
+            <Window>
+              <MobileScrollView>
+                <Content />
+              </MobileScrollView>
+            </Window>
+          ) : (
+            <Content />
+          )}
+        </ThemeProvider>
+      </ZIndexProvider>
+    </IsMobileProvider>
   );
 }

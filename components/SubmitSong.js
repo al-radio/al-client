@@ -7,6 +7,7 @@ import {
   WindowContent,
 } from "react95";
 import { API_URL } from "../services/api";
+import ResponsiveLayout from "./ResponsiveLayout";
 
 const SubmitSong = () => {
   const [query, setQuery] = useState("");
@@ -80,35 +81,39 @@ const SubmitSong = () => {
   };
 
   return (
-    <Window>
-      <WindowHeader className="window-header">Submit a Song</WindowHeader>
-      <WindowContent>
-        <div style={{ display: "flex" }}>
-          <TextInput
-            value={query}
-            onChange={handleQueryChange}
-            placeholder="Search for a song..."
-            fullWidth
-          />
-          <Button onClick={handleSubmit} type="submit">
-            Request
-          </Button>
-        </div>
-        {isConfirming && songMetadata && (
-          <div>
-            <h3>Confirm Song</h3>
-            <p>Title: {songMetadata.title}</p>
-            <p>Artist: {songMetadata.artist}</p>
-            <p>Album: {songMetadata.album}</p>
-            <Button onClick={() => handleConfirm()}>Confirm</Button>
-            <Button onClick={handleCancel}>Cancel</Button>
+    <ResponsiveLayout>
+      <Window>
+        <WindowHeader className="window-header">Submit a Song</WindowHeader>
+        <WindowContent>
+          <div style={{ display: "flex" }}>
+            <TextInput
+              value={query}
+              onChange={handleQueryChange}
+              placeholder="Search for a song..."
+              fullWidth
+            />
+            <Button onClick={handleSubmit} type="submit">
+              Request
+            </Button>
           </div>
-        )}
-        {notification && (
-          <div style={{ marginTop: 10, color: "magenta" }}>{notification}</div>
-        )}
-      </WindowContent>
-    </Window>
+          {isConfirming && songMetadata && (
+            <div>
+              <h3>Confirm Song</h3>
+              <p>Title: {songMetadata.title}</p>
+              <p>Artist: {songMetadata.artist}</p>
+              <p>Album: {songMetadata.album}</p>
+              <Button onClick={() => handleConfirm()}>Confirm</Button>
+              <Button onClick={handleCancel}>Cancel</Button>
+            </div>
+          )}
+          {notification && (
+            <div style={{ marginTop: 10, color: "magenta" }}>
+              {notification}
+            </div>
+          )}
+        </WindowContent>
+      </Window>
+    </ResponsiveLayout>
   );
 };
 
