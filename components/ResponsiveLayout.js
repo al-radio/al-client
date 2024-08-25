@@ -45,6 +45,9 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
 
   // Handle window resizing
   const handleResize = useCallback(() => {
+    if (!childRef.current) {
+      return;
+    }
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     const { x, y } = position;
