@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   Window,
   WindowHeader,
@@ -7,7 +7,7 @@ import {
   Avatar,
   Slider,
   Toolbar,
-  ProgressBar,
+  Hourglass,
 } from "react95";
 import { API_URL, fetchCurrentSong } from "../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
@@ -25,9 +25,7 @@ const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [bufferingProgress, setBufferingProgress] = useState(0);
-  const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS()); // Detect iOS/iPadOS
-
+  const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
   const audioUrl = `${API_URL}/stream`;
   const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
 
@@ -102,32 +100,15 @@ const AudioPlayer = () => {
 
   // Buffering effect when starting to play
   useEffect(() => {
-    setBufferingProgress(0);
-    let progressInterval;
-
     if (isPlaying) {
-      const startTime = Date.now();
-      setIsBuffering(true);
-
-      progressInterval = setInterval(() => {
-        const elapsedTime = Date.now() - startTime;
-        const smoothProgress = Math.min((elapsedTime / 18000) * 100, 100);
-
-        setBufferingProgress((prevProgress) => {
-          if (prevProgress >= 100) return 100;
-          const diff = Math.random() * 10;
-          const choppyProgress = Math.min(prevProgress + diff, smoothProgress);
-
-          return choppyProgress;
-        });
-
+      const hasBuffered = () => {
         if (getPosition() > 0) {
-          setBufferingProgress(100);
-          setTimeout(() => setIsBuffering(false), 300);
+          setIsBuffering(false);
         }
-      }, 500);
+      };
 
-      return () => clearInterval(progressInterval);
+      const bufferCheck = setInterval(hasBuffered, 1000);
+      return () => clearInterval(bufferCheck);
     }
   }, [isPlaying, getPosition]);
 
@@ -155,7 +136,7 @@ const AudioPlayer = () => {
             <div
               style={{
                 width: "100%",
-                maxWidth: "300px", // Maximum size for larger screens
+                maxWidth: 400,
                 aspectRatio: "1", // Maintains 1:1 aspect ratio
               }}
             >
@@ -173,7 +154,6 @@ const AudioPlayer = () => {
               style={{
                 display: "flex",
                 flexDirection: "row",
-                alignItems: "center",
                 marginTop: 16,
               }}
             >
@@ -202,13 +182,7 @@ const AudioPlayer = () => {
                 />
               </div>
             </div>
-            {isBuffering && (
-              <ProgressBar
-                variant="tile"
-                value={bufferingProgress}
-                style={{ marginTop: 16, width: "100%" }}
-              />
-            )}
+            {isBuffering && <Hourglass size={32} />}
           </div>
           <div style={{ flex: 1 }}></div>
           <Toolbar style={{ display: "flex", padding: 8 }}>

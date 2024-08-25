@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Window,
   WindowHeader,
@@ -64,8 +64,8 @@ const SongHistory = () => {
       <Window>
         <WindowHeader className="window-header">History</WindowHeader>
         <WindowContent>
-          <ScrollView style={{ height: "400px" }} scrollable>
-            <Table>
+          <ScrollView scrollable style={{ height: "400px" }}>
+            <Table style={{ maxWidth: "500px" }}>
               <TableHead>
                 <TableHeadCell></TableHeadCell>
                 <TableHeadCell>Title</TableHeadCell>

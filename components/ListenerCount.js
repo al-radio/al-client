@@ -21,7 +21,6 @@ const ListenerCount = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // center the counter
   return (
     <ResponsiveLayout
       uniqueKey="listeners"

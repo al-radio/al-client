@@ -5,6 +5,7 @@ import {
   Window,
   WindowHeader,
   WindowContent,
+  Hourglass,
 } from "react95";
 import { API_URL } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
@@ -15,11 +16,13 @@ const SubmitSong = () => {
   const [songMetadata, setSongMetadata] = useState(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [notification, setNotification] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleQueryChange = (e) => setQuery(e.target.value);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/submit`, {
@@ -40,13 +43,22 @@ const SubmitSong = () => {
         setIsConfirming(false);
         setNotification("Song submitted successfully!");
         setTimeout(() => setNotification(""), 5000);
+      } else {
+        setQuery("");
+        setSongMetadata(null);
+        setIsConfirming(false);
+        setNotification(result.message);
+        setTimeout(() => setNotification(""), 5000);
       }
     } catch (error) {
       console.error("Error submitting song:", error);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
   const handleConfirm = async () => {
+    setIsLoading(true); // Start loading
     try {
       const response = await fetch(`${API_URL}/submit`, {
         method: "POST",
@@ -66,6 +78,8 @@ const SubmitSong = () => {
     } catch (error) {
       console.error("Error confirming song:", error);
       setNotification("Error confirming song. Please try again.");
+    } finally {
+      setIsLoading(false); // Stop loading
     }
 
     setQuery("");
@@ -95,10 +109,13 @@ const SubmitSong = () => {
               placeholder="Search for a song..."
               fullWidth
             />
-            <Button onClick={handleSubmit} type="submit">
+            <Button onClick={handleSubmit} type="submit" disabled={isLoading}>
               Request
             </Button>
           </div>
+          {isLoading && (
+            <Hourglass size={25} style={{ marginTop: 10, marginLeft: 10 }} />
+          )}
           {isConfirming && songMetadata && (
             <div>
               <h3>Confirm Song</h3>

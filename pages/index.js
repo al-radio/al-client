@@ -17,7 +17,6 @@ import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
 
-// Global Styles with scanline effect
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
   @font-face {
@@ -36,12 +35,25 @@ const GlobalStyles = createGlobalStyle`
     font-family: 'ms_sans_serif';
   }
 
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+
   body {
     background-color: ${({ theme }) => theme.headerBackground};
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    box-sizing: border-box;
+  }
+
+  * {
+    box-sizing: border-box; /* Ensure padding and borders are included in width and height */
   }
 
   body::before {
@@ -61,6 +73,15 @@ const GlobalStyles = createGlobalStyle`
     z-index: 1000;
     pointer-events: none;
   }
+`;
+
+const MobileScrollView = styled(ScrollView)`
+  width: 100%; /* Ensure it takes the full width */
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  padding: 0;
+  margin: 0;
 `;
 
 const RadioTitle = styled.h1`
@@ -86,15 +107,6 @@ const ContentContainer = styled.div`
   justify-content: flex-start;
   min-height: calc(100vh - 40px);
   box-sizing: border-box;
-`;
-
-const MobileScrollView = styled(ScrollView)`
-  width: 100%;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0;
-  margin: 0;
 `;
 
 const TopBarContainer = styled.div`
