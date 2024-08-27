@@ -9,8 +9,8 @@ const ListenerCount = () => {
   useEffect(() => {
     const getListenerCount = async () => {
       try {
-        const count = await fetchListenerCount();
-        setListenerCount(count);
+        const listeners = await fetchListenerCount();
+        setListenerCount(listeners.count);
       } catch (error) {
         console.error("Error fetching listener count:", error);
       }

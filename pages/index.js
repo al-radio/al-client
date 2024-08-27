@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { createGlobalStyle } from "styled-components";
 import { styleReset } from "react95";
-import { ZIndexProvider, useZIndex } from "../contexts/ZIndexContext";
-import candy from "react95/dist/themes/candy";
+import { ZIndexProvider } from "../contexts/ZIndexContext";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 import styled from "styled-components";

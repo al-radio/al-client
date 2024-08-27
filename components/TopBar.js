@@ -12,8 +12,9 @@ import pamelaAnderson from "react95/dist/themes/pamelaAnderson";
 import theSixtiesUSA from "react95/dist/themes/theSixtiesUSA";
 import violetDark from "react95/dist/themes/violetDark";
 import candy from "react95/dist/themes/candy";
+import RegisterModal from "./RegisterModal";
+import LoginModal from "./LoginModal";
 
-// Styled component for menu list
 const StyledMenuList = styled(MenuList)`
   position: absolute;
   left: 0;
@@ -36,8 +37,14 @@ const TopBar = () => {
   };
 
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
+  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [isProfileModalOpen, setProfileModalOpen] = useState(false); // Add state for profile modal
+  const [profile, setProfile] = useState(null); // Add state for profile data
   const menuRef = useRef(null);
-  const buttonRef = useRef(null);
+  const themeButtonRef = useRef(null);
+  const accountButtonRef = useRef(null);
 
   const { toggleTheme } = useTheme();
 
@@ -46,15 +53,53 @@ const TopBar = () => {
     setThemeDropdownOpen(false);
   };
 
+  const handleAccountClick = (action) => {
+    if (action === "register") {
+      setRegisterModalOpen(true);
+    } else if (action === "login") {
+      setLoginModalOpen(true);
+    } else if (action === "profile") {
+      // Fetch profile data here if needed
+      fetchProfileData();
+      setProfileModalOpen(true);
+    }
+    setAccountDropdownOpen(false);
+  };
+
+  const fetchProfileData = () => {
+    // Simulate fetching profile data
+    const fetchedProfile = {
+      ALThoughts: "",
+      avatarUrl: "https://via.placeholder.com/100",
+      bio: "This is a sample bio.",
+      favouriteSong: "Sample Song",
+      handle: "greg",
+      isOnline: false,
+      location: "Sample Location",
+      numberOfSongsListened: 0,
+      createdDate: "2024-08-27T05:07:16.894Z",
+      friends: [],
+      lastOnline: "2024-08-27T05:07:16.894Z",
+    };
+    setProfile(fetchedProfile);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         menuRef.current &&
         !menuRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
+        !(
+          themeButtonRef.current &&
+          themeButtonRef.current.contains(event.target)
+        ) &&
+        !(
+          accountButtonRef.current &&
+          accountButtonRef.current.contains(event.target)
+        )
       ) {
         setThemeDropdownOpen(false);
+        setAccountDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -64,36 +109,75 @@ const TopBar = () => {
   }, []);
 
   return (
-    <AppBar style={{ zIndex: "3000" }}>
-      <Toolbar
-        style={{ justifyContent: "space-between", position: "relative" }}
-      >
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <Button
-            ref={buttonRef}
-            onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-            active={themeDropdownOpen}
-          >
-            Themes
-          </Button>
-          {themeDropdownOpen && (
-            <StyledMenuList
-              ref={menuRef}
-              onClick={() => setThemeDropdownOpen(false)}
+    <>
+      <AppBar style={{ zIndex: "3000" }}>
+        <Toolbar
+          style={{ justifyContent: "space-between", position: "relative" }}
+        >
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <Button
+              ref={accountButtonRef}
+              onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+              active={accountDropdownOpen}
+              aria-expanded={accountDropdownOpen}
+              aria-haspopup="true"
             >
-              {Object.keys(themeMap).map((theme) => (
-                <MenuListItem
-                  key={theme}
-                  onClick={() => handleThemeChange(theme)}
-                >
-                  {theme}
+              Account
+            </Button>
+            {accountDropdownOpen && (
+              <StyledMenuList
+                ref={menuRef}
+                onClick={() => setAccountDropdownOpen(false)}
+              >
+                <MenuListItem onClick={() => handleAccountClick("register")}>
+                  Create Account
                 </MenuListItem>
-              ))}
-            </StyledMenuList>
-          )}
-        </div>
-      </Toolbar>
-    </AppBar>
+                <MenuListItem onClick={() => handleAccountClick("login")}>
+                  Login
+                </MenuListItem>
+                <MenuListItem onClick={() => handleAccountClick("profile")}>
+                  View Profile
+                </MenuListItem>
+              </StyledMenuList>
+            )}
+          </div>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <Button
+              ref={themeButtonRef}
+              onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
+              active={themeDropdownOpen}
+              aria-expanded={themeDropdownOpen}
+              aria-haspopup="true"
+            >
+              Themes
+            </Button>
+            {themeDropdownOpen && (
+              <StyledMenuList
+                ref={menuRef}
+                onClick={() => setThemeDropdownOpen(false)}
+              >
+                {Object.keys(themeMap).map((theme) => (
+                  <MenuListItem
+                    key={theme}
+                    onClick={() => handleThemeChange(theme)}
+                  >
+                    {theme}
+                  </MenuListItem>
+                ))}
+              </StyledMenuList>
+            )}
+          </div>
+        </Toolbar>
+      </AppBar>
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+      />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
+    </>
   );
 };
 

@@ -7,7 +7,7 @@ import {
   WindowContent,
   Hourglass,
 } from "react95";
-import { API_URL } from "../services/api";
+import { API_URL, submitSongRequest } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
 
 const SubmitSong = () => {
@@ -25,14 +25,7 @@ const SubmitSong = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-      });
-
-      const result = await response.json();
-
+      const result = await submitSongRequest(query);
       if (result.metadata) {
         setSongMetadata(result.metadata);
         setIsConfirming(true);
@@ -60,13 +53,7 @@ const SubmitSong = () => {
   const handleConfirm = async () => {
     setIsLoading(true); // Start loading
     try {
-      const response = await fetch(`${API_URL}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: trackId }),
-      });
-
-      const result = await response.json();
+      const result = await submitSongRequest(trackId);
       if (result.success) {
         setNotification("Song confirmed successfully!");
         setTimeout(() => setNotification(""), 5000);

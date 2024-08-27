@@ -75,7 +75,12 @@ const SongHistory = () => {
                 {songHistory.map((song, index) => (
                   <TableRow key={index} onClick={() => handleRowClick(song)}>
                     <TableDataCell>
-                      <Avatar square size={50} src={song.artUrl} />
+                      <Avatar
+                        square
+                        size={50}
+                        src={song.artUrl}
+                        style={{ marginTop: 10 }}
+                      />
                     </TableDataCell>
                     <TableDataCell>{song.title}</TableDataCell>
                     <TableDataCell>{song.artist}</TableDataCell>
