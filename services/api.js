@@ -45,13 +45,13 @@ export const login = async (handle, password) => {
   return response.json();
 };
 
-export const register = async (username, password) => {
+export const register = async (email, handle, password) => {
   const response = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ email, handle, password }),
   });
   return response.json();
 };
