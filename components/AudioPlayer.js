@@ -8,6 +8,7 @@ import {
   Slider,
   Toolbar,
   Hourglass,
+  Anchor,
 } from "react95";
 import { API_URL, fetchCurrentSong } from "../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
@@ -163,6 +164,10 @@ const AudioPlayer = () => {
                     <h2>{currentSong.title}</h2>
                     <p>{currentSong.artist}</p>
                     <p>{currentSong.album}</p>
+                    <p>
+                      Requested by:{" "}
+                      <Anchor>{currentSong.userSubmittedId || "AL"}</Anchor>
+                    </p>
                   </>
                 ) : (
                   <>

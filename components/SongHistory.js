@@ -11,6 +11,7 @@ import {
   TableDataCell,
   Avatar,
   ScrollView,
+  Anchor,
 } from "react95";
 import { fetchSongHistory } from "../services/api";
 import GetSong from "./GetSong";
@@ -65,16 +66,18 @@ const SongHistory = () => {
         <WindowHeader className="window-header">History</WindowHeader>
         <WindowContent>
           <ScrollView scrollable style={{ height: "400px" }}>
-            <Table style={{ maxWidth: "500px" }}>
+            <Table style={{ maxWidth: "300px" }}>
               <TableHead>
                 <TableHeadCell></TableHeadCell>
                 <TableHeadCell>Title</TableHeadCell>
                 <TableHeadCell>Artist</TableHeadCell>
+                <TableHeadCell>Album</TableHeadCell>
+                <TableHeadCell>Requested By</TableHeadCell>
               </TableHead>
               <TableBody>
                 {songHistory.map((song, index) => (
-                  <TableRow key={index} onClick={() => handleRowClick(song)}>
-                    <TableDataCell>
+                  <TableRow key={index}>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
                       <Avatar
                         square
                         size={50}
@@ -82,8 +85,18 @@ const SongHistory = () => {
                         style={{ marginTop: 10 }}
                       />
                     </TableDataCell>
-                    <TableDataCell>{song.title}</TableDataCell>
-                    <TableDataCell>{song.artist}</TableDataCell>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      {song.title}
+                    </TableDataCell>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      {song.artist}
+                    </TableDataCell>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      {song.album}
+                    </TableDataCell>
+                    <TableDataCell>
+                      <Anchor>{song.userSubmittedId || "AL"}</Anchor>
+                    </TableDataCell>
                   </TableRow>
                 ))}
               </TableBody>

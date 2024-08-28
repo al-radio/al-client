@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Window, WindowHeader, WindowContent, Avatar } from "react95";
+import { Window, WindowHeader, WindowContent, Avatar, Anchor } from "react95";
 import styled from "styled-components";
 import { fetchNextSong } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
@@ -55,6 +55,10 @@ const NextSong = () => {
                 <h2>{nextSong.title}</h2>
                 <p>{nextSong.artist}</p>
                 <p>{nextSong.album}</p>
+                <p>
+                  Requested by:{" "}
+                  <Anchor>{nextSong.userSubmittedId || "AL"}</Anchor>
+                </p>
               </SongDetails>
             </>
           ) : (

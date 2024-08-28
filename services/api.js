@@ -23,10 +23,12 @@ export const fetchSongHistory = async () => {
 };
 
 export const submitSongRequest = async (query) => {
+  const jwt = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/song/submit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({ query }),
   });
