@@ -17,6 +17,7 @@ import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
 import Account from "@/components/Account";
+import Customize from "@/components/Customiuze";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -42,6 +43,8 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     overflow-x: hidden; /* Prevent horizontal scroll */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
   }
 
   body {
@@ -71,7 +74,7 @@ const GlobalStyles = createGlobalStyle`
       rgba(255, 255, 255, 0.1) 1px,
       rgba(255, 255, 255, 0.1) 2px
     );
-    z-index: 1000;
+    z-index: 9999;
     pointer-events: none;
   }
 `;
@@ -133,6 +136,7 @@ export default function Home() {
         </TopBarContainer>
         <ContentContainer>
           <RadioTitle>AL Radio</RadioTitle>
+          <Customize />
           <ListenerCount />
           <AudioPlayer />
           <Account />

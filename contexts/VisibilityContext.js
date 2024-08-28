@@ -10,6 +10,7 @@ export const VisibilityProvider = ({ children }) => {
     submitSong: true,
     listeners: true,
     account: true,
+    customize: true,
   });
 
   const toggleVisibility = (component) => {
