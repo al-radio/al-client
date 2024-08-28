@@ -87,7 +87,7 @@ const SubmitSong = () => {
       defaultPosition={{ x: 1200, y: 170 }}
     >
       <Window>
-        <WindowHeader className="window-header">Submit a Song</WindowHeader>
+        <WindowHeader className="window-header">Request Song</WindowHeader>
         <WindowContent>
           <div style={{ display: "flex" }}>
             <TextInput

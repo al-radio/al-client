@@ -12,17 +12,25 @@ import pamelaAnderson from "react95/dist/themes/pamelaAnderson";
 import theSixtiesUSA from "react95/dist/themes/theSixtiesUSA";
 import violetDark from "react95/dist/themes/violetDark";
 import candy from "react95/dist/themes/candy";
-import RegisterModal from "./RegisterModal";
-import LoginModal from "./LoginModal";
 
 const StyledMenuList = styled(MenuList)`
   position: absolute;
-  left: 0;
+  right: 0; /* Position the dropdown on the right side */
   top: 100%;
   z-index: 2000;
 `;
 
-const TopBar = () => {
+const TopBar = ({
+  onToggleComponent,
+  componentVisibility: {
+    isAudioPlayerVisible,
+    isSongHistoryVisible,
+    isNextSongVisible,
+    isSubmitSongVisible,
+    isListenerCountVisible,
+    isAccountVisible,
+  },
+}) => {
   const themeMap = {
     Original: original,
     Candy: candy,
@@ -37,11 +45,6 @@ const TopBar = () => {
   };
 
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
-  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
-  const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
-  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-  const [isProfileModalOpen, setProfileModalOpen] = useState(false); // Add state for profile modal
-  const [profile, setProfile] = useState(null); // Add state for profile data
   const menuRef = useRef(null);
   const themeButtonRef = useRef(null);
   const accountButtonRef = useRef(null);
@@ -53,53 +56,14 @@ const TopBar = () => {
     setThemeDropdownOpen(false);
   };
 
-  const handleAccountClick = (action) => {
-    if (action === "register") {
-      setRegisterModalOpen(true);
-    } else if (action === "login") {
-      setLoginModalOpen(true);
-    } else if (action === "profile") {
-      // Fetch profile data here if needed
-      fetchProfileData();
-      setProfileModalOpen(true);
-    }
-    setAccountDropdownOpen(false);
-  };
-
-  const fetchProfileData = () => {
-    // Simulate fetching profile data
-    const fetchedProfile = {
-      ALThoughts: "",
-      avatarUrl: "https://via.placeholder.com/100",
-      bio: "This is a sample bio.",
-      favouriteSong: "Sample Song",
-      handle: "greg",
-      isOnline: false,
-      location: "Sample Location",
-      numberOfSongsListened: 0,
-      createdDate: "2024-08-27T05:07:16.894Z",
-      friends: [],
-      lastOnline: "2024-08-27T05:07:16.894Z",
-    };
-    setProfile(fetchedProfile);
-  };
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         menuRef.current &&
         !menuRef.current.contains(event.target) &&
-        !(
-          themeButtonRef.current &&
-          themeButtonRef.current.contains(event.target)
-        ) &&
-        !(
-          accountButtonRef.current &&
-          accountButtonRef.current.contains(event.target)
-        )
+        !themeButtonRef.current.contains(event.target)
       ) {
         setThemeDropdownOpen(false);
-        setAccountDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -114,48 +78,54 @@ const TopBar = () => {
         <Toolbar
           style={{ justifyContent: "space-between", position: "relative" }}
         >
-          <div style={{ position: "relative", display: "inline-block" }}>
+          <div style={{ display: "flex", gap: "10px" }}>
             <Button
-              ref={accountButtonRef}
-              onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-              active={accountDropdownOpen}
-              aria-expanded={accountDropdownOpen}
-              aria-haspopup="true"
+              active={isAccountVisible}
+              onClick={() => onToggleComponent("Account")}
             >
               Account
             </Button>
-            {accountDropdownOpen && (
-              <StyledMenuList
-                ref={menuRef}
-                onClick={() => setAccountDropdownOpen(false)}
-              >
-                <MenuListItem onClick={() => handleAccountClick("register")}>
-                  Create Account
-                </MenuListItem>
-                <MenuListItem onClick={() => handleAccountClick("login")}>
-                  Login
-                </MenuListItem>
-                <MenuListItem onClick={() => handleAccountClick("profile")}>
-                  View Profile
-                </MenuListItem>
-              </StyledMenuList>
-            )}
+            <Button
+              active={isAudioPlayerVisible}
+              onClick={() => onToggleComponent("AudioPlayer")}
+            >
+              Player
+            </Button>
+            <Button
+              active={isSongHistoryVisible}
+              onClick={() => onToggleComponent("SongHistory")}
+            >
+              History
+            </Button>
+            <Button
+              active={isNextSongVisible}
+              onClick={() => onToggleComponent("NextSong")}
+            >
+              Up Next
+            </Button>
+            <Button
+              active={isSubmitSongVisible}
+              onClick={() => onToggleComponent("SubmitSong")}
+            >
+              Request Song
+            </Button>
+            <Button
+              active={isListenerCountVisible}
+              onClick={() => onToggleComponent("ListenerCount")}
+            >
+              Listeners
+            </Button>
           </div>
-          <div style={{ position: "relative", display: "inline-block" }}>
+          <div style={{ display: "flex", gap: "10px", position: "relative" }}>
             <Button
               ref={themeButtonRef}
               onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
               active={themeDropdownOpen}
-              aria-expanded={themeDropdownOpen}
-              aria-haspopup="true"
             >
-              Themes
+              Theme
             </Button>
             {themeDropdownOpen && (
-              <StyledMenuList
-                ref={menuRef}
-                onClick={() => setThemeDropdownOpen(false)}
-              >
+              <StyledMenuList ref={menuRef}>
                 {Object.keys(themeMap).map((theme) => (
                   <MenuListItem
                     key={theme}
@@ -169,14 +139,6 @@ const TopBar = () => {
           </div>
         </Toolbar>
       </AppBar>
-      <RegisterModal
-        isOpen={isRegisterModalOpen}
-        onClose={() => setRegisterModalOpen(false)}
-      />
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-      />
     </>
   );
 };

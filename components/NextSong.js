@@ -46,7 +46,7 @@ const NextSong = () => {
   return (
     <ResponsiveLayout uniqueKey="nextSong" defaultPosition={{ x: 440, y: 115 }}>
       <Window>
-        <WindowHeader className="window-header">Next Song</WindowHeader>
+        <WindowHeader className="window-header">Up Next</WindowHeader>
         <StyledWindowContent>
           {nextSong?.title ? (
             <>

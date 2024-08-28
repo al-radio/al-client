@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { createGlobalStyle } from "styled-components";
 import { styleReset } from "react95";
 import { ZIndexProvider } from "../contexts/ZIndexContext";
@@ -15,6 +15,7 @@ import NextSong from "@/components/NextSong";
 import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
+import Account from "@/components/Account";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -120,22 +121,64 @@ const TopBarContainer = styled.div`
   justify-content: space-between;
   padding: 0 20px;
 `;
-
 export default function Home() {
   const isMobile = useIsMobile();
+
+  const [isAudioPlayerVisible, setAudioPlayerVisible] = useState(true);
+  const [isSongHistoryVisible, setSongHistoryVisible] = useState(true);
+  const [isNextSongVisible, setNextSongVisible] = useState(true);
+  const [isSubmitSongVisible, setSubmitSongVisible] = useState(true);
+  const [isListenerCountVisible, setListenerCountVisible] = useState(true);
+  const [isAccountVisible, setAccountVisible] = useState(true);
+
+  const toggleVisibility = (component) => {
+    switch (component) {
+      case "AudioPlayer":
+        setAudioPlayerVisible((prev) => !prev);
+        break;
+      case "SongHistory":
+        setSongHistoryVisible((prev) => !prev);
+        break;
+      case "NextSong":
+        setNextSongVisible((prev) => !prev);
+        break;
+      case "SubmitSong":
+        setSubmitSongVisible((prev) => !prev);
+        break;
+      case "ListenerCount":
+        setListenerCountVisible((prev) => !prev);
+        break;
+      case "Account":
+        setAccountVisible((prev) => !prev);
+        break;
+      default:
+        break;
+    }
+  };
 
   const Content = () => (
     <>
       <TopBarContainer>
-        <TopBar />
+        <TopBar
+          onToggleComponent={toggleVisibility}
+          componentVisibility={{
+            isAudioPlayerVisible,
+            isSongHistoryVisible,
+            isNextSongVisible,
+            isSubmitSongVisible,
+            isListenerCountVisible,
+            isAccountVisible,
+          }}
+        />
       </TopBarContainer>
       <ContentContainer>
         <RadioTitle>AL Radio</RadioTitle>
-        <ListenerCount />
-        <AudioPlayer />
-        <NextSong />
-        <SubmitSong />
-        <SongHistory />
+        {isListenerCountVisible && <ListenerCount />}
+        {isAudioPlayerVisible && <AudioPlayer />}
+        {isAccountVisible && <Account />}
+        {isNextSongVisible && <NextSong />}
+        {isSubmitSongVisible && <SubmitSong />}
+        {isSongHistoryVisible && <SongHistory />}
       </ContentContainer>
     </>
   );
@@ -156,7 +199,7 @@ export default function Home() {
               <Content />
             )}
           </ZIndexProvider>
-        </IsMobileProvider>{" "}
+        </IsMobileProvider>
       </ThemeProvider>
     </>
   );

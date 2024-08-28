@@ -18,6 +18,7 @@ const getLocalStorageKey = (uniqueKey) =>
 const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
   const [zIndex, setZIndex] = useState(1);
   const [position, setPosition] = useState(defaultPosition);
+  const [isPositionLoaded, setIsPositionLoaded] = useState(false);
   const bringToFront = useZIndex();
   const isMobile = useIsMobile();
   const childRef = useRef(null);
@@ -28,15 +29,18 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
     if (savedPosition) {
       setPosition(JSON.parse(savedPosition));
     }
+    setIsPositionLoaded(true); // Position is loaded
   }, [uniqueKey]);
 
   // Save position and size to local storage
   useEffect(() => {
-    localStorage.setItem(
-      getLocalStorageKey(uniqueKey),
-      JSON.stringify(position),
-    );
-  }, [position, uniqueKey]);
+    if (isPositionLoaded) {
+      localStorage.setItem(
+        getLocalStorageKey(uniqueKey),
+        JSON.stringify(position),
+      );
+    }
+  }, [position, uniqueKey, isPositionLoaded]);
 
   // Handle bringing the window to the front
   const handleInteraction = () => {
@@ -100,7 +104,10 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
       bounds="parent"
       enableResizing={false}
       dragHandleClassName="window-header"
-      style={{ zIndex }}
+      style={{
+        zIndex,
+        visibility: isPositionLoaded ? "visible" : "hidden",
+      }}
       position={{ x: position.x, y: position.y }}
       onDragStop={(e, data) => {
         setPosition({ x: data.x, y: data.y });
