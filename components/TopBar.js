@@ -1,6 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { styled } from "styled-components";
 import { Button, AppBar, MenuList, MenuListItem, Toolbar } from "react95";
+import {
+  useVisibility,
+  VisibilityProvider,
+} from "@/contexts/VisibilityContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import original from "react95/dist/themes/original";
 import spruce from "react95/dist/themes/spruce";
@@ -20,17 +24,15 @@ const StyledMenuList = styled(MenuList)`
   z-index: 2000;
 `;
 
-const TopBar = ({
-  onToggleComponent,
-  componentVisibility: {
-    isAudioPlayerVisible,
-    isSongHistoryVisible,
-    isNextSongVisible,
-    isSubmitSongVisible,
-    isListenerCountVisible,
-    isAccountVisible,
-  },
-}) => {
+const ScrollableToolbar = styled.div`
+  display: flex;
+  gap: 10px;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  white-space: nowrap; /* Prevent wrapping of buttons */
+  padding: 0 10px; /* Add some padding to the container */
+`;
+
+const TopBar = () => {
   const themeMap = {
     Original: original,
     Candy: candy,
@@ -45,15 +47,19 @@ const TopBar = ({
   };
 
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+  const { visibility, toggleVisibility } = useVisibility();
   const menuRef = useRef(null);
   const themeButtonRef = useRef(null);
-  const accountButtonRef = useRef(null);
 
   const { toggleTheme } = useTheme();
 
   const handleThemeChange = (themeName) => {
     toggleTheme(themeMap[themeName]);
     setThemeDropdownOpen(false);
+  };
+
+  const handleToggleComponent = (component) => {
+    toggleVisibility(component);
   };
 
   useEffect(() => {
@@ -78,65 +84,59 @@ const TopBar = ({
         <Toolbar
           style={{ justifyContent: "space-between", position: "relative" }}
         >
-          <div style={{ display: "flex", gap: "10px" }}>
+          <ScrollableToolbar>
             <Button
-              active={isAccountVisible}
-              onClick={() => onToggleComponent("Account")}
+              active={visibility.account}
+              onClick={() => handleToggleComponent("account")}
             >
               Account
             </Button>
+            <Button ref={themeButtonRef} active={themeDropdownOpen}>
+              Theme
+            </Button>
             <Button
-              active={isAudioPlayerVisible}
-              onClick={() => onToggleComponent("AudioPlayer")}
+              active={visibility.audioPlayer}
+              onClick={() => handleToggleComponent("audioPlayer")}
             >
               Player
             </Button>
             <Button
-              active={isSongHistoryVisible}
-              onClick={() => onToggleComponent("SongHistory")}
+              active={visibility.songHistory}
+              onClick={() => handleToggleComponent("songHistory")}
             >
               History
             </Button>
             <Button
-              active={isNextSongVisible}
-              onClick={() => onToggleComponent("NextSong")}
+              active={visibility.nextSong}
+              onClick={() => handleToggleComponent("nextSong")}
             >
               Up Next
             </Button>
             <Button
-              active={isSubmitSongVisible}
-              onClick={() => onToggleComponent("SubmitSong")}
+              active={visibility.submitSong}
+              onClick={() => handleToggleComponent("submitSong")}
             >
               Request Song
             </Button>
             <Button
-              active={isListenerCountVisible}
-              onClick={() => onToggleComponent("ListenerCount")}
+              active={visibility.listeners}
+              onClick={() => handleToggleComponent("listeners")}
             >
               Listeners
             </Button>
-          </div>
-          <div style={{ display: "flex", gap: "10px", position: "relative" }}>
-            <Button
-              ref={themeButtonRef}
-              onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-              active={themeDropdownOpen}
-            >
-              Theme
-            </Button>
-            {themeDropdownOpen && (
-              <StyledMenuList ref={menuRef}>
-                {Object.keys(themeMap).map((theme) => (
-                  <MenuListItem
-                    key={theme}
-                    onClick={() => handleThemeChange(theme)}
-                  >
-                    {theme}
-                  </MenuListItem>
-                ))}
-              </StyledMenuList>
-            )}
-          </div>
+          </ScrollableToolbar>
+          {themeDropdownOpen && (
+            <StyledMenuList ref={menuRef}>
+              {Object.keys(themeMap).map((theme) => (
+                <MenuListItem
+                  key={theme}
+                  onClick={() => handleThemeChange(theme)}
+                >
+                  {theme}
+                </MenuListItem>
+              ))}
+            </StyledMenuList>
+          )}
         </Toolbar>
       </AppBar>
     </>

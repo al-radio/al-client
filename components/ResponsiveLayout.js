@@ -3,6 +3,7 @@ import { Rnd } from "react-rnd";
 import styled from "styled-components";
 import { useZIndex } from "@/contexts/ZIndexContext";
 import { useIsMobile } from "@/contexts/isMobileContext";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 // Style for mobile layout
 const MobileWindow = styled.div`
@@ -18,7 +19,7 @@ const getLocalStorageKey = (uniqueKey) =>
 const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
   const [zIndex, setZIndex] = useState(1);
   const [position, setPosition] = useState(defaultPosition);
-  const [isPositionLoaded, setIsPositionLoaded] = useState(false);
+  const { visibility } = useVisibility();
   const bringToFront = useZIndex();
   const isMobile = useIsMobile();
   const childRef = useRef(null);
@@ -29,18 +30,15 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
     if (savedPosition) {
       setPosition(JSON.parse(savedPosition));
     }
-    setIsPositionLoaded(true); // Position is loaded
   }, [uniqueKey]);
 
   // Save position and size to local storage
   useEffect(() => {
-    if (isPositionLoaded) {
-      localStorage.setItem(
-        getLocalStorageKey(uniqueKey),
-        JSON.stringify(position),
-      );
-    }
-  }, [position, uniqueKey, isPositionLoaded]);
+    localStorage.setItem(
+      getLocalStorageKey(uniqueKey),
+      JSON.stringify(position),
+    );
+  }, [position, uniqueKey]);
 
   // Handle bringing the window to the front
   const handleInteraction = () => {
@@ -96,7 +94,7 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
   }, [handleResize]);
 
   if (isMobile) {
-    return <MobileWindow>{children}</MobileWindow>;
+    return <MobileWindow>{visibility[uniqueKey] && children}</MobileWindow>;
   }
 
   return (
@@ -106,7 +104,6 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
       dragHandleClassName="window-header"
       style={{
         zIndex,
-        visibility: isPositionLoaded ? "visible" : "hidden",
       }}
       position={{ x: position.x, y: position.y }}
       onDragStop={(e, data) => {
@@ -123,7 +120,7 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
       onMouseDown={handleInteraction}
     >
       <div style={{ width: "100%", height: "100%" }} ref={childRef}>
-        {children}
+        {visibility[uniqueKey] && children}
       </div>
     </Rnd>
   );

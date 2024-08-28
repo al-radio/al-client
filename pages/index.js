@@ -8,6 +8,7 @@ import styled from "styled-components";
 import { ScrollView, Window } from "react95";
 import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { VisibilityProvider } from "@/contexts/VisibilityContext";
 
 import AudioPlayer from "@/components/AudioPlayer";
 import SongHistory from "@/components/SongHistory";
@@ -124,62 +125,22 @@ const TopBarContainer = styled.div`
 export default function Home() {
   const isMobile = useIsMobile();
 
-  const [isAudioPlayerVisible, setAudioPlayerVisible] = useState(true);
-  const [isSongHistoryVisible, setSongHistoryVisible] = useState(true);
-  const [isNextSongVisible, setNextSongVisible] = useState(true);
-  const [isSubmitSongVisible, setSubmitSongVisible] = useState(true);
-  const [isListenerCountVisible, setListenerCountVisible] = useState(true);
-  const [isAccountVisible, setAccountVisible] = useState(true);
-
-  const toggleVisibility = (component) => {
-    switch (component) {
-      case "AudioPlayer":
-        setAudioPlayerVisible((prev) => !prev);
-        break;
-      case "SongHistory":
-        setSongHistoryVisible((prev) => !prev);
-        break;
-      case "NextSong":
-        setNextSongVisible((prev) => !prev);
-        break;
-      case "SubmitSong":
-        setSubmitSongVisible((prev) => !prev);
-        break;
-      case "ListenerCount":
-        setListenerCountVisible((prev) => !prev);
-        break;
-      case "Account":
-        setAccountVisible((prev) => !prev);
-        break;
-      default:
-        break;
-    }
-  };
-
   const Content = () => (
     <>
-      <TopBarContainer>
-        <TopBar
-          onToggleComponent={toggleVisibility}
-          componentVisibility={{
-            isAudioPlayerVisible,
-            isSongHistoryVisible,
-            isNextSongVisible,
-            isSubmitSongVisible,
-            isListenerCountVisible,
-            isAccountVisible,
-          }}
-        />
-      </TopBarContainer>
-      <ContentContainer>
-        <RadioTitle>AL Radio</RadioTitle>
-        {isListenerCountVisible && <ListenerCount />}
-        {isAudioPlayerVisible && <AudioPlayer />}
-        {isAccountVisible && <Account />}
-        {isNextSongVisible && <NextSong />}
-        {isSubmitSongVisible && <SubmitSong />}
-        {isSongHistoryVisible && <SongHistory />}
-      </ContentContainer>
+      <VisibilityProvider>
+        <TopBarContainer>
+          <TopBar />
+        </TopBarContainer>
+        <ContentContainer>
+          <RadioTitle>AL Radio</RadioTitle>
+          <ListenerCount />
+          <AudioPlayer />
+          <Account />
+          <NextSong />
+          <SubmitSong />
+          <SongHistory />
+        </ContentContainer>
+      </VisibilityProvider>
     </>
   );
 
