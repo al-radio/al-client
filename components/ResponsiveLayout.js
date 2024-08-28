@@ -18,7 +18,7 @@ const getLocalStorageKey = (uniqueKey) =>
 
 const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
   const [zIndex, setZIndex] = useState(1);
-  const [position, setPosition] = useState(defaultPosition);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const { visibility } = useVisibility();
   const bringToFront = useZIndex();
   const isMobile = useIsMobile();
@@ -29,8 +29,10 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
     const savedPosition = localStorage.getItem(getLocalStorageKey(uniqueKey));
     if (savedPosition) {
       setPosition(JSON.parse(savedPosition));
+    } else {
+      setPosition(defaultPosition);
     }
-  }, [uniqueKey]);
+  }, [defaultPosition, uniqueKey]);
 
   // Save position and size to local storage
   useEffect(() => {

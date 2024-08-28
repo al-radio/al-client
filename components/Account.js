@@ -19,6 +19,7 @@ import {
   skipCurrentSong,
   submitQueueChanges,
 } from "../services/api";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 const Account = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
@@ -33,6 +34,11 @@ const Account = () => {
     password: "",
     email: "",
   });
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("account");
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -283,8 +289,14 @@ const Account = () => {
   return (
     <ResponsiveLayout uniqueKey="account" defaultPosition={{ x: 200, y: 200 }}>
       <Window>
-        <WindowHeader className="window-header">
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
           <span>Account</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
         </WindowHeader>
         <WindowContent>
           <Tabs

@@ -13,6 +13,7 @@ import {
 import { API_URL, fetchCurrentSong } from "../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
 import ResponsiveLayout from "./ResponsiveLayout";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -29,6 +30,11 @@ const AudioPlayer = () => {
   const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
   const audioUrl = `${API_URL}/stream`;
   const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("audioPlayer");
+  };
 
   // Forces stream to be live on play instead of playing from cache
   const handlePlay = useCallback(() => {
@@ -123,7 +129,15 @@ const AudioPlayer = () => {
       defaultPosition={{ x: 840, y: 400 }}
     >
       <Window>
-        <WindowHeader className="window-header">Now Playing</WindowHeader>
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>Now Playing</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
+        </WindowHeader>
         <WindowContent
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >

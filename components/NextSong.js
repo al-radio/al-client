@@ -1,8 +1,16 @@
 import { useEffect, useState, useRef } from "react";
-import { Window, WindowHeader, WindowContent, Avatar, Anchor } from "react95";
+import {
+  Window,
+  WindowHeader,
+  WindowContent,
+  Avatar,
+  Anchor,
+  Button,
+} from "react95";
 import styled from "styled-components";
 import { fetchNextSong } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 const StyledWindowContent = styled(WindowContent)`
   display: flex;
@@ -27,6 +35,11 @@ const SongDetails = styled.div`
 
 const NextSong = () => {
   const [nextSong, setNextSong] = useState(null);
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("nextSong");
+  };
 
   useEffect(() => {
     const getNextSong = async () => {
@@ -46,7 +59,15 @@ const NextSong = () => {
   return (
     <ResponsiveLayout uniqueKey="nextSong" defaultPosition={{ x: 440, y: 115 }}>
       <Window>
-        <WindowHeader className="window-header">Up Next</WindowHeader>
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>Up Next</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
+        </WindowHeader>
         <StyledWindowContent>
           {nextSong?.title ? (
             <>

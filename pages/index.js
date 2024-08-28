@@ -17,7 +17,7 @@ import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
 import Account from "@/components/Account";
-import Customize from "@/components/Customiuze";
+import Customize from "@/components/Customize";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -76,6 +76,35 @@ const GlobalStyles = createGlobalStyle`
     );
     z-index: 9999;
     pointer-events: none;
+  }
+
+  .close-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: -1px;
+    margin-top: -1px;
+    transform: rotateZ(45deg);
+    position: relative;
+    &:before,
+    &:after {
+      content: '';
+      position: absolute;
+      background: ${({ theme }) => theme.materialText};
+    }
+    &:before {
+      height: 100%;
+      width: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    &:after {
+      height: 3px;
+      width: 100%;
+      left: 0px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
   }
 `;
 

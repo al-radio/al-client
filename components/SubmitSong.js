@@ -9,6 +9,7 @@ import {
 } from "react95";
 import { API_URL, submitSongRequest } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 const SubmitSong = () => {
   const [query, setQuery] = useState("");
@@ -17,6 +18,11 @@ const SubmitSong = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [notification, setNotification] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("submitSong");
+  };
 
   const handleQueryChange = (e) => setQuery(e.target.value);
 
@@ -87,7 +93,15 @@ const SubmitSong = () => {
       defaultPosition={{ x: 1200, y: 170 }}
     >
       <Window>
-        <WindowHeader className="window-header">Request Song</WindowHeader>
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>Request Song</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
+        </WindowHeader>
         <WindowContent>
           <div style={{ display: "flex" }}>
             <TextInput

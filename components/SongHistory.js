@@ -12,10 +12,12 @@ import {
   Avatar,
   ScrollView,
   Anchor,
+  Button,
 } from "react95";
 import { fetchSongHistory } from "../services/api";
 import GetSong from "./GetSong";
 import ResponsiveLayout from "./ResponsiveLayout";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([
@@ -31,6 +33,11 @@ const SongHistory = () => {
   ]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("songHistory");
+  };
 
   useEffect(() => {
     const getSongHistory = async () => {
@@ -63,7 +70,15 @@ const SongHistory = () => {
       defaultPosition={{ x: 1500, y: 550 }}
     >
       <Window>
-        <WindowHeader className="window-header">History</WindowHeader>
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>History</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
+        </WindowHeader>
         <WindowContent>
           <ScrollView scrollable style={{ height: "400px" }}>
             <Table style={{ maxWidth: "300px" }}>
