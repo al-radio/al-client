@@ -80,15 +80,49 @@ export const updateProfile = async (id, profile) => {
   return response.json();
 };
 
-// Friends Routes
-export const fetchFriends = async () => {
-  const response = await fetch(`${API_URL}/accounts/friends`);
+// Admin Queue Routes
+export const fetchQueue = async (type) => {
+  const jwt = localStorage.getItem("token");
+  const urlMap = {
+    user: `${API_URL}/admin/queue/user`,
+    suggestion: `${API_URL}/admin/queue/suggestion`,
+    audio: `${API_URL}/admin/queue/audio`,
+  };
+
+  const response = await fetch(urlMap[type], {
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
   return response.json();
 };
 
-export const addFriend = async (id) => {
-  const response = await fetch(`${API_URL}/accounts/friends/add/${id}`, {
+export const submitQueueChanges = async (queueType, queueData) => {
+  const jwt = localStorage.getItem("token");
+  const urlMap = {
+    user: `${API_URL}/admin/queue/user`,
+    suggestion: `${API_URL}/admin/queue/suggestion`,
+    audio: `${API_URL}/admin/queue/audio`,
+  };
+
+  const response = await fetch(urlMap[queueType], {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: queueData,
+  });
+  return response.json();
+};
+
+export const skipCurrentSong = async () => {
+  const jwt = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/admin/skip`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
   });
   return response.json();
 };

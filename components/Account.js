@@ -11,7 +11,14 @@ import {
   TextInput,
 } from "react95";
 import ResponsiveLayout from "./ResponsiveLayout";
-import { fetchProfile, login, register } from "../services/api";
+import {
+  fetchProfile,
+  login,
+  register,
+  fetchQueue,
+  skipCurrentSong,
+  submitQueueChanges,
+} from "../services/api";
 
 const Account = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
@@ -19,6 +26,8 @@ const Account = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLoginView, setIsLoginView] = useState(true);
+  const [queueData, setQueueData] = useState("");
+  const [queueType, setQueueType] = useState("");
   const [formData, setFormData] = useState({
     handle: "",
     password: "",
@@ -55,7 +64,7 @@ const Account = () => {
           setProfile(profileData);
         });
       })
-      .catch((err) => {
+      .catch(() => {
         setError("An error occurred during login. Please try again.");
       });
   };
@@ -70,7 +79,7 @@ const Account = () => {
         setIsLoginView(true);
         setError(null);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("An error occurred during registration. Please try again.");
       });
   };
@@ -82,6 +91,42 @@ const Account = () => {
     setIsLoginView(true);
   };
 
+  const handleFetchQueue = (type) => {
+    fetchQueue(type)
+      .then((data) => {
+        setQueueData(JSON.stringify(data, null, 2));
+        setQueueType(type);
+      })
+      .catch(() => {
+        console.error("Failed to fetch queue data.");
+      });
+  };
+
+  const handleSubmitQueueChanges = () => {
+    if (!queueType) {
+      console.error("No queue type selected.");
+      return;
+    }
+
+    submitQueueChanges(queueType, queueData)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch(() => {
+        console.error("Failed to submit queue changes.");
+      });
+  };
+
+  const handleSkipCurrentSong = () => {
+    skipCurrentSong()
+      .then((data) => {
+        console.log(data);
+      })
+      .catch(() => {
+        console.error("Failed to skip current song.");
+      });
+  };
+
   const renderProfileContent = () => {
     if (isLoading) {
       return <Hourglass size={32} />;
@@ -91,84 +136,11 @@ const Account = () => {
       return (
         <div>
           <div>
-            <p>
-              <strong>Handle:</strong> {profile.handle}
-            </p>
-            <p>
-              <strong>Email:</strong> {profile.email}
-            </p>
-            <p>
-              <strong>Bio:</strong> {profile.bio}
-            </p>
-            <p>
-              <strong>Location:</strong> {profile.location}
-            </p>
-            <p>
-              <strong>Favorite Song:</strong> {profile.favouriteSong}
-            </p>
-            <p>
-              <strong>AL Thoughts:</strong> {profile.ALThoughts}
-            </p>
-            <p>
-              <strong>Number of Songs Listened:</strong>{" "}
-              {profile.numberOfSongsListened}
-            </p>
-            <p>
-              <strong>Online Status:</strong>{" "}
-              {profile.isOnline ? "Online" : "Offline"}
-            </p>
-            <p>
-              <strong>Last Online:</strong>{" "}
-              {new Date(profile.lastOnline).toLocaleString()}
-            </p>
-            <p>
-              <strong>Account Created:</strong>{" "}
-              {new Date(profile.createdDate).toLocaleString()}
-            </p>
-            <p>
-              <strong>Email Verified:</strong>{" "}
-              {profile.isEmailVerified ? "Yes" : "No"}
-            </p>
-            <p>
-              <strong>Customization Preferences:</strong>
-            </p>
-            <ul>
-              {profile.customizationPreferences &&
-                Array.from(profile.customizationPreferences).map(
-                  ([key, value]) => (
-                    <li key={key}>
-                      {key}: {JSON.stringify(value)}
-                    </li>
-                  ),
-                )}
-            </ul>
-            <p>
-              <strong>Linked Services:</strong>
-            </p>
-            <ul>
-              {profile.linkedServices &&
-                Array.from(profile.linkedServices).map(([service, url]) => (
-                  <li key={service}>
-                    {service}: <Anchor href={url}>{url}</Anchor>
-                  </li>
-                ))}
-            </ul>
-            <p>
-              <strong>Friends:</strong>
-            </p>
-            <ul>
-              {profile.friends &&
-                profile.friends.map((friend) => (
-                  <li key={friend.friendId}>
-                    {friend.friendId} (Added:{" "}
-                    {new Date(friend.dateAdded).toLocaleString()})
-                  </li>
-                ))}
-            </ul>
+            {/* Profile Details Here */}
+            <Button onClick={handleLogout} style={{ marginTop: "10px" }}>
+              Logout
+            </Button>
           </div>
-          <Button onClick={handleLogout} style={{ marginTop: "10px" }}>
-            Logout
-          </Button>
         </div>
       );
     }
@@ -241,14 +213,54 @@ const Account = () => {
           <div
             style={{
               color: "red",
-              maxWidth: "100%", // Ensures it doesn't extend beyond the container
-              wordWrap: "break-word", // Allows wrapping of long words
-              whiteSpace: "pre-wrap", // Maintains whitespace and wraps text
+              maxWidth: "100%",
+              wordWrap: "break-word",
+              whiteSpace: "pre-wrap",
             }}
           >
             {error}
           </div>
         )}
+      </div>
+    );
+  };
+
+  const renderDeveloperContent = () => {
+    return (
+      <div>
+        <Button onClick={handleSkipCurrentSong}>Skip Current Song</Button>
+        <Button onClick={() => handleFetchQueue("user")}>
+          View User Queue
+        </Button>
+        <Button onClick={() => handleFetchQueue("suggestion")}>
+          View Suggestion Queue
+        </Button>
+        <Button onClick={() => handleFetchQueue("audio")}>
+          View Audio Queue
+        </Button>
+
+        <textarea
+          value={queueData}
+          onChange={(e) => setQueueData(e.target.value)}
+          rows={10}
+          style={{
+            width: "100%",
+            height: "200px",
+            marginTop: "10px",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            whiteSpace: "pre",
+            overflowX: "auto",
+            overflowY: "auto",
+          }}
+        />
+
+        <Button
+          onClick={handleSubmitQueueChanges}
+          style={{ marginTop: "10px" }}
+        >
+          Submit Changes
+        </Button>
       </div>
     );
   };
@@ -261,6 +273,8 @@ const Account = () => {
         return <div>Request History Content</div>;
       case "Friends":
         return <div>Friends Content</div>;
+      case "Developer":
+        return renderDeveloperContent();
       default:
         return renderProfileContent();
     }
@@ -281,6 +295,9 @@ const Account = () => {
             <Tab value="Profile">Profile</Tab>
             <Tab value="History">History</Tab>
             <Tab value="Friends">Friends</Tab>
+            {profile?.role === "admin" && (
+              <Tab value="Developer">Developer</Tab>
+            )}
           </Tabs>
           {renderContent()}
         </WindowContent>

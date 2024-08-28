@@ -57,7 +57,11 @@ const NextSong = () => {
                 <p>{nextSong.album}</p>
                 <p>
                   Requested by:{" "}
-                  <Anchor>{nextSong.userSubmittedId || "AL"}</Anchor>
+                  {nextSong.userSubmittedId ? (
+                    <Anchor>{nextSong.userSubmittedId}</Anchor>
+                  ) : (
+                    "AL"
+                  )}
                 </p>
               </SongDetails>
             </>

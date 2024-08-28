@@ -95,7 +95,11 @@ const SongHistory = () => {
                       {song.album}
                     </TableDataCell>
                     <TableDataCell>
-                      <Anchor>{song.userSubmittedId || "AL"}</Anchor>
+                      {song.userSubmittedId ? (
+                        <Anchor>{song.userSubmittedId}</Anchor>
+                      ) : (
+                        "AL"
+                      )}
                     </TableDataCell>
                   </TableRow>
                 ))}

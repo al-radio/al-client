@@ -166,7 +166,11 @@ const AudioPlayer = () => {
                     <p>{currentSong.album}</p>
                     <p>
                       Requested by:{" "}
-                      <Anchor>{currentSong.userSubmittedId || "AL"}</Anchor>
+                      {currentSong.userSubmittedId ? (
+                        <Anchor>{currentSong.userSubmittedId}</Anchor>
+                      ) : (
+                        "AL"
+                      )}
                     </p>
                   </>
                 ) : (
