@@ -9,8 +9,11 @@ import {
   Hourglass,
   Anchor,
   TextInput,
+  Avatar,
+  GroupBox,
+  TabBody,
 } from "react95";
-import ResponsiveLayout from "./ResponsiveLayout";
+import ResponsiveLayout from "../ResponsiveLayout";
 import {
   fetchProfile,
   login,
@@ -18,8 +21,10 @@ import {
   fetchQueue,
   skipCurrentSong,
   submitQueueChanges,
-} from "../services/api";
+} from "../../services/api";
 import { useVisibility } from "@/contexts/VisibilityContext";
+import ProfilePage from "./ProfilePage";
+import HistoryPage from "./HistoryPage";
 
 const Account = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
@@ -140,19 +145,17 @@ const Account = () => {
 
     if (profile?.handle) {
       return (
-        <div>
-          <div>
-            {/* Profile Details Here */}
-            <Button onClick={handleLogout} style={{ marginTop: "10px" }}>
-              Logout
-            </Button>
-          </div>
-        </div>
+        <>
+          <ProfilePage profile={profile} />
+          <Button onClick={handleLogout} style={{ marginTop: "10px" }}>
+            Logout
+          </Button>
+        </>
       );
     }
 
     return (
-      <div>
+      <>
         {isLoginView ? (
           <>
             <TextInput
@@ -227,13 +230,17 @@ const Account = () => {
             {error}
           </div>
         )}
-      </div>
+      </>
     );
+  };
+
+  const renderHistoryContent = () => {
+    return <HistoryPage handle={profile.handle} />;
   };
 
   const renderDeveloperContent = () => {
     return (
-      <div>
+      <div style={{ maxWidth: "500px" }}>
         <Button onClick={handleSkipCurrentSong}>Skip Current Song</Button>
         <Button onClick={() => handleFetchQueue("user")}>
           View User Queue
@@ -275,10 +282,8 @@ const Account = () => {
     switch (selectedTab) {
       case "Profile":
         return renderProfileContent();
-      case "History":
-        return <div>Request History Content</div>;
-      case "Friends":
-        return <div>Friends Content</div>;
+      case "Requests":
+        return renderHistoryContent();
       case "Developer":
         return renderDeveloperContent();
       default:
@@ -299,19 +304,14 @@ const Account = () => {
           </Button>
         </WindowHeader>
         <WindowContent>
-          <Tabs
-            value={selectedTab}
-            onChange={(tab) => setSelectedTab(tab)}
-            style={{ marginBottom: "10px" }}
-          >
+          <Tabs value={selectedTab} onChange={(tab) => setSelectedTab(tab)}>
             <Tab value="Profile">Profile</Tab>
-            <Tab value="History">History</Tab>
-            <Tab value="Friends">Friends</Tab>
+            <Tab value="Requests">Requests</Tab>
             {profile?.role === "admin" && (
               <Tab value="Developer">Developer</Tab>
             )}
           </Tabs>
-          {renderContent()}
+          <TabBody>{renderContent()}</TabBody>
         </WindowContent>
       </Window>
     </ResponsiveLayout>

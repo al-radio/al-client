@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
-import { Window, WindowHeader, WindowContent, Counter, Button } from "react95";
+import React, { useState } from "react";
+import {
+  Window,
+  WindowHeader,
+  WindowContent,
+  Button,
+  Radio,
+  GroupBox,
+} from "react95";
 import ResponsiveLayout from "./ResponsiveLayout";
 import { useVisibility } from "@/contexts/VisibilityContext";
-
 import { useTheme } from "@/contexts/ThemeContext";
+
 import original from "react95/dist/themes/original";
 import spruce from "react95/dist/themes/spruce";
 import vaporTeal from "react95/dist/themes/vaporTeal";
@@ -16,8 +23,9 @@ import violetDark from "react95/dist/themes/violetDark";
 import candy from "react95/dist/themes/candy";
 
 const Customize = () => {
-  const [listenerCount, setListenerCount] = useState(0);
   const { toggleVisibility } = useVisibility();
+  const { toggleTheme } = useTheme();
+  const [selectedTheme, setSelectedTheme] = useState("Original");
 
   const handleCloseButton = () => {
     toggleVisibility("customize");
@@ -36,6 +44,10 @@ const Customize = () => {
     "Violet Dark": violetDark,
   };
 
+  const handleSetTheme = () => {
+    toggleTheme(themeMap[selectedTheme]);
+  };
+
   return (
     <ResponsiveLayout
       uniqueKey="customize"
@@ -51,8 +63,27 @@ const Customize = () => {
             <span className="close-icon" />
           </Button>
         </WindowHeader>
-        <WindowContent style={{ display: "flex", justifyContent: "center" }}>
-          <Counter value={1} minLength={1} />
+        <WindowContent>
+          <GroupBox label="Choose a Theme">
+            {Object.keys(themeMap).map((themeName) => (
+              <>
+                <Radio
+                  key={themeName}
+                  checked={selectedTheme === themeName}
+                  onChange={() => setSelectedTheme(themeName)}
+                  label={themeName}
+                  name="themes"
+                />
+                <br />
+              </>
+            ))}
+          </GroupBox>
+          <Button
+            onClick={handleSetTheme}
+            style={{ marginTop: "20px", width: "100%" }}
+          >
+            Set Theme
+          </Button>
         </WindowContent>
       </Window>
     </ResponsiveLayout>

@@ -16,7 +16,7 @@ import NextSong from "@/components/NextSong";
 import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
-import Account from "@/components/Account";
+import Account from "@/components/accounts/Account";
 import Customize from "@/components/Customize";
 
 const GlobalStyles = createGlobalStyle`
@@ -82,8 +82,6 @@ const GlobalStyles = createGlobalStyle`
     display: inline-block;
     width: 16px;
     height: 16px;
-    margin-left: -1px;
-    margin-top: -1px;
     transform: rotateZ(45deg);
     position: relative;
     &:before,

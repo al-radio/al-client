@@ -13,11 +13,13 @@ import {
   ScrollView,
   Anchor,
   Button,
+  Tooltip,
 } from "react95";
 import { fetchSongHistory } from "../services/api";
 import GetSong from "./GetSong";
 import ResponsiveLayout from "./ResponsiveLayout";
 import { useVisibility } from "@/contexts/VisibilityContext";
+import ProfilePage from "./accounts/ProfilePage";
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([
@@ -64,6 +66,11 @@ const SongHistory = () => {
     setSelectedSong(null);
   };
 
+  const handleUserClick = (handle) => {
+    // todo
+    console.log(handle);
+  };
+
   return (
     <ResponsiveLayout
       uniqueKey="songHistory"
@@ -81,7 +88,7 @@ const SongHistory = () => {
         </WindowHeader>
         <WindowContent>
           <ScrollView scrollable style={{ height: "400px" }}>
-            <Table style={{ maxWidth: "300px" }}>
+            <Table style={{ maxWidth: "550px" }}>
               <TableHead>
                 <TableHeadCell></TableHeadCell>
                 <TableHeadCell>Title</TableHeadCell>
@@ -111,7 +118,11 @@ const SongHistory = () => {
                     </TableDataCell>
                     <TableDataCell>
                       {song.userSubmittedId ? (
-                        <Anchor>{song.userSubmittedId}</Anchor>
+                        <Anchor
+                          onClick={() => handleUserClick(song.userSubmittedId)}
+                        >
+                          {song.userSubmittedId}
+                        </Anchor>
                       ) : (
                         "AL"
                       )}

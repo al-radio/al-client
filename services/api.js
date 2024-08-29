@@ -17,7 +17,11 @@ export const fetchNextSong = async () => {
   return response.json();
 };
 
-export const fetchSongHistory = async () => {
+export const fetchSongHistory = async (handle = null) => {
+  if (handle) {
+    const response = await fetch(`${API_URL}/accounts/${handle}/history`);
+    return response.json();
+  }
   const response = await fetch(`${API_URL}/song/history`);
   return response.json();
 };
