@@ -9,8 +9,6 @@ import {
   Hourglass,
   Anchor,
   TextInput,
-  Avatar,
-  GroupBox,
   TabBody,
 } from "react95";
 import ResponsiveLayout from "../ResponsiveLayout";
@@ -25,6 +23,15 @@ import {
 import { useVisibility } from "@/contexts/VisibilityContext";
 import ProfilePage from "./ProfilePage";
 import HistoryPage from "./HistoryPage";
+import styled from "styled-components";
+
+// style the error message to use the same color as the theme
+const ErrorMessage = styled.div`
+  color: ${({ theme }) => theme.progress};
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+`;
 
 const Account = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
@@ -156,6 +163,11 @@ const Account = () => {
 
     return (
       <>
+        {error && (
+          <ErrorMessage>
+            <p>{error}</p>
+          </ErrorMessage>
+        )}
         {isLoginView ? (
           <>
             <TextInput
@@ -217,18 +229,6 @@ const Account = () => {
               Already have an account? <Anchor>Login here</Anchor>
             </p>
           </>
-        )}
-        {error && (
-          <div
-            style={{
-              color: "red",
-              maxWidth: "100%",
-              wordWrap: "break-word",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {error}
-          </div>
         )}
       </>
     );
@@ -306,7 +306,7 @@ const Account = () => {
         <WindowContent>
           <Tabs value={selectedTab} onChange={(tab) => setSelectedTab(tab)}>
             <Tab value="Profile">Profile</Tab>
-            <Tab value="Requests">Requests</Tab>
+            {profile?.handle && <Tab value="Requests">Requests</Tab>}
             {profile?.role === "admin" && (
               <Tab value="Developer">Developer</Tab>
             )}

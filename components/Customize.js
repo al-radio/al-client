@@ -38,7 +38,7 @@ const themeMap = {
 const Customize = () => {
   const { toggleVisibility } = useVisibility();
   const { toggleTheme } = useTheme();
-  const [selectedTheme, setSelectedTheme] = useState("Original");
+  const [selectedTheme, setSelectedTheme] = useState("Vapor Teal");
 
   const handleCloseButton = () => {
     toggleVisibility("customize");

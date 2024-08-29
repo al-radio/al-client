@@ -7,9 +7,19 @@ import {
   WindowContent,
   Hourglass,
 } from "react95";
-import { API_URL, submitSongRequest } from "../services/api";
+import { submitSongRequest } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
 import { useVisibility } from "@/contexts/VisibilityContext";
+import styled from "styled-components";
+
+// style the notification message to use the same color as the theme
+const NotificationMessage = styled.div`
+  color: ${({ theme }) => theme.progress};
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  margin-top: 10px;
+`;
 
 const SubmitSong = () => {
   const [query, setQuery] = useState("");
@@ -128,9 +138,7 @@ const SubmitSong = () => {
             </div>
           )}
           {notification && (
-            <div style={{ marginTop: 10, color: "magenta" }}>
-              {notification}
-            </div>
+            <NotificationMessage>{notification}</NotificationMessage>
           )}
         </WindowContent>
       </Window>

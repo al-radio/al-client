@@ -1,19 +1,13 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 import { styled } from "styled-components";
-import { Button, AppBar, MenuList, MenuListItem, Toolbar } from "react95";
+import { Button, AppBar, Toolbar } from "react95";
 import { useVisibility } from "@/contexts/VisibilityContext";
-
-const StyledMenuList = styled(MenuList)`
-  position: absolute;
-  right: 0; /* Position the dropdown on the right side */
-  top: 100%;
-  z-index: 2000;
-`;
 
 const ScrollableToolbar = styled.div`
   display: flex;
   gap: 10px;
   overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: hidden; /* Hide vertical scrolling */
   white-space: nowrap; /* Prevent wrapping of buttons */
   padding: 0 10px; /* Add some padding to the container */
   scrollbar-width: none;
