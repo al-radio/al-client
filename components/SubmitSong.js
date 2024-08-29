@@ -7,8 +7,9 @@ import {
   WindowContent,
   Hourglass,
 } from "react95";
-import { API_URL } from "../services/api";
+import { API_URL, submitSongRequest } from "../services/api";
 import ResponsiveLayout from "./ResponsiveLayout";
+import { useVisibility } from "@/contexts/VisibilityContext";
 
 const SubmitSong = () => {
   const [query, setQuery] = useState("");
@@ -17,6 +18,11 @@ const SubmitSong = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [notification, setNotification] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("submitSong");
+  };
 
   const handleQueryChange = (e) => setQuery(e.target.value);
 
@@ -25,14 +31,7 @@ const SubmitSong = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-      });
-
-      const result = await response.json();
-
+      const result = await submitSongRequest(query);
       if (result.metadata) {
         setSongMetadata(result.metadata);
         setIsConfirming(true);
@@ -60,13 +59,7 @@ const SubmitSong = () => {
   const handleConfirm = async () => {
     setIsLoading(true); // Start loading
     try {
-      const response = await fetch(`${API_URL}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: trackId }),
-      });
-
-      const result = await response.json();
+      const result = await submitSongRequest(trackId);
       if (result.success) {
         setNotification("Song confirmed successfully!");
         setTimeout(() => setNotification(""), 5000);
@@ -100,7 +93,15 @@ const SubmitSong = () => {
       defaultPosition={{ x: 1200, y: 170 }}
     >
       <Window>
-        <WindowHeader className="window-header">Submit a Song</WindowHeader>
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>Request Song</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
+        </WindowHeader>
         <WindowContent>
           <div style={{ display: "flex" }}>
             <TextInput

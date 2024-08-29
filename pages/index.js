@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { createGlobalStyle } from "styled-components";
 import { styleReset } from "react95";
-import { ZIndexProvider, useZIndex } from "../contexts/ZIndexContext";
-import candy from "react95/dist/themes/candy";
+import { ZIndexProvider } from "../contexts/ZIndexContext";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 import styled from "styled-components";
 import { ScrollView, Window } from "react95";
 import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { VisibilityProvider } from "@/contexts/VisibilityContext";
 
 import AudioPlayer from "@/components/AudioPlayer";
 import SongHistory from "@/components/SongHistory";
@@ -16,6 +16,8 @@ import NextSong from "@/components/NextSong";
 import ListenerCount from "@/components/ListenerCount";
 import SubmitSong from "@/components/SubmitSong";
 import TopBar from "@/components/TopBar";
+import Account from "@/components/accounts/Account";
+import Customize from "@/components/Customize";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -41,6 +43,8 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     overflow-x: hidden; /* Prevent horizontal scroll */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
   }
 
   body {
@@ -70,8 +74,35 @@ const GlobalStyles = createGlobalStyle`
       rgba(255, 255, 255, 0.1) 1px,
       rgba(255, 255, 255, 0.1) 2px
     );
-    z-index: 1000;
+    z-index: 9999;
     pointer-events: none;
+  }
+
+  .close-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    transform: rotateZ(45deg);
+    position: relative;
+    &:before,
+    &:after {
+      content: '';
+      position: absolute;
+      background: ${({ theme }) => theme.materialText};
+    }
+    &:before {
+      height: 100%;
+      width: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    &:after {
+      height: 3px;
+      width: 100%;
+      left: 0px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
   }
 `;
 
@@ -121,23 +152,26 @@ const TopBarContainer = styled.div`
   justify-content: space-between;
   padding: 0 20px;
 `;
-
 export default function Home() {
   const isMobile = useIsMobile();
 
   const Content = () => (
     <>
-      <TopBarContainer>
-        <TopBar />
-      </TopBarContainer>
-      <ContentContainer>
-        <RadioTitle>AL Radio</RadioTitle>
-        <ListenerCount />
-        <AudioPlayer />
-        <NextSong />
-        <SubmitSong />
-        <SongHistory />
-      </ContentContainer>
+      <VisibilityProvider>
+        <TopBarContainer>
+          <TopBar />
+        </TopBarContainer>
+        <ContentContainer>
+          <RadioTitle>AL Radio</RadioTitle>
+          <Customize />
+          <ListenerCount />
+          <AudioPlayer />
+          <Account />
+          <NextSong />
+          <SubmitSong />
+          <SongHistory />
+        </ContentContainer>
+      </VisibilityProvider>
     </>
   );
 
@@ -157,7 +191,7 @@ export default function Home() {
               <Content />
             )}
           </ZIndexProvider>
-        </IsMobileProvider>{" "}
+        </IsMobileProvider>
       </ThemeProvider>
     </>
   );

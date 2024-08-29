@@ -11,10 +11,15 @@ import {
   TableDataCell,
   Avatar,
   ScrollView,
+  Anchor,
+  Button,
+  Tooltip,
 } from "react95";
 import { fetchSongHistory } from "../services/api";
 import GetSong from "./GetSong";
 import ResponsiveLayout from "./ResponsiveLayout";
+import { useVisibility } from "@/contexts/VisibilityContext";
+import ProfilePage from "./accounts/ProfilePage";
 
 const SongHistory = () => {
   const [songHistory, setSongHistory] = useState([
@@ -30,6 +35,11 @@ const SongHistory = () => {
   ]);
   const [selectedSong, setSelectedSong] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility("songHistory");
+  };
 
   useEffect(() => {
     const getSongHistory = async () => {
@@ -56,29 +66,67 @@ const SongHistory = () => {
     setSelectedSong(null);
   };
 
+  const handleUserClick = (handle) => {
+    // todo
+    console.log(handle);
+  };
+
   return (
     <ResponsiveLayout
       uniqueKey="songHistory"
       defaultPosition={{ x: 1500, y: 550 }}
     >
       <Window>
-        <WindowHeader className="window-header">History</WindowHeader>
+        <WindowHeader
+          className="window-header"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <span>History</span>
+          <Button onClick={handleCloseButton}>
+            <span className="close-icon" />
+          </Button>
+        </WindowHeader>
         <WindowContent>
           <ScrollView scrollable style={{ height: "400px" }}>
-            <Table style={{ maxWidth: "500px" }}>
+            <Table style={{ maxWidth: "550px" }}>
               <TableHead>
                 <TableHeadCell></TableHeadCell>
                 <TableHeadCell>Title</TableHeadCell>
                 <TableHeadCell>Artist</TableHeadCell>
+                <TableHeadCell>Album</TableHeadCell>
+                <TableHeadCell>Requested By</TableHeadCell>
               </TableHead>
               <TableBody>
                 {songHistory.map((song, index) => (
-                  <TableRow key={index} onClick={() => handleRowClick(song)}>
-                    <TableDataCell>
-                      <Avatar square size={50} src={song.artUrl} />
+                  <TableRow key={index}>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      <Avatar
+                        square
+                        size={50}
+                        src={song.artUrl}
+                        style={{ marginTop: 10 }}
+                      />
                     </TableDataCell>
-                    <TableDataCell>{song.title}</TableDataCell>
-                    <TableDataCell>{song.artist}</TableDataCell>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      {song.title}
+                    </TableDataCell>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      {song.artist}
+                    </TableDataCell>
+                    <TableDataCell onClick={() => handleRowClick(song)}>
+                      {song.album}
+                    </TableDataCell>
+                    <TableDataCell>
+                      {song.userSubmittedId ? (
+                        <Anchor
+                          onClick={() => handleUserClick(song.userSubmittedId)}
+                        >
+                          {song.userSubmittedId}
+                        </Anchor>
+                      ) : (
+                        "AL"
+                      )}
+                    </TableDataCell>
                   </TableRow>
                 ))}
               </TableBody>
