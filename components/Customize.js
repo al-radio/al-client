@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Window,
   WindowHeader,
@@ -22,6 +22,19 @@ import theSixtiesUSA from "react95/dist/themes/theSixtiesUSA";
 import violetDark from "react95/dist/themes/violetDark";
 import candy from "react95/dist/themes/candy";
 
+const themeMap = {
+  Original: original,
+  Candy: candy,
+  Spruce: spruce,
+  "Vapor Teal": vaporTeal,
+  "High Contrast": highContrast,
+  Lilac: lilac,
+  Maple: maple,
+  "Blind Pink": pamelaAnderson,
+  "The Sixties": theSixtiesUSA,
+  "Violet Dark": violetDark,
+};
+
 const Customize = () => {
   const { toggleVisibility } = useVisibility();
   const { toggleTheme } = useTheme();
@@ -31,22 +44,19 @@ const Customize = () => {
     toggleVisibility("customize");
   };
 
-  const themeMap = {
-    Original: original,
-    Candy: candy,
-    Spruce: spruce,
-    "Vapor Teal": vaporTeal,
-    "High Contrast": highContrast,
-    Lilac: lilac,
-    Maple: maple,
-    "Blind Pink": pamelaAnderson,
-    "The Sixties": theSixtiesUSA,
-    "Violet Dark": violetDark,
+  const handleSetTheme = () => {
+    const theme = themeMap[selectedTheme];
+    toggleTheme(theme);
+    localStorage.setItem("selectedTheme", selectedTheme); // Save to local storage
   };
 
-  const handleSetTheme = () => {
-    toggleTheme(themeMap[selectedTheme]);
-  };
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("selectedTheme");
+    if (storedTheme && themeMap[storedTheme]) {
+      setSelectedTheme(storedTheme);
+      toggleTheme(themeMap[storedTheme]); // Apply stored theme
+    }
+  }, [toggleTheme]);
 
   return (
     <ResponsiveLayout
@@ -66,16 +76,15 @@ const Customize = () => {
         <WindowContent>
           <GroupBox label="Choose a Theme">
             {Object.keys(themeMap).map((themeName) => (
-              <>
+              <div key={themeName}>
                 <Radio
-                  key={themeName}
                   checked={selectedTheme === themeName}
                   onChange={() => setSelectedTheme(themeName)}
                   label={themeName}
                   name="themes"
                 />
                 <br />
-              </>
+              </div>
             ))}
           </GroupBox>
           <Button
