@@ -19,6 +19,8 @@ export const fetchNextSong = async () => {
 
 export const fetchSongHistory = async (handle = null) => {
   if (handle) {
+    // temp until server deploys force lowercase
+    handle = handle.trim().toLowerCase();
     const response = await fetch(`${API_URL}/accounts/${handle}/history`);
     return response.json();
   }
@@ -41,6 +43,8 @@ export const submitSongRequest = async (query) => {
 
 // Account Routes
 export const login = async (handle, password) => {
+  // temp until server deploys force lowercase
+  handle = handle.trim().toLowerCase();
   const response = await fetch(`${API_URL}/login`, {
     method: "POST",
     headers: {
@@ -63,6 +67,8 @@ export const register = async (email, handle, password) => {
 };
 
 export const fetchProfile = async (handle) => {
+  // temp until server deploys force lowercase
+  handle = handle.trim().toLowerCase();
   // jwt stored in localStorage
   const jwt = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/accounts`, {
@@ -73,8 +79,8 @@ export const fetchProfile = async (handle) => {
   return response.json();
 };
 
-export const updateProfile = async (id, profile) => {
-  const response = await fetch(`${API_URL}/accounts/${id}`, {
+export const updateProfile = async (handle, profile) => {
+  const response = await fetch(`${API_URL}/accounts/${handle}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
