@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react95";
 import { fetchSongHistory } from "@/services/api";
-import GetSong from "../GetSong";
+import GetSong from "../modals/GetSong";
 
 const HistoryPage = ({ handle }) => {
   const [songHistory, setSongHistory] = useState([

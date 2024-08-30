@@ -11,7 +11,7 @@ import {
   TextInput,
   TabBody,
 } from "react95";
-import ResponsiveLayout from "../ResponsiveLayout";
+import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import {
   fetchProfile,
   login,
@@ -32,6 +32,8 @@ const ErrorMessage = styled.div`
   word-wrap: break-word;
   white-space: pre-wrap;
 `;
+
+const windowId = "account";
 
 const Account = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
@@ -292,29 +294,20 @@ const Account = () => {
   };
 
   return (
-    <ResponsiveLayout uniqueKey="account" defaultPosition={{ x: 200, y: 200 }}>
-      <Window>
-        <WindowHeader
-          className="window-header"
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
-          <span>Account</span>
-          <Button onClick={handleCloseButton}>
-            <span className="close-icon" />
-          </Button>
-        </WindowHeader>
-        <WindowContent>
-          <Tabs value={selectedTab} onChange={(tab) => setSelectedTab(tab)}>
-            <Tab value="Profile">Profile</Tab>
-            {profile?.handle && <Tab value="Requests">Requests</Tab>}
-            {profile?.role === "admin" && (
-              <Tab value="Developer">Developer</Tab>
-            )}
-          </Tabs>
-          <TabBody>{renderContent()}</TabBody>
-        </WindowContent>
-      </Window>
-    </ResponsiveLayout>
+    <ResponsiveWindowBase
+      windowId={windowId}
+      windowHeaderTitle="Account"
+      defaultPosition={{ x: 200, y: 200 }}
+    >
+      <WindowContent>
+        <Tabs value={selectedTab} onChange={(tab) => setSelectedTab(tab)}>
+          <Tab value="Profile">Profile</Tab>
+          {profile?.handle && <Tab value="Requests">Requests</Tab>}
+          {profile?.role === "admin" && <Tab value="Developer">Developer</Tab>}
+        </Tabs>
+        <TabBody>{renderContent()}</TabBody>
+      </WindowContent>
+    </ResponsiveWindowBase>
   );
 };
 

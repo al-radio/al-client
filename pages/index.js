@@ -10,14 +10,14 @@ import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VisibilityProvider } from "@/contexts/VisibilityContext";
 
-import AudioPlayer from "@/components/AudioPlayer";
-import SongHistory from "@/components/SongHistory";
-import NextSong from "@/components/NextSong";
-import ListenerCount from "@/components/ListenerCount";
-import SubmitSong from "@/components/SubmitSong";
-import TopBar from "@/components/TopBar";
+import AudioPlayer from "@/components/windows/AudioPlayer";
+import SongHistory from "@/components/windows/SongHistory";
+import NextSong from "@/components/windows/NextSong";
+import ListenerCount from "@/components/windows/ListenerCount";
+import SubmitSong from "@/components/windows/SubmitSong";
+import TopBar from "@/components/foundational/TopBar";
 import Account from "@/components/accounts/Account";
-import Customize from "@/components/Customize";
+import Customize from "@/components/windows/Customize";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}

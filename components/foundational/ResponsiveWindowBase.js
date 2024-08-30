@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useZIndex } from "@/contexts/ZIndexContext";
 import { useIsMobile } from "@/contexts/isMobileContext";
 import { useVisibility } from "@/contexts/VisibilityContext";
+import { Button, Window, WindowHeader } from "react95";
 
 // Style for mobile layout
 const MobileWindow = styled.div`
@@ -13,34 +14,43 @@ const MobileWindow = styled.div`
   }
 `;
 
-const getLocalStorageKey = (uniqueKey) =>
-  `responsiveLayoutPosition_${uniqueKey}`;
+const getLocalStorageKey = (windowId) => `responsiveLayoutPosition_${windowId}`;
 
-const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
+const ResponsiveWindowBase = ({
+  children,
+  windowId,
+  defaultPosition,
+  windowHeaderTitle,
+}) => {
   const [zIndex, setZIndex] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const { visibility } = useVisibility();
   const bringToFront = useZIndex();
   const isMobile = useIsMobile();
   const childRef = useRef(null);
+  const { toggleVisibility } = useVisibility();
+
+  const handleCloseButton = () => {
+    toggleVisibility(windowId);
+  };
 
   // Load saved position and size from local storage
   useEffect(() => {
-    const savedPosition = localStorage.getItem(getLocalStorageKey(uniqueKey));
+    const savedPosition = localStorage.getItem(getLocalStorageKey(windowId));
     if (savedPosition) {
       setPosition(JSON.parse(savedPosition));
     } else {
       setPosition(defaultPosition);
     }
-  }, [defaultPosition, uniqueKey]);
+  }, [defaultPosition, windowId]);
 
   // Save position and size to local storage
   useEffect(() => {
     localStorage.setItem(
-      getLocalStorageKey(uniqueKey),
+      getLocalStorageKey(windowId),
       JSON.stringify(position),
     );
-  }, [position, uniqueKey]);
+  }, [position, windowId]);
 
   // Handle bringing the window to the front
   const handleInteraction = () => {
@@ -96,7 +106,7 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
   }, [handleResize]);
 
   if (isMobile) {
-    return <MobileWindow>{visibility[uniqueKey] && children}</MobileWindow>;
+    return <MobileWindow>{visibility[windowId] && children}</MobileWindow>;
   }
 
   return (
@@ -122,10 +132,23 @@ const ResponsiveLayout = ({ children, uniqueKey, defaultPosition }) => {
       onMouseDown={handleInteraction}
     >
       <div style={{ width: "100%", height: "100%" }} ref={childRef}>
-        {visibility[uniqueKey] && children}
+        {visibility[windowId] && (
+          <Window>
+            <WindowHeader
+              className="window-header"
+              style={{ display: "flex", justifyContent: "space-between" }}
+            >
+              <span>{windowHeaderTitle}</span>
+              <Button onClick={handleCloseButton}>
+                <span className="close-icon" />
+              </Button>
+            </WindowHeader>
+            {children}
+          </Window>
+        )}
       </div>
     </Rnd>
   );
 };
 
-export default ResponsiveLayout;
+export default ResponsiveWindowBase;

@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  Window,
-  WindowHeader,
   WindowContent,
   Button,
   Avatar,
@@ -10,10 +8,9 @@ import {
   Hourglass,
   Anchor,
 } from "react95";
-import { API_URL, fetchCurrentSong } from "../services/api";
+import { API_URL, fetchCurrentSong } from "../../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
-import ResponsiveLayout from "./ResponsiveLayout";
-import { useVisibility } from "@/contexts/VisibilityContext";
+import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -23,6 +20,8 @@ const isIOSOrIPadOS = () => {
   }
 };
 
+const windowId = "audioPlayer";
+
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,11 +29,6 @@ const AudioPlayer = () => {
   const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
   const audioUrl = `${API_URL}/stream`;
   const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
-  const { toggleVisibility } = useVisibility();
-
-  const handleCloseButton = () => {
-    toggleVisibility("audioPlayer");
-  };
 
   // Forces stream to be live on play instead of playing from cache
   const handlePlay = useCallback(() => {
@@ -124,111 +118,101 @@ const AudioPlayer = () => {
   };
 
   return (
-    <ResponsiveLayout
-      uniqueKey="audioPlayer"
+    <ResponsiveWindowBase
+      windowId={windowId}
+      windowHeaderTitle="Now Playing"
       defaultPosition={{ x: 840, y: 400 }}
     >
-      <Window>
-        <WindowHeader
-          className="window-header"
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
-          <span>Now Playing</span>
-          <Button onClick={handleCloseButton}>
-            <span className="close-icon" />
-          </Button>
-        </WindowHeader>
-        <WindowContent
-          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+      <WindowContent
+        style={{ display: "flex", flexDirection: "column", height: "100%" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              width: "100%",
+              maxWidth: 400,
+              aspectRatio: "1", // Maintains 1:1 aspect ratio
             }}
           >
-            <div
+            <Avatar
+              square
+              src={currentSong?.artUrl}
               style={{
                 width: "100%",
-                maxWidth: 400,
-                aspectRatio: "1", // Maintains 1:1 aspect ratio
+                height: "auto", // Maintain aspect ratio
+                display: "block",
               }}
-            >
-              <Avatar
-                square
-                src={currentSong?.artUrl}
-                style={{
-                  width: "100%",
-                  height: "auto", // Maintain aspect ratio
-                  display: "block",
-                }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              marginTop: 16,
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              {currentSong?.title ? (
+                <>
+                  <h2>{currentSong.title}</h2>
+                  <p>{currentSong.artist}</p>
+                  <p>{currentSong.album}</p>
+                  <p>
+                    Requested by:{" "}
+                    {currentSong.userSubmittedId ? (
+                      <Anchor>{currentSong.userSubmittedId}</Anchor>
+                    ) : (
+                      "AL"
+                    )}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2>Not Playing</h2>
+                  <p>Not Playing</p>
+                  <p>Not Playing</p>
+                </>
+              )}
+            </div>
+            <div style={{ width: 150, marginLeft: 16 }}>
+              <Slider
+                min={0}
+                max={100}
+                defaultValue={75}
+                onChange={handleVolumeChange}
+                disabled={isIOSDevice}
               />
             </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                marginTop: 16,
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                {currentSong?.title ? (
-                  <>
-                    <h2>{currentSong.title}</h2>
-                    <p>{currentSong.artist}</p>
-                    <p>{currentSong.album}</p>
-                    <p>
-                      Requested by:{" "}
-                      {currentSong.userSubmittedId ? (
-                        <Anchor>{currentSong.userSubmittedId}</Anchor>
-                      ) : (
-                        "AL"
-                      )}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h2>Not Playing</h2>
-                    <p>Not Playing</p>
-                    <p>Not Playing</p>
-                  </>
-                )}
-              </div>
-              <div style={{ width: 150, marginLeft: 16 }}>
-                <Slider
-                  min={0}
-                  max={100}
-                  defaultValue={75}
-                  onChange={handleVolumeChange}
-                  disabled={isIOSDevice}
-                />
-              </div>
-            </div>
-            {isBuffering && <Hourglass size={32} />}
           </div>
-          <div style={{ flex: 1 }}></div>
-          <Toolbar style={{ display: "flex", padding: 8 }}>
-            <Button
-              onClick={handleTuneIn}
-              active={isPlaying}
-              disabled={isPlaying}
-              style={{ flex: 1, marginRight: 4 }}
-            >
-              Tune In
-            </Button>
-            <Button
-              onClick={handleTuneOut}
-              active={!isPlaying}
-              disabled={!isPlaying}
-              style={{ flex: 1, marginLeft: 4 }}
-            >
-              Tune Out
-            </Button>
-          </Toolbar>
-        </WindowContent>
-      </Window>
-    </ResponsiveLayout>
+          {isBuffering && <Hourglass size={32} />}
+        </div>
+        <div style={{ flex: 1 }}></div>
+        <Toolbar style={{ display: "flex", padding: 8 }}>
+          <Button
+            onClick={handleTuneIn}
+            active={isPlaying}
+            disabled={isPlaying}
+            style={{ flex: 1, marginRight: 4 }}
+          >
+            Tune In
+          </Button>
+          <Button
+            onClick={handleTuneOut}
+            active={!isPlaying}
+            disabled={!isPlaying}
+            style={{ flex: 1, marginLeft: 4 }}
+          >
+            Tune Out
+          </Button>
+        </Toolbar>
+      </WindowContent>
+    </ResponsiveWindowBase>
   );
 };
 

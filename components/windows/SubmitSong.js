@@ -1,15 +1,7 @@
 import { useState } from "react";
-import {
-  Button,
-  TextInput,
-  Window,
-  WindowHeader,
-  WindowContent,
-  Hourglass,
-} from "react95";
-import { submitSongRequest } from "../services/api";
-import ResponsiveLayout from "./ResponsiveLayout";
-import { useVisibility } from "@/contexts/VisibilityContext";
+import { Button, TextInput, WindowContent, Hourglass } from "react95";
+import { submitSongRequest } from "../../services/api";
+import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import styled from "styled-components";
 
 // style the notification message to use the same color as the theme
@@ -21,6 +13,8 @@ const NotificationMessage = styled.div`
   margin-top: 10px;
 `;
 
+const windowId = "submitSong";
+
 const SubmitSong = () => {
   const [query, setQuery] = useState("");
   const [trackId, setTrackId] = useState("");
@@ -28,11 +22,6 @@ const SubmitSong = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [notification, setNotification] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { toggleVisibility } = useVisibility();
-
-  const handleCloseButton = () => {
-    toggleVisibility("submitSong");
-  };
 
   const handleQueryChange = (e) => setQuery(e.target.value);
 
@@ -98,51 +87,41 @@ const SubmitSong = () => {
   };
 
   return (
-    <ResponsiveLayout
-      uniqueKey="submitSong"
+    <ResponsiveWindowBase
+      windowId={windowId}
+      windowHeaderTitle="Request Song"
       defaultPosition={{ x: 1200, y: 170 }}
     >
-      <Window>
-        <WindowHeader
-          className="window-header"
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
-          <span>Request Song</span>
-          <Button onClick={handleCloseButton}>
-            <span className="close-icon" />
+      <WindowContent>
+        <div style={{ display: "flex" }}>
+          <TextInput
+            value={query}
+            onChange={handleQueryChange}
+            placeholder="Search for a song..."
+            fullWidth
+          />
+          <Button onClick={handleSubmit} type="submit" disabled={isLoading}>
+            Request
           </Button>
-        </WindowHeader>
-        <WindowContent>
-          <div style={{ display: "flex" }}>
-            <TextInput
-              value={query}
-              onChange={handleQueryChange}
-              placeholder="Search for a song..."
-              fullWidth
-            />
-            <Button onClick={handleSubmit} type="submit" disabled={isLoading}>
-              Request
-            </Button>
+        </div>
+        {isLoading && (
+          <Hourglass size={25} style={{ marginTop: 10, marginLeft: 10 }} />
+        )}
+        {isConfirming && songMetadata && (
+          <div>
+            <h3>Confirm Song</h3>
+            <p>Title: {songMetadata.title}</p>
+            <p>Artist: {songMetadata.artist}</p>
+            <p>Album: {songMetadata.album}</p>
+            <Button onClick={() => handleConfirm()}>Confirm</Button>
+            <Button onClick={handleCancel}>Cancel</Button>
           </div>
-          {isLoading && (
-            <Hourglass size={25} style={{ marginTop: 10, marginLeft: 10 }} />
-          )}
-          {isConfirming && songMetadata && (
-            <div>
-              <h3>Confirm Song</h3>
-              <p>Title: {songMetadata.title}</p>
-              <p>Artist: {songMetadata.artist}</p>
-              <p>Album: {songMetadata.album}</p>
-              <Button onClick={() => handleConfirm()}>Confirm</Button>
-              <Button onClick={handleCancel}>Cancel</Button>
-            </div>
-          )}
-          {notification && (
-            <NotificationMessage>{notification}</NotificationMessage>
-          )}
-        </WindowContent>
-      </Window>
-    </ResponsiveLayout>
+        )}
+        {notification && (
+          <NotificationMessage>{notification}</NotificationMessage>
+        )}
+      </WindowContent>
+    </ResponsiveWindowBase>
   );
 };
 

@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  Window,
-  WindowHeader,
-  WindowContent,
-  Button,
-  Radio,
-  GroupBox,
-} from "react95";
-import ResponsiveLayout from "./ResponsiveLayout";
-import { useVisibility } from "@/contexts/VisibilityContext";
+import { WindowContent, Button, Radio, GroupBox } from "react95";
+import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import { useTheme } from "@/contexts/ThemeContext";
 
 import original from "react95/dist/themes/original";
@@ -35,14 +27,11 @@ const themeMap = {
   "Violet Dark": violetDark,
 };
 
+const windowId = "customize";
+
 const Customize = () => {
-  const { toggleVisibility } = useVisibility();
   const { toggleTheme } = useTheme();
   const [selectedTheme, setSelectedTheme] = useState("Vapor Teal");
-
-  const handleCloseButton = () => {
-    toggleVisibility("customize");
-  };
 
   const handleSetTheme = () => {
     const theme = themeMap[selectedTheme];
@@ -59,43 +48,33 @@ const Customize = () => {
   }, [toggleTheme]);
 
   return (
-    <ResponsiveLayout
-      uniqueKey="customize"
+    <ResponsiveWindowBase
+      windowId={windowId}
+      windowHeaderTitle="Customize"
       defaultPosition={{ x: 200, y: 600 }}
     >
-      <Window>
-        <WindowHeader
-          className="window-header"
-          style={{ display: "flex", justifyContent: "space-between" }}
+      <WindowContent>
+        <GroupBox label="Choose a Theme">
+          {Object.keys(themeMap).map((themeName) => (
+            <div key={themeName}>
+              <Radio
+                checked={selectedTheme === themeName}
+                onChange={() => setSelectedTheme(themeName)}
+                label={themeName}
+                name="themes"
+              />
+              <br />
+            </div>
+          ))}
+        </GroupBox>
+        <Button
+          onClick={handleSetTheme}
+          style={{ marginTop: "20px", width: "100%" }}
         >
-          <span>Customize</span>
-          <Button onClick={handleCloseButton}>
-            <span className="close-icon" />
-          </Button>
-        </WindowHeader>
-        <WindowContent>
-          <GroupBox label="Choose a Theme">
-            {Object.keys(themeMap).map((themeName) => (
-              <div key={themeName}>
-                <Radio
-                  checked={selectedTheme === themeName}
-                  onChange={() => setSelectedTheme(themeName)}
-                  label={themeName}
-                  name="themes"
-                />
-                <br />
-              </div>
-            ))}
-          </GroupBox>
-          <Button
-            onClick={handleSetTheme}
-            style={{ marginTop: "20px", width: "100%" }}
-          >
-            Set Theme
-          </Button>
-        </WindowContent>
-      </Window>
-    </ResponsiveLayout>
+          Set Theme
+        </Button>
+      </WindowContent>
+    </ResponsiveWindowBase>
   );
 };
 
