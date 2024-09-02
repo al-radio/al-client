@@ -105,8 +105,28 @@ const ResponsiveWindowBase = ({
     };
   }, [handleResize]);
 
+  // Common Content Component
+  const Content = (
+    <>
+      {visibility[windowId] && (
+        <Window>
+          <WindowHeader
+            className="window-header"
+            style={{ display: "flex", justifyContent: "space-between" }}
+          >
+            <span>{windowHeaderTitle}</span>
+            <Button onClick={handleCloseButton}>
+              <span className="close-icon" />
+            </Button>
+          </WindowHeader>
+          {children}
+        </Window>
+      )}
+    </>
+  );
+
   if (isMobile) {
-    return <MobileWindow>{visibility[windowId] && children}</MobileWindow>;
+    return <MobileWindow>{Content}</MobileWindow>;
   }
 
   return (
@@ -114,9 +134,7 @@ const ResponsiveWindowBase = ({
       bounds="parent"
       enableResizing={false}
       dragHandleClassName="window-header"
-      style={{
-        zIndex,
-      }}
+      style={{ zIndex }}
       position={{ x: position.x, y: position.y }}
       onDragStop={(e, data) => {
         setPosition({ x: data.x, y: data.y });
@@ -132,20 +150,7 @@ const ResponsiveWindowBase = ({
       onMouseDown={handleInteraction}
     >
       <div style={{ width: "100%", height: "100%" }} ref={childRef}>
-        {visibility[windowId] && (
-          <Window>
-            <WindowHeader
-              className="window-header"
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span>{windowHeaderTitle}</span>
-              <Button onClick={handleCloseButton}>
-                <span className="close-icon" />
-              </Button>
-            </WindowHeader>
-            {children}
-          </Window>
-        )}
+        {Content}
       </div>
     </Rnd>
   );
