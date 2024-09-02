@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createGlobalStyle } from "styled-components";
 import { styleReset } from "react95";
 import { ZIndexProvider } from "../contexts/ZIndexContext";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 import styled from "styled-components";
-import { ScrollView, Window } from "react95";
+import { ScrollView, Window, WindowHeader, WindowContent } from "react95";
 import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VisibilityProvider } from "@/contexts/VisibilityContext";
+import { fetchCurrentSong } from "@/services/api";
 
 import AudioPlayer from "@/components/windows/AudioPlayer";
 import SongHistory from "@/components/windows/SongHistory";
@@ -18,6 +19,7 @@ import SubmitSong from "@/components/windows/SubmitSong";
 import TopBar from "@/components/foundational/TopBar";
 import Account from "@/components/windows/Account";
 import Customize from "@/components/windows/Customize";
+import RadioOffline from "@/components/modals/RadioOffline";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -154,24 +156,47 @@ const TopBarContainer = styled.div`
 `;
 export default function Home() {
   const isMobile = useIsMobile();
+  const [isServerRunning, setIsServerRunning] = useState(true);
+
+  useEffect(() => {
+    const checkServer = async () => {
+      try {
+        await fetchCurrentSong();
+        setIsServerRunning(true);
+      } catch (error) {
+        setIsServerRunning(false);
+      }
+    };
+    checkServer();
+
+    const interval = setInterval(async () => {
+      checkServer();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const Content = () => (
     <>
-      <VisibilityProvider>
-        <TopBarContainer>
-          <TopBar />
-        </TopBarContainer>
-        <ContentContainer>
-          <RadioTitle>AL Radio</RadioTitle>
-          <Customize />
-          <ListenerCount />
-          <AudioPlayer />
-          <Account />
-          <NextSong />
-          <SubmitSong />
-          <SongHistory />
-        </ContentContainer>
-      </VisibilityProvider>
+      {!isServerRunning ? (
+        <RadioOffline />
+      ) : (
+        <VisibilityProvider>
+          <TopBarContainer>
+            <TopBar />
+          </TopBarContainer>
+          <ContentContainer>
+            <RadioTitle>AL Radio</RadioTitle>
+            <Customize />
+            <ListenerCount />
+            <AudioPlayer />
+            <Account />
+            <NextSong />
+            <SubmitSong />
+            <SongHistory />
+          </ContentContainer>
+        </VisibilityProvider>
+      )}
     </>
   );
 
