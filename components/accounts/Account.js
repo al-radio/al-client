@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Tab,
-  Window,
-  WindowHeader,
   WindowContent,
   Button,
   Hourglass,

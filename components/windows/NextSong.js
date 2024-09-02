@@ -3,6 +3,7 @@ import { WindowContent, Avatar, Anchor } from "react95";
 import styled from "styled-components";
 import { fetchNextSong } from "../../services/api";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
+import ProfileAnchor from "../foundational/ProfileAnchor";
 
 const StyledWindowContent = styled(WindowContent)`
   display: flex;
@@ -62,7 +63,7 @@ const NextSong = () => {
               <p>
                 Requested by:{" "}
                 {nextSong.userSubmittedId ? (
-                  <Anchor>{nextSong.userSubmittedId}</Anchor>
+                  <ProfileAnchor handle={nextSong.userSubmittedId} />
                 ) : (
                   "AL"
                 )}

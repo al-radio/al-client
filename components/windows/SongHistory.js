@@ -10,11 +10,11 @@ import {
   TableDataCell,
   Avatar,
   ScrollView,
-  Anchor,
 } from "react95";
 import { fetchSongHistory } from "../../services/api";
 import GetSong from "../modals/GetSong";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
+import ProfileAnchor from "../foundational/ProfileAnchor";
 
 const windowId = "songHistory";
 
@@ -101,11 +101,7 @@ const SongHistory = () => {
                   </TableDataCell>
                   <TableDataCell>
                     {song.userSubmittedId ? (
-                      <Anchor
-                        onClick={() => handleUserClick(song.userSubmittedId)}
-                      >
-                        {song.userSubmittedId}
-                      </Anchor>
+                      <ProfileAnchor handle={song.userSubmittedId} />
                     ) : (
                       "AL"
                     )}

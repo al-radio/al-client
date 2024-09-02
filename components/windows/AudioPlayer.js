@@ -11,6 +11,7 @@ import {
 import { API_URL, fetchCurrentSong } from "../../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
+import ProfileAnchor from "../foundational/ProfileAnchor";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -166,7 +167,7 @@ const AudioPlayer = () => {
                   <p>
                     Requested by:{" "}
                     {currentSong.userSubmittedId ? (
-                      <Anchor>{currentSong.userSubmittedId}</Anchor>
+                      <ProfileAnchor handle={currentSong.userSubmittedId} />
                     ) : (
                       "AL"
                     )}
