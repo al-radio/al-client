@@ -90,6 +90,16 @@ export const updateProfile = async (handle, profile) => {
   return response.json();
 };
 
+export const getHandleAndPictureFromToken = async () => {
+  const jwt = localStorage.getItem("token");
+  const response = await fetch(`${API_URL}/handle`, {
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
+  return response.json();
+};
+
 // Admin Queue Routes
 export const fetchQueue = async (type) => {
   const jwt = localStorage.getItem("token");

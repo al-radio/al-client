@@ -16,7 +16,7 @@ import NextSong from "@/components/windows/NextSong";
 import ListenerCount from "@/components/windows/ListenerCount";
 import SubmitSong from "@/components/windows/SubmitSong";
 import TopBar from "@/components/foundational/TopBar";
-import Account from "@/components/accounts/Account";
+import Account from "@/components/windows/Account";
 import Customize from "@/components/windows/Customize";
 
 const GlobalStyles = createGlobalStyle`

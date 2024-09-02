@@ -1,20 +1,8 @@
-import { useEffect, useState } from "react";
-import {
-  Window,
-  WindowContent,
-  Table,
-  TableHead,
-  TableHeadCell,
-  TableBody,
-  TableRow,
-  TableDataCell,
-  Avatar,
-  ScrollView,
-} from "react95";
+import React, { useEffect, useState } from "react";
+import { WindowContent, ScrollView } from "react95";
 import { fetchSongHistory } from "../../services/api";
-import GetSong from "../modals/GetSong";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
-import ProfileAnchor from "../foundational/ProfileAnchor";
+import SongHistoryTable from "../foundational/SongHistoryTable";
 
 const windowId = "songHistory";
 
@@ -30,8 +18,6 @@ const SongHistory = () => {
       },
     },
   ]);
-  const [selectedSong, setSelectedSong] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const getSongHistory = async () => {
@@ -48,21 +34,6 @@ const SongHistory = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleRowClick = (song) => {
-    setSelectedSong(song);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedSong(null);
-  };
-
-  const handleUserClick = (handle) => {
-    // todo
-    console.log(handle);
-  };
-
   return (
     <ResponsiveWindowBase
       windowId={windowId}
@@ -71,55 +42,18 @@ const SongHistory = () => {
     >
       <WindowContent>
         <ScrollView scrollable style={{ height: "400px" }}>
-          <Table style={{ maxWidth: "550px" }}>
-            <TableHead>
-              <TableHeadCell></TableHeadCell>
-              <TableHeadCell>Title</TableHeadCell>
-              <TableHeadCell>Artist</TableHeadCell>
-              <TableHeadCell>Album</TableHeadCell>
-              <TableHeadCell>Requested By</TableHeadCell>
-            </TableHead>
-            <TableBody>
-              {songHistory.map((song, index) => (
-                <TableRow key={index}>
-                  <TableDataCell onClick={() => handleRowClick(song)}>
-                    <Avatar
-                      square
-                      size={50}
-                      src={song.artUrl}
-                      style={{ marginTop: 10 }}
-                    />
-                  </TableDataCell>
-                  <TableDataCell onClick={() => handleRowClick(song)}>
-                    {song.title}
-                  </TableDataCell>
-                  <TableDataCell onClick={() => handleRowClick(song)}>
-                    {song.artist}
-                  </TableDataCell>
-                  <TableDataCell onClick={() => handleRowClick(song)}>
-                    {song.album}
-                  </TableDataCell>
-                  <TableDataCell>
-                    {song.userSubmittedId ? (
-                      <ProfileAnchor handle={song.userSubmittedId} />
-                    ) : (
-                      "AL"
-                    )}
-                  </TableDataCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <SongHistoryTable
+            songHistory={songHistory}
+            fields={{
+              title: true,
+              artist: true,
+              album: true,
+              userSubmittedId: true,
+              likes: true,
+            }}
+          />
         </ScrollView>
       </WindowContent>
-
-      {selectedSong && (
-        <GetSong
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          urlForPlatform={selectedSong.urlForPlatform}
-        />
-      )}
     </ResponsiveWindowBase>
   );
 };

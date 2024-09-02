@@ -19,8 +19,8 @@ import {
   submitQueueChanges,
 } from "../../services/api";
 import { useVisibility } from "@/contexts/VisibilityContext";
-import ProfilePage from "./ProfilePage";
-import HistoryPage from "./HistoryPage";
+import ProfilePage from "../accounts/ProfilePage";
+import HistoryPage from "../accounts/HistoryPage";
 import styled from "styled-components";
 
 // style the error message to use the same color as the theme
@@ -294,7 +294,7 @@ const Account = () => {
   return (
     <ResponsiveWindowBase
       windowId={windowId}
-      windowHeaderTitle="Account"
+      windowHeaderTitle={profile?.handle || "Account"}
       defaultPosition={{ x: 200, y: 200 }}
     >
       <WindowContent>
