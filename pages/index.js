@@ -10,6 +10,7 @@ import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VisibilityProvider } from "@/contexts/VisibilityContext";
 import { fetchCurrentSong } from "@/services/api";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import AudioPlayer from "@/components/windows/AudioPlayer";
 import SongHistory from "@/components/windows/SongHistory";
@@ -206,15 +207,17 @@ export default function Home() {
         <GlobalStyles />
         <IsMobileProvider>
           <ZIndexProvider>
-            {isMobile ? (
-              <Window>
-                <MobileScrollView>
-                  <Content />
-                </MobileScrollView>
-              </Window>
-            ) : (
-              <Content />
-            )}
+            <AuthProvider>
+              {isMobile ? (
+                <Window>
+                  <MobileScrollView>
+                    <Content />
+                  </MobileScrollView>
+                </Window>
+              ) : (
+                <Content />
+              )}
+            </AuthProvider>
           </ZIndexProvider>
         </IsMobileProvider>
       </ThemeProvider>

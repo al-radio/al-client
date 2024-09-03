@@ -6,6 +6,11 @@ export const fetchListenerCount = async () => {
   return response.json();
 };
 
+export const tuneOut = async (handle) => {
+  const response = await fetch(`${API_URL}/tuneout?handle=${handle}`);
+  return response.json();
+};
+
 // Song Routes
 export const fetchCurrentSong = async () => {
   const response = await fetch(`${API_URL}/song/current`);

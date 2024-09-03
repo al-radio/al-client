@@ -22,6 +22,7 @@ import { useVisibility } from "@/contexts/VisibilityContext";
 import ProfilePage from "../accounts/ProfilePage";
 import HistoryPage from "../accounts/HistoryPage";
 import styled from "styled-components";
+import { useAuth } from "@/contexts/AuthContext";
 
 // style the error message to use the same color as the theme
 const ErrorMessage = styled.div`
@@ -47,6 +48,7 @@ const Account = () => {
     email: "",
   });
   const { toggleVisibility } = useVisibility();
+  const { updateAuthState } = useAuth();
 
   const handleCloseButton = () => {
     toggleVisibility("account");
@@ -80,6 +82,10 @@ const Account = () => {
         localStorage.setItem("token", response.token);
         fetchProfile(response.token).then((profileData) => {
           setProfile(profileData);
+          updateAuthState({
+            handle: profileData.handle,
+            avatarUrl: profileData.avatarUrl,
+          });
         });
       })
       .catch(() => {
@@ -104,6 +110,10 @@ const Account = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    updateAuthState({
+      handle: "",
+      avatarUrl: "",
+    });
     setProfile(null);
     setError(null);
     setIsLoginView(true);
