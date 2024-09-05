@@ -1,5 +1,14 @@
 import React from "react";
 import { Avatar } from "react95";
+import styled from "styled-components";
+
+const Online = styled.div`
+  color: ${({ theme }) => theme.hoverBackground};
+`;
+
+const Offline = styled.div`
+  color: ${({ theme }) => theme.canvasTextDisabled};
+`;
 
 const ProfilePage = ({ profile }) => {
   if (!profile) return null;
@@ -14,20 +23,20 @@ const ProfilePage = ({ profile }) => {
         </div>
       </div>
 
+      {profile.isOnline ? (
+        <Online>Tuned in</Online>
+      ) : (
+        <Offline>
+          Tuned out since {new Date(profile.lastOnline).toLocaleString()}{" "}
+        </Offline>
+      )}
+
       <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
       {/* <p>Favourite Song: {profile.favouriteSong || "N/A"}</p> */}
 
-      {/* {profile.isOnline ? (
-        <p style={{ color: "green" }}>Online</p>
-      ) : (
-        <p style={{ color: "red" }}>
-          Last Online: {new Date(profile.lastOnline).toLocaleString()}
-        </p>
-      )} */}
-
       {/* {profile.location && <p>Location: {profile.location}</p>} */}
 
-      {/* <p>Songs Listened: {profile.numberOfSongsListened}</p> */}
+      <p>Listens: {profile.numberOfSongsListened}</p>
 
       {/* {profile.linkedServices && (
         <div>

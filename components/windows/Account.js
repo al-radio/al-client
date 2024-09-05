@@ -24,7 +24,6 @@ import HistoryPage from "../accounts/HistoryPage";
 import styled from "styled-components";
 import { useAuth } from "@/contexts/AuthContext";
 
-// style the error message to use the same color as the theme
 const ErrorMessage = styled.div`
   color: ${({ theme }) => theme.progress};
   max-width: 100%;

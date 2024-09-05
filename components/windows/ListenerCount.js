@@ -45,7 +45,7 @@ const ListenerCount = () => {
         <div style={{ width: "100%", marginTop: "10px" }}>
           <Marquee gradient={false} speed={80}>
             {listenerList.map((listener, index) => (
-              <span key={index} style={{ padding: "0 20px" }}>
+              <span key={index} style={{ padding: "0 10px" }}>
                 {listener}
               </span>
             ))}
