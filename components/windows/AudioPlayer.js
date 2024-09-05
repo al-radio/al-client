@@ -92,7 +92,7 @@ const AudioPlayer = () => {
         album: currentSong.album,
         artwork: [
           {
-            src: currentSong.artUrl,
+            src: currentSong.artUrl || "../../public/default-art.png",
             sizes: "100x100",
             type: "image/png",
           },
