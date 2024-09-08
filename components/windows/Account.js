@@ -17,6 +17,7 @@ import {
   fetchQueue,
   skipCurrentSong,
   submitQueueChanges,
+  logout,
 } from "../../services/api";
 import { useVisibility } from "@/contexts/VisibilityContext";
 import ProfilePage from "../accounts/ProfilePage";
@@ -54,21 +55,16 @@ const Account = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchProfile(token)
-        .then((profileData) => {
-          setProfile(profileData);
-        })
-        .catch(() => {
-          setProfile(null);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else {
-      setIsLoading(false);
-    }
+    fetchProfile()
+      .then((profileData) => {
+        setProfile(profileData);
+      })
+      .catch(() => {
+        setProfile(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const handleLogin = () => {
@@ -78,8 +74,8 @@ const Account = () => {
           setError(response.message);
           return;
         }
-        localStorage.setItem("token", response.token);
-        fetchProfile(response.token).then((profileData) => {
+        fetchProfile().then((profileData) => {
+          console.log("Logged in as:", profileData.handle);
           setProfile(profileData);
           updateAuthState({
             handle: profileData.handle,
@@ -87,8 +83,9 @@ const Account = () => {
           });
         });
       })
-      .catch(() => {
+      .catch((error) => {
         setError("An error occurred during login. Please try again.");
+        console.error(error);
       });
   };
 
@@ -108,7 +105,9 @@ const Account = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    logout().then(() => {
+      console.log("Logged out.");
+    });
     updateAuthState({
       handle: "",
       avatarUrl: "",
