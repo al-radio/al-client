@@ -25,18 +25,16 @@ const audioUrl = `${API_URL}/stream`;
 
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
   const [streamUrl, setStreamUrl] = useState(null);
-  const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
+  const { load, pause, setVolume, playing } = useGlobalAudioPlayer();
 
   // Forces stream to be live on play instead of playing from cache
   useEffect(() => {
     if (streamUrl) {
       setIsBuffering(true);
     }
-    console.log("Playing audio from:", streamUrl);
     load(streamUrl || "about:", {
       autoplay: true,
       html5: true,
@@ -46,14 +44,11 @@ const AudioPlayer = () => {
 
   const handleTuneIn = useCallback(() => {
     setStreamUrl(audioUrl + "?t=" + Date.now());
-    setIsPlaying(true);
   }, []);
 
   const handleTuneOut = useCallback(() => {
     pause();
     setStreamUrl(null);
-    setIsPlaying(false);
-    setIsBuffering(false);
   }, [pause]);
 
   useEffect(() => {
@@ -106,17 +101,10 @@ const AudioPlayer = () => {
 
   // Buffering effect when starting to play
   useEffect(() => {
-    if (isPlaying) {
-      const hasBuffered = () => {
-        if (getPosition() > 0) {
-          setIsBuffering(false);
-        }
-      };
-
-      const bufferCheck = setInterval(hasBuffered, 1000);
-      return () => clearInterval(bufferCheck);
+    if (playing) {
+      setIsBuffering(false);
     }
-  }, [isPlaying, getPosition]);
+  }, [playing]);
 
   const handleVolumeChange = (value) => {
     setVolume(value / 100);
@@ -201,16 +189,16 @@ const AudioPlayer = () => {
         <Toolbar style={{ display: "flex", padding: 8 }}>
           <Button
             onClick={handleTuneIn}
-            active={isPlaying}
-            disabled={isPlaying}
+            active={playing}
+            disabled={playing}
             style={{ flex: 1, marginRight: 4 }}
           >
             Tune In
           </Button>
           <Button
             onClick={handleTuneOut}
-            active={!isPlaying}
-            disabled={!isPlaying}
+            active={!playing}
+            disabled={!playing}
             style={{ flex: 1, marginLeft: 4 }}
           >
             Tune Out

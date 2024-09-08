@@ -25,9 +25,7 @@ const TopBar = () => {
   const [handle, setHandle] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  // when the authState changes, update the handle and avatarUrl
   useEffect(() => {
-    console.log("authState changed", authState);
     setHandle(authState.handle);
     setAvatarUrl(authState.avatarUrl);
   }, [authState]);
