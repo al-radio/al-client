@@ -47,12 +47,8 @@ const Account = () => {
     password: "",
     email: "",
   });
-  const { toggleVisibility } = useVisibility();
+  const { visibility } = useVisibility();
   const { updateAuthState } = useAuth();
-
-  const handleCloseButton = () => {
-    toggleVisibility("account");
-  };
 
   useEffect(() => {
     fetchProfile()
@@ -65,7 +61,7 @@ const Account = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [visibility.account]);
 
   const handleLogin = () => {
     login(formData.handle, formData.password)
