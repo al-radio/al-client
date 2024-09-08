@@ -17,19 +17,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchProfile(token)
-        .then((profileData) => {
-          updateAuthState({
-            handle: profileData.handle,
-            avatarUrl: profileData.avatarUrl,
-          });
-        })
-        .catch((error) => {
-          console.error("Failed to fetch profile:", error);
+    fetchProfile()
+      .then((profileData) => {
+        updateAuthState({
+          handle: profileData.handle,
+          avatarUrl: profileData.avatarUrl,
         });
-    }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch profile:", error);
+      });
   }, []);
 
   return (

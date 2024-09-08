@@ -11,8 +11,6 @@ import { API_URL, fetchCurrentSong } from "../../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfileAnchor from "../foundational/ProfileAnchor";
-import { useAuth } from "@/contexts/AuthContext";
-import { tuneOut } from "../../services/api";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -23,41 +21,40 @@ const isIOSOrIPadOS = () => {
 };
 
 const windowId = "audioPlayer";
-const uniqueStreamSessionId = `anon${Math.random().toString(36).substring(2, 20).padEnd(20, "0")}`;
+const audioUrl = `${API_URL}/stream`;
 
 const AudioPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
-  const { authState } = useAuth();
-  const audioUrl = `${API_URL}/stream`;
+  const [streamUrl, setStreamUrl] = useState(null);
   const { load, pause, setVolume, getPosition } = useGlobalAudioPlayer();
 
   // Forces stream to be live on play instead of playing from cache
-  const handlePlay = useCallback(() => {
-    setIsBuffering(true);
-    load(
-      `${audioUrl}?t=${new Date().getTime()}&handle=${authState.handle || uniqueStreamSessionId}`,
-      {
-        autoplay: true,
-        html5: true,
-        format: "mp3",
-      },
-    );
-  }, [load, audioUrl, authState.handle]);
+  useEffect(() => {
+    if (streamUrl) {
+      setIsBuffering(true);
+    }
+    console.log("Playing audio from:", streamUrl);
+    load(streamUrl || "about:", {
+      autoplay: true,
+      html5: true,
+      format: "mp3",
+    });
+  }, [load, streamUrl]);
 
   const handleTuneIn = useCallback(() => {
-    handlePlay();
+    setStreamUrl(audioUrl + "?t=" + Date.now());
     setIsPlaying(true);
-  }, [handlePlay]);
+  }, []);
 
   const handleTuneOut = useCallback(() => {
     pause();
+    setStreamUrl(null);
     setIsPlaying(false);
     setIsBuffering(false);
-    tuneOut(authState.handle || uniqueStreamSessionId);
-  }, [pause, authState.handle]);
+  }, [pause]);
 
   useEffect(() => {
     // detect iOS/iPadOS

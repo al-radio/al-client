@@ -6,11 +6,6 @@ export const fetchListenerCount = async () => {
   return response.json();
 };
 
-export const tuneOut = async (handle) => {
-  const response = await fetch(`${API_URL}/tuneout?handle=${handle}`);
-  return response.json();
-};
-
 // Song Routes
 export const fetchCurrentSong = async () => {
   const response = await fetch(`${API_URL}/song/current`);
@@ -32,14 +27,13 @@ export const fetchSongHistory = async (handle = null) => {
 };
 
 export const submitSongRequest = async (query) => {
-  const jwt = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/song/submit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({ query }),
+    credentials: "include",
   });
   return response.json();
 };
@@ -52,6 +46,7 @@ export const login = async (handle, password) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ handle, password }),
+    credentials: "include",
   });
   return response.json();
 };
@@ -67,12 +62,17 @@ export const register = async (email, handle, password) => {
   return response.json();
 };
 
-export const fetchProfile = async (handle) => {
-  const jwt = localStorage.getItem("token");
+export const logout = async () => {
+  const response = await fetch(`${API_URL}/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const fetchProfile = async () => {
   const response = await fetch(`${API_URL}/accounts`, {
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-    },
+    credentials: "include",
   });
   return response.json();
 };
@@ -89,23 +89,13 @@ export const updateProfile = async (handle, profile) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(profile),
-  });
-  return response.json();
-};
-
-export const getHandleAndPictureFromToken = async () => {
-  const jwt = localStorage.getItem("token");
-  const response = await fetch(`${API_URL}/handle`, {
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-    },
+    credentials: "include",
   });
   return response.json();
 };
 
 // Admin Queue Routes
 export const fetchQueue = async (type) => {
-  const jwt = localStorage.getItem("token");
   const urlMap = {
     user: `${API_URL}/admin/queue/user`,
     suggestion: `${API_URL}/admin/queue/suggestion`,
@@ -113,15 +103,12 @@ export const fetchQueue = async (type) => {
   };
 
   const response = await fetch(urlMap[type], {
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-    },
+    credentials: "include",
   });
   return response.json();
 };
 
 export const submitQueueChanges = async (queueType, queueData) => {
-  const jwt = localStorage.getItem("token");
   const urlMap = {
     user: `${API_URL}/admin/queue/user`,
     suggestion: `${API_URL}/admin/queue/suggestion`,
@@ -132,20 +119,17 @@ export const submitQueueChanges = async (queueType, queueData) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${jwt}`,
     },
     body: queueData,
+    credentials: "include",
   });
   return response.json();
 };
 
 export const skipCurrentSong = async () => {
-  const jwt = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/admin/skip`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-    },
+    credentials: "include",
   });
   return response.json();
 };
