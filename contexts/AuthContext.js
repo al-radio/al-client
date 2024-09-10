@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { fetchProfile } from "@/services/api";
+import { fetchProfile, API_URL } from "@/services/api";
 
 const AuthContext = createContext(null);
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       .then((profileData) => {
         updateAuthState({
           handle: profileData.handle,
-          avatarUrl: profileData.avatarUrl,
+          avatarUrl: profileData.avatarUrl || `${API_URL}/avatars/default.png`,
         });
       })
       .catch((error) => {

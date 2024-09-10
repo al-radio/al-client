@@ -1,3 +1,4 @@
+import { API_URL } from "@/services/api";
 import React from "react";
 import { Avatar } from "react95";
 import styled from "styled-components";
@@ -16,7 +17,10 @@ const ProfilePage = ({ profile }) => {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center" }}>
-        <Avatar size={50} src={profile.avatarUrl || "default-avatar.png"} />
+        <Avatar
+          size={50}
+          src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
+        />
         <div style={{ marginLeft: "10px" }}>
           <h2>{profile.handle}</h2>
           <p>{profile.bio}</p>
