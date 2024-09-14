@@ -94,6 +94,29 @@ export const updateProfile = async (handle, profile) => {
   return response.json();
 };
 
+// Authorized Services Routes
+export const authorizeSpotify = () => {
+  const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+  const redirectUri = `${API_URL}/auth/spotify/callback`;
+  const scopes = "playlist-modify-public playlist-modify-private";
+
+  window.location.href = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${encodeURIComponent(
+    scopes,
+  )}`;
+};
+
+export const addSongToSpotifyPlaylist = async (trackId) => {
+  const response = await fetch(`${API_URL}/auth/spotify/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ trackId }),
+    credentials: "include",
+  });
+  return response.json();
+};
+
 // Admin Queue Routes
 export const fetchQueue = async (type) => {
   const urlMap = {

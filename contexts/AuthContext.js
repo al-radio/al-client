@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     handle: "",
     avatarUrl: "",
+    linkedServices: {},
   });
 
   const updateAuthState = (newAuthState) => {
@@ -16,13 +17,28 @@ export const AuthProvider = ({ children }) => {
     }));
   };
 
+  const resetAuthState = () => {
+    setAuthState({
+      handle: "",
+      avatarUrl: "",
+      linkedServices: {},
+    });
+  };
+
+  const setAuthStateFromProfile = (profileData) => {
+    updateAuthState({
+      handle: profileData.handle,
+      avatarUrl: profileData.avatarUrl || `${API_URL}/avatars/default.png`,
+      linkedServices: {
+        spotify: profileData.spotifyUserId,
+      },
+    });
+  };
+
   useEffect(() => {
     fetchProfile()
       .then((profileData) => {
-        updateAuthState({
-          handle: profileData.handle,
-          avatarUrl: profileData.avatarUrl || `${API_URL}/avatars/default.png`,
-        });
+        setAuthStateFromProfile(profileData);
       })
       .catch((error) => {
         console.error("Failed to fetch profile:", error);
@@ -30,7 +46,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authState, updateAuthState }}>
+    <AuthContext.Provider
+      value={{
+        authState,
+        updateAuthState,
+        resetAuthState,
+        setAuthStateFromProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -48,7 +48,7 @@ const Account = () => {
     email: "",
   });
   const { visibility } = useVisibility();
-  const { updateAuthState } = useAuth();
+  const { setAuthStateFromProfile, resetAuthState } = useAuth();
 
   useEffect(() => {
     fetchProfile()
@@ -73,10 +73,7 @@ const Account = () => {
         fetchProfile().then((profileData) => {
           console.log("Logged in as:", profileData.handle);
           setProfile(profileData);
-          updateAuthState({
-            handle: profileData.handle,
-            avatarUrl: profileData.avatarUrl,
-          });
+          setAuthStateFromProfile(profileData);
         });
       })
       .catch((error) => {
@@ -104,10 +101,7 @@ const Account = () => {
     logout().then(() => {
       console.log("Logged out.");
     });
-    updateAuthState({
-      handle: "",
-      avatarUrl: "",
-    });
+    resetAuthState();
     setProfile(null);
     setError(null);
     setIsLoginView(true);

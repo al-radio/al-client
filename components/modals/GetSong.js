@@ -6,7 +6,19 @@ import {
   Radio,
   Button,
   GroupBox,
+  Hourglass,
 } from "react95";
+import { useAuth } from "@/contexts/AuthContext";
+import { addSongToSpotifyPlaylist } from "../../services/api";
+import styled from "styled-components";
+
+const NotificationMessage = styled.div`
+  color: ${({ theme }) => theme.progress};
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  margin-top: 10px;
+`;
 
 const platformDisplayNames = {
   spotify: "Spotify",
@@ -16,8 +28,11 @@ const platformDisplayNames = {
   amazonMusic: "Amazon Music",
 };
 
-const GetSong = ({ isOpen, onClose, urlForPlatform }) => {
+const GetSong = ({ isOpen, onClose, urlForPlatform, trackId }) => {
   const [activePlatform, setActivePlatform] = useState("spotify");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const { authState } = useAuth();
 
   if (!isOpen) return null;
 
@@ -26,7 +41,26 @@ const GetSong = ({ isOpen, onClose, urlForPlatform }) => {
   const handleOpen = () => {
     if (activePlatform) {
       window.open(urlForPlatform[activePlatform], "_blank");
-      onClose();
+    }
+    onClose();
+  };
+
+  const handleAddSong = async () => {
+    if (activePlatform && authState.linkedServices?.[activePlatform]) {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        const response = await addSongToSpotifyPlaylist(trackId);
+        console.log("Response from addSongToSpotifyPlaylist:", response);
+        setMessage(response.message);
+        setTimeout(onClose, 3000);
+      } catch (error) {
+        console.error("Error adding song to playlist:", error);
+        setMessage("Error adding song to playlist.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -76,10 +110,27 @@ const GetSong = ({ isOpen, onClose, urlForPlatform }) => {
                   </div>
                 ))}
               </GroupBox>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "10px",
+                }}
+              >
+                {loading && <Hourglass size={32} />}
+              </div>
+              {message && <NotificationMessage>{message}</NotificationMessage>}
               <div style={{ marginTop: "20px" }}>
-                <Button onClick={handleOpen} style={{ marginRight: "10px" }}>
-                  Open
+                <Button
+                  onClick={handleAddSong}
+                  disabled={
+                    !authState.linkedServices?.[activePlatform] || loading
+                  }
+                  active={loading}
+                >
+                  Add
                 </Button>
+                <Button onClick={handleOpen}>Open</Button>
                 <Button onClick={onClose}>Exit</Button>
               </div>
             </form>

@@ -1,7 +1,9 @@
-import { API_URL } from "@/services/api";
 import React from "react";
-import { Avatar } from "react95";
+import { Avatar, Button } from "react95";
 import styled from "styled-components";
+import { authorizeSpotify } from "../../services/api";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const Online = styled.div`
   color: ${({ theme }) => theme.hoverBackground};
@@ -14,52 +16,92 @@ const Offline = styled.div`
 const ProfilePage = ({ profile }) => {
   if (!profile) return null;
 
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <Avatar
-          size={50}
-          src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
-        />
-        <div style={{ marginLeft: "10px" }}>
-          <h2>{profile.handle}</h2>
-          <p>{profile.bio}</p>
+  const handleSpotifyAuth = () => {
+    // Trigger the authorization flow
+    authorizeSpotify();
+  };
+
+  const openSpotifyProfile = () => {
+    // Open the user's Spotify profile in a new tab
+    const spotifyProfileUrl = `https://open.spotify.com/user/${profile.spotifyUserId}`;
+    window.open(spotifyProfileUrl, "_blank", "noopener,noreferrer");
+  };
+
+  let content;
+
+  if (profile.isPrivate) {
+    // Render for private profiles
+    content = (
+      <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            size={50}
+            src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
+          />
+          <div style={{ marginLeft: "10px" }}>
+            <h2>{profile.handle}</h2>
+            <p>{profile.bio}</p>
+          </div>
         </div>
+
+        {profile.isOnline ? (
+          <Online>Tuned in</Online>
+        ) : (
+          <Offline>
+            Tuned out since {new Date(profile.lastOnline).toLocaleString()}
+          </Offline>
+        )}
+
+        <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
+        <p>Listens: {profile.numberOfSongsListened}</p>
+
+        {profile.spotifyUserId ? (
+          <>
+            <Button onClick={openSpotifyProfile}>
+              Spotify: {profile.spotifyUserId}
+            </Button>
+          </>
+        ) : (
+          <Button onClick={handleSpotifyAuth}>Connect Spotify</Button>
+        )}
       </div>
-
-      {profile.isOnline ? (
-        <Online>Tuned in</Online>
-      ) : (
-        <Offline>
-          Tuned out since {new Date(profile.lastOnline).toLocaleString()}{" "}
-        </Offline>
-      )}
-
-      <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
-      {/* <p>Favourite Song: {profile.favouriteSong || "N/A"}</p> */}
-
-      {/* {profile.location && <p>Location: {profile.location}</p>} */}
-
-      <p>Listens: {profile.numberOfSongsListened}</p>
-
-      {/* {profile.linkedServices && (
-        <div>
-          <h3>Linked Services:</h3>
-          <ul>
-            {Object.entries(profile.linkedServices).map(
-              ([service, url]) => (
-                <li key={service}>
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    {service}
-                  </a>
-                </li>
-              )
-            )}
-          </ul>
+    );
+  } else {
+    // Render for public profiles
+    content = (
+      <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            size={50}
+            src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
+          />
+          <div style={{ marginLeft: "10px" }}>
+            <h2>{profile.handle}</h2>
+            <p>{profile.bio}</p>
+          </div>
         </div>
-      )} */}
-    </div>
-  );
+
+        {profile.isOnline ? (
+          <Online>Tuned in</Online>
+        ) : (
+          <Offline>
+            Tuned out since {new Date(profile.lastOnline).toLocaleString()}
+          </Offline>
+        )}
+
+        <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
+        <p>Listens: {profile.numberOfSongsListened}</p>
+
+        {profile.spotifyUserId && (
+          <Button onClick={openSpotifyProfile}>
+            Spotify: {profile.spotifyUserId}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  return content;
 };
 
 export default ProfilePage;
