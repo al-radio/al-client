@@ -11,6 +11,7 @@ import { API_URL, fetchCurrentSong } from "../../services/api";
 import { useGlobalAudioPlayer } from "react-use-audio-player";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfileAnchor from "../foundational/ProfileAnchor";
+import GetSong from "../modals/GetSong";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -29,6 +30,7 @@ const AudioPlayer = () => {
   const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
   const [streamUrl, setStreamUrl] = useState(null);
   const { load, pause, setVolume, playing } = useGlobalAudioPlayer();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Forces stream to be live on play instead of playing from cache
   useEffect(() => {
@@ -110,6 +112,14 @@ const AudioPlayer = () => {
     setVolume(value / 100);
   };
 
+  const handleGetSongClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <ResponsiveWindowBase
       windowId={windowId}
@@ -148,6 +158,8 @@ const AudioPlayer = () => {
               display: "flex",
               flexDirection: "row",
               marginTop: 16,
+              width: "100%",
+              maxWidth: 600,
             }}
           >
             <div style={{ flex: 1 }}>
@@ -173,14 +185,23 @@ const AudioPlayer = () => {
                 </>
               )}
             </div>
-            <div style={{ width: 150, marginLeft: 16 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginLeft: 16,
+              }}
+            >
               <Slider
                 min={0}
                 max={100}
                 defaultValue={75}
                 onChange={handleVolumeChange}
                 disabled={isIOSDevice}
+                style={{ marginBottom: 8 }}
               />
+              <Button onClick={handleGetSongClick}>Get Song</Button>
             </div>
           </div>
           {isBuffering && <Hourglass size={32} />}
@@ -205,6 +226,15 @@ const AudioPlayer = () => {
           </Button>
         </Toolbar>
       </WindowContent>
+
+      {isModalOpen && (
+        <GetSong
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          urlForPlatform={currentSong?.urlForPlatform}
+          trackId={currentSong?.trackId}
+        />
+      )}
     </ResponsiveWindowBase>
   );
 };
