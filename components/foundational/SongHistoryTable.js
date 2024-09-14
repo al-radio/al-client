@@ -82,6 +82,7 @@ const SongHistoryTable = ({ songHistory, fields }) => {
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           urlForPlatform={selectedSong.urlForPlatform}
+          trackId={selectedSong.trackId}
         />
       )}
     </>

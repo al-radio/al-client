@@ -1,7 +1,9 @@
-import { API_URL } from "@/services/api";
 import React from "react";
-import { Avatar } from "react95";
+import { Avatar, Button } from "react95";
 import styled from "styled-components";
+import { authorizeSpotify } from "../../services/api";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const Online = styled.div`
   color: ${({ theme }) => theme.hoverBackground};
@@ -13,6 +15,17 @@ const Offline = styled.div`
 
 const ProfilePage = ({ profile }) => {
   if (!profile) return null;
+
+  const handleSpotifyAuth = () => {
+    // Trigger the authorization flow
+    authorizeSpotify();
+  };
+
+  const openSpotifyProfile = () => {
+    // Open the user's Spotify profile in a new tab
+    const spotifyProfileUrl = `https://open.spotify.com/user/${profile.spotifyUserId}`;
+    window.open(spotifyProfileUrl, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div>
@@ -36,28 +49,17 @@ const ProfilePage = ({ profile }) => {
       )}
 
       <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
-      {/* <p>Favourite Song: {profile.favouriteSong || "N/A"}</p> */}
-
-      {/* {profile.location && <p>Location: {profile.location}</p>} */}
-
       <p>Listens: {profile.numberOfSongsListened}</p>
 
-      {/* {profile.linkedServices && (
-        <div>
-          <h3>Linked Services:</h3>
-          <ul>
-            {Object.entries(profile.linkedServices).map(
-              ([service, url]) => (
-                <li key={service}>
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    {service}
-                  </a>
-                </li>
-              )
-            )}
-          </ul>
-        </div>
-      )} */}
+      {profile.spotifyUserId ? (
+        <>
+          <Button onClick={openSpotifyProfile}>
+            Spotify: {profile.spotifyUserId}
+          </Button>
+        </>
+      ) : (
+        <Button onClick={handleSpotifyAuth}>Connect Spotify</Button>
+      )}
     </div>
   );
 };

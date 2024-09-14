@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     handle: "",
     avatarUrl: "",
+    linkedServices: {},
   });
 
   const updateAuthState = (newAuthState) => {
@@ -22,6 +23,9 @@ export const AuthProvider = ({ children }) => {
         updateAuthState({
           handle: profileData.handle,
           avatarUrl: profileData.avatarUrl || `${API_URL}/avatars/default.png`,
+          linkedServices: {
+            spotify: profileData.spotifyUserId,
+          },
         });
       })
       .catch((error) => {
