@@ -201,7 +201,13 @@ const AudioPlayer = () => {
                 disabled={isIOSDevice}
                 style={{ marginBottom: 8 }}
               />
-              <Button onClick={handleGetSongClick}>Get Song</Button>
+              <Button
+                onClick={handleGetSongClick}
+                disabled={!currentSong}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                Get Song
+              </Button>
             </div>
           </div>
           {isBuffering && <Hourglass size={32} />}
@@ -212,7 +218,7 @@ const AudioPlayer = () => {
             onClick={handleTuneIn}
             active={playing}
             disabled={playing}
-            style={{ flex: 1, marginRight: 4 }}
+            style={{ flex: 1, marginRight: 4, whiteSpace: "nowrap" }}
           >
             Tune In
           </Button>
@@ -220,7 +226,7 @@ const AudioPlayer = () => {
             onClick={handleTuneOut}
             active={!playing}
             disabled={!playing}
-            style={{ flex: 1, marginLeft: 4 }}
+            style={{ flex: 1, marginLeft: 4, whiteSpace: "nowrap" }}
           >
             Tune Out
           </Button>
