@@ -5,7 +5,7 @@ The client for AL Radio.
 ## Setup Client
 
 - `npm i`
-- Populate `NEXT_PUBLIC_API_URL` in `.env.local` to the server API. Use `https://api.alradio.live` to use the production server.
+- Populate `NEXT_PUBLIC_API_URL` in `.env.local` to the local server API.
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3002
