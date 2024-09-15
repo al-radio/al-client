@@ -117,6 +117,15 @@ export const addSongToSpotifyPlaylist = async (trackId) => {
   return response.json();
 };
 
+export const authorizeLastFM = () => {
+  const apiKey = process.env.NEXT_PUBLIC_LASTFM_API_KEY;
+  const redirectUri = `${API_URL}/auth/lastfm/callback`;
+
+  window.location.href = `https://www.last.fm/api/auth/?api_key=${apiKey}&cb=${encodeURIComponent(
+    redirectUri,
+  )}`;
+};
+
 // Admin Queue Routes
 export const fetchQueue = async (type) => {
   const urlMap = {

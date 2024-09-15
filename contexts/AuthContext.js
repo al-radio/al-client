@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
       avatarUrl: profileData.avatarUrl || `${API_URL}/avatars/default.png`,
       linkedServices: {
         spotify: profileData.spotifyUserId,
+        lastFM: profileData.lastFMUsername,
       },
     });
   };

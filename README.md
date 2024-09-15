@@ -11,6 +11,7 @@ The client for AL Radio.
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3002
 NEXT_PUBLIC_SPOTIFY_CLIENT_ID=
+NEXT_PUBLIC_LASTFM_API_KEY=
 ```
 
 ## Run

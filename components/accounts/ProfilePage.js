@@ -1,7 +1,7 @@
 import React from "react";
-import { Avatar, Button } from "react95";
+import { Anchor, Avatar, Button } from "react95";
 import styled from "styled-components";
-import { authorizeSpotify } from "../../services/api";
+import { authorizeSpotify, authorizeLastFM } from "../../services/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -16,15 +16,14 @@ const Offline = styled.div`
 const ProfilePage = ({ profile }) => {
   if (!profile) return null;
 
-  const handleSpotifyAuth = () => {
-    // Trigger the authorization flow
-    authorizeSpotify();
-  };
-
   const openSpotifyProfile = () => {
-    // Open the user's Spotify profile in a new tab
     const spotifyProfileUrl = `https://open.spotify.com/user/${profile.spotifyUserId}`;
     window.open(spotifyProfileUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const openLastFMProfile = () => {
+    const lastFMProfileUrl = `https://www.last.fm/user/${profile.lastFMUsername}`;
+    window.open(lastFMProfileUrl, "_blank", "noopener,noreferrer");
   };
 
   let content;
@@ -57,12 +56,24 @@ const ProfilePage = ({ profile }) => {
 
         {profile.spotifyUserId ? (
           <>
-            <Button onClick={openSpotifyProfile}>
-              Spotify: {profile.spotifyUserId}
-            </Button>
+            Spotify:{" "}
+            <Anchor onClick={openSpotifyProfile}>
+              {profile.spotifyUserId}
+            </Anchor>
           </>
         ) : (
-          <Button onClick={handleSpotifyAuth}>Connect Spotify</Button>
+          <Button onClick={authorizeSpotify}>Connect Spotify</Button>
+        )}
+        <br />
+        {profile.lastFMUsername ? (
+          <>
+            LastFM:{" "}
+            <Anchor onClick={openLastFMProfile}>
+              {profile.lastFMUsername}
+            </Anchor>
+          </>
+        ) : (
+          <Button onClick={authorizeLastFM}>Connect LastFM</Button>
         )}
       </div>
     );
@@ -95,6 +106,12 @@ const ProfilePage = ({ profile }) => {
         {profile.spotifyUserId && (
           <Button onClick={openSpotifyProfile}>
             Spotify: {profile.spotifyUserId}
+          </Button>
+        )}
+
+        {profile.lastFMUsername && (
+          <Button onClick={openLastFMProfile}>
+            LastFM: {profile.lastFMUsername}
           </Button>
         )}
       </div>
