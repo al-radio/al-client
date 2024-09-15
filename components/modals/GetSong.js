@@ -52,7 +52,6 @@ const GetSong = ({ isOpen, onClose, urlForPlatform, trackId }) => {
 
       try {
         const response = await addSongToSpotifyPlaylist(trackId);
-        console.log("Response from addSongToSpotifyPlaylist:", response);
         setMessage(response.message);
         setTimeout(onClose, 3000);
       } catch (error) {
