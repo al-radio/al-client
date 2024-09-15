@@ -105,7 +105,7 @@ const ProfilePage = ({ profile }) => {
 
         {profile.spotifyUserId && (
           <Button onClick={openSpotifyProfile}>
-            Spotify: {profile.spotifyUserId}
+            Spotify: {profile.spotifyDisplayName || profile.spotifyUserId}
           </Button>
         )}
 
