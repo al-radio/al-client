@@ -104,15 +104,21 @@ const ProfilePage = ({ profile }) => {
         <p>Listens: {profile.numberOfSongsListened}</p>
 
         {profile.spotifyUserId && (
-          <Button onClick={openSpotifyProfile}>
-            Spotify: {profile.spotifyDisplayName || profile.spotifyUserId}
-          </Button>
+          <>
+            Spotify:{" "}
+            <Anchor onClick={openSpotifyProfile}>
+              {profile.spotifyDisplayName || profile.spotifyUserId}
+            </Anchor>
+          </>
         )}
-
+        <br />
         {profile.lastFMUsername && (
-          <Button onClick={openLastFMProfile}>
-            LastFM: {profile.lastFMUsername}
-          </Button>
+          <>
+            LastFM:{" "}
+            <Anchor onClick={openLastFMProfile}>
+              {profile.lastFMUsername}
+            </Anchor>
+          </>
         )}
       </div>
     );
