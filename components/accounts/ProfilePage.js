@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Button } from "react95";
+import { Anchor, Avatar, Button } from "react95";
 import styled from "styled-components";
 import { authorizeSpotify, authorizeLastFM } from "../../services/api";
 
@@ -56,18 +56,22 @@ const ProfilePage = ({ profile }) => {
 
         {profile.spotifyUserId ? (
           <>
-            <Button onClick={openSpotifyProfile}>
-              Spotify: {profile.spotifyUserId}
-            </Button>
+            Spotify:{" "}
+            <Anchor onClick={openSpotifyProfile}>
+              {profile.spotifyUserId}
+            </Anchor>
           </>
         ) : (
           <Button onClick={authorizeSpotify}>Connect Spotify</Button>
         )}
-
+        <br />
         {profile.lastFMUsername ? (
-          <Button onClick={openLastFMProfile}>
-            LastFM: {profile.lastFMUsername}
-          </Button>
+          <>
+            LastFM:{" "}
+            <Anchor onClick={openLastFMProfile}>
+              {profile.lastFMUsername}
+            </Anchor>
+          </>
         ) : (
           <Button onClick={authorizeLastFM}>Connect LastFM</Button>
         )}
