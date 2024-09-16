@@ -1,5 +1,10 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+// Server Status
+export const fetchServerStatus = async () => {
+  await fetch(`${API_URL}/status`);
+};
+
 // Stream Routes
 export const fetchListenerCount = () => {
   return new EventSource(`${API_URL}/listeners`);

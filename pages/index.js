@@ -5,11 +5,11 @@ import { ZIndexProvider } from "../contexts/ZIndexContext";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 import styled from "styled-components";
-import { ScrollView, Window, WindowHeader, WindowContent } from "react95";
+import { ScrollView, Window } from "react95";
 import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VisibilityProvider } from "@/contexts/VisibilityContext";
-import { fetchCurrentSong } from "@/services/api";
+import { fetchServerStatus } from "@/services/api";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 import AudioPlayer from "@/components/windows/AudioPlayer";
@@ -162,9 +162,10 @@ export default function Home() {
   useEffect(() => {
     const checkServer = async () => {
       try {
-        // await fetchCurrentSong();
+        await fetchServerStatus();
         setIsServerRunning(true);
       } catch (error) {
+        console.log(error);
         setIsServerRunning(false);
       }
     };
