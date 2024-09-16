@@ -11,19 +11,18 @@ const ListenerCount = () => {
   const [listenerList, setListenerList] = useState([]);
 
   useEffect(() => {
-    const getListenerCount = async () => {
-      try {
-        const listeners = await fetchListenerCount();
-        setListenerCount(listeners.count.total);
-        setListenerList(listeners.list);
-      } catch (error) {
-        console.error("Error fetching listener count:", error);
-      }
+    const listenersEventSource = fetchListenerCount();
+    console.log(listenersEventSource);
+    listenersEventSource.onmessage = (event) => {
+      const listeners = JSON.parse(event.data);
+      console.log("listeners:", listeners);
+      setListenerCount(listeners.count.total);
+      setListenerList(listeners.list);
     };
 
-    getListenerCount();
-    const intervalId = setInterval(getListenerCount, 10000);
-    return () => clearInterval(intervalId);
+    return () => {
+      listenersEventSource.close();
+    };
   }, []);
 
   return (

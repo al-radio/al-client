@@ -1,9 +1,8 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 // Stream Routes
-export const fetchListenerCount = async () => {
-  const response = await fetch(`${API_URL}/listeners`);
-  return response.json();
+export const fetchListenerCount = () => {
+  return new EventSource(`${API_URL}/listeners`);
 };
 
 // Song Routes
