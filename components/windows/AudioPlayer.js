@@ -61,7 +61,6 @@ const AudioPlayer = () => {
   // Fetch current song every 10 seconds
   useEffect(() => {
     const currentSongEventSource = fetchCurrentSong();
-    console.log(currentSongEventSource);
     currentSongEventSource.onmessage = (event) => {
       const songData = JSON.parse(event.data);
       if (!currentSong || songData.title !== currentSong.title) {

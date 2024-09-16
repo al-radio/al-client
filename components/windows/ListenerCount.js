@@ -12,10 +12,8 @@ const ListenerCount = () => {
 
   useEffect(() => {
     const listenersEventSource = fetchListenerCount();
-    console.log(listenersEventSource);
     listenersEventSource.onmessage = (event) => {
       const listeners = JSON.parse(event.data);
-      console.log("listeners:", listeners);
       setListenerCount(listeners.count.total);
       setListenerList(listeners.list);
     };
