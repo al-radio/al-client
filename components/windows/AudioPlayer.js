@@ -12,6 +12,7 @@ import { useGlobalAudioPlayer } from "react-use-audio-player";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfileAnchor from "../foundational/ProfileAnchor";
 import GetSong from "../modals/GetSong";
+import PausingMarquee from "../foundational/PausingMarqee";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -162,9 +163,11 @@ const AudioPlayer = () => {
             <div style={{ flex: 1 }}>
               {currentSong?.title ? (
                 <>
-                  <h2>{currentSong.title}</h2>
-                  <p>{currentSong.artist}</p>
-                  <p>{currentSong.album}</p>
+                  <PausingMarquee text={currentSong.title} sizeLimit={30} />
+                  <br />
+                  <PausingMarquee text={currentSong.artist} sizeLimit={30} />
+                  <br />
+                  <PausingMarquee text={currentSong.album} sizeLimit={30} />
                   <p>
                     Requested by:{" "}
                     {currentSong.userSubmittedId ? (

@@ -35,9 +35,7 @@ const SongHistoryTable = ({ songHistory, fields }) => {
             {fields.title && <TableHeadCell>Title</TableHeadCell>}
             {fields.artist && <TableHeadCell>Artist</TableHeadCell>}
             {fields.album && <TableHeadCell>Album</TableHeadCell>}
-            {fields.userSubmittedId && (
-              <TableHeadCell>Requested By</TableHeadCell>
-            )}
+            {fields.userSubmittedId && <TableHeadCell>Requested</TableHeadCell>}
             {fields.datePlayed && <TableHeadCell>Time Played</TableHeadCell>}
             {fields.likes && <TableHeadCell>Likes</TableHeadCell>}
           </TableRow>
@@ -81,7 +79,15 @@ const SongHistoryTable = ({ songHistory, fields }) => {
               )}
               {fields.datePlayed && (
                 <TableDataCell>
-                  {new Date(song.datePlayed).toLocaleString()} EST
+                  <PausingMarquee
+                    text={
+                      new Date(song.datePlayed).toDateString() +
+                      ", " +
+                      new Date(song.datePlayed).toLocaleTimeString() +
+                      " EST"
+                    }
+                    sizeLimit={15}
+                  />
                 </TableDataCell>
               )}
               {fields.likes && <TableDataCell>{song.likes}</TableDataCell>}

@@ -42,7 +42,7 @@ const SongHistory = () => {
       defaultPosition={{ x: 1500, y: 550 }}
     >
       <WindowContent>
-        <ScrollView scrollable style={{ height: "400px" }}>
+        <ScrollView scrollable style={{ height: "400px", maxWidth: "95vw" }}>
           <SongHistoryTable
             songHistory={songHistory}
             fields={{

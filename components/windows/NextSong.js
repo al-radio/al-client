@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { fetchNextSong } from "../../services/api";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfileAnchor from "../foundational/ProfileAnchor";
+import PausingMarquee from "../foundational/PausingMarqee";
 
 const StyledWindowContent = styled(WindowContent)`
   display: flex;
@@ -56,9 +57,11 @@ const NextSong = () => {
           <>
             <StyledAvatar square src={nextSong.artUrl} />
             <SongDetails>
-              <h2>{nextSong.title}</h2>
-              <p>{nextSong.artist}</p>
-              <p>{nextSong.album}</p>
+              <PausingMarquee text={nextSong.title} sizeLimit={30} />
+              <br />
+              <PausingMarquee text={nextSong.artist} sizeLimit={30} />
+              <br />
+              <PausingMarquee text={nextSong.album} sizeLimit={30} />
               <p>
                 Requested by:{" "}
                 {nextSong.userSubmittedId ? (
