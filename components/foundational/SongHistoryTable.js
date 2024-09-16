@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,6 +10,7 @@ import {
 } from "react95";
 import ProfileAnchor from "./ProfileAnchor";
 import GetSong from "../modals/GetSong";
+import PausingMarquee from "./PausingMarqee";
 
 const SongHistoryTable = ({ songHistory, fields }) => {
   const [selectedSong, setSelectedSong] = useState(null);
@@ -52,9 +53,21 @@ const SongHistoryTable = ({ songHistory, fields }) => {
                   style={{ marginTop: 10 }}
                 />
               </TableDataCell>
-              {fields.title && <TableDataCell>{song.title}</TableDataCell>}
-              {fields.artist && <TableDataCell>{song.artist}</TableDataCell>}
-              {fields.album && <TableDataCell>{song.album}</TableDataCell>}
+              {fields.title && (
+                <TableDataCell>
+                  <PausingMarquee text={song.title} />
+                </TableDataCell>
+              )}
+              {fields.artist && (
+                <TableDataCell>
+                  <PausingMarquee text={song.artist} />
+                </TableDataCell>
+              )}
+              {fields.album && (
+                <TableDataCell>
+                  <PausingMarquee text={song.album} />
+                </TableDataCell>
+              )}
               {fields.userSubmittedId && (
                 <TableDataCell
                   onClick={(e) => e.stopPropagation()} // Prevents row click when clicking on ProfileAnchor
