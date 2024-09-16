@@ -7,23 +7,21 @@ export const fetchListenerCount = async () => {
 };
 
 // Song Routes
-export const fetchCurrentSong = async () => {
-  const response = await fetch(`${API_URL}/song/current`);
+export const fetchCurrentSong = () => {
+  return new EventSource(`${API_URL}/song/current`);
+};
+
+export const fetchNextSong = () => {
+  return new EventSource(`${API_URL}/song/next`);
+};
+
+export const fetchUserSongHistory = async (handle) => {
+  const response = await fetch(`${API_URL}/accounts/${handle}/history`);
   return response.json();
 };
 
-export const fetchNextSong = async () => {
-  const response = await fetch(`${API_URL}/song/next`);
-  return response.json();
-};
-
-export const fetchSongHistory = async (handle = null) => {
-  if (handle) {
-    const response = await fetch(`${API_URL}/accounts/${handle}/history`);
-    return response.json();
-  }
-  const response = await fetch(`${API_URL}/song/history`);
-  return response.json();
+export const fetchGlobalSongHistory = () => {
+  return new EventSource(`${API_URL}/song/history`);
 };
 
 export const submitSongRequest = async (query) => {

@@ -60,20 +60,18 @@ const AudioPlayer = () => {
 
   // Fetch current song every 10 seconds
   useEffect(() => {
-    const getCurrentSong = async () => {
-      try {
-        const songData = await fetchCurrentSong();
-        if (songData.title !== currentSong?.title) {
-          setCurrentSong(songData);
-        }
-      } catch (error) {
-        console.error("Error fetching current song:", error);
+    const currentSongEventSource = fetchCurrentSong();
+    console.log(currentSongEventSource);
+    currentSongEventSource.onmessage = (event) => {
+      const songData = JSON.parse(event.data);
+      if (!currentSong || songData.title !== currentSong.title) {
+        setCurrentSong(songData);
       }
     };
 
-    getCurrentSong();
-    const intervalId = setInterval(getCurrentSong, 10000);
-    return () => clearInterval(intervalId);
+    return () => {
+      currentSongEventSource.close();
+    };
   }, [currentSong]);
 
   // Update media session metadata when current song changes

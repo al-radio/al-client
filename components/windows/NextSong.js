@@ -32,19 +32,18 @@ const NextSong = () => {
   const [nextSong, setNextSong] = useState(null);
 
   useEffect(() => {
-    const getNextSong = async () => {
-      try {
-        const songData = await fetchNextSong();
+    const nextSongEventSource = fetchNextSong();
+    nextSongEventSource.onmessage = (event) => {
+      const songData = JSON.parse(event.data);
+      if (songData.title !== nextSong?.title) {
         setNextSong(songData);
-      } catch (error) {
-        console.error("Error fetching next song:", error);
       }
     };
 
-    getNextSong();
-    const intervalId = setInterval(getNextSong, 10000);
-    return () => clearInterval(intervalId);
-  }, []);
+    return () => {
+      nextSongEventSource.close();
+    };
+  }, [nextSong]);
 
   return (
     <ResponsiveWindowBase

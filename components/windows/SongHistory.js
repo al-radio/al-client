@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { WindowContent, ScrollView } from "react95";
-import { fetchSongHistory } from "../../services/api";
+import {
+  fetchGlobalSongHistory,
+  fetchUserSongHistory,
+} from "../../services/api";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import SongHistoryTable from "../foundational/SongHistoryTable";
 
@@ -20,18 +23,16 @@ const SongHistory = () => {
   ]);
 
   useEffect(() => {
-    const getSongHistory = async () => {
-      try {
-        const historyData = await fetchSongHistory();
-        setSongHistory(historyData);
-      } catch (error) {
-        console.error("Error fetching song history:", error);
-      }
+    const songHistoryEventSource = fetchGlobalSongHistory();
+    console.log;
+    songHistoryEventSource.onmessage = (event) => {
+      const historyData = JSON.parse(event.data);
+      setSongHistory(historyData);
     };
 
-    getSongHistory();
-    const intervalId = setInterval(getSongHistory, 10000);
-    return () => clearInterval(intervalId);
+    return () => {
+      songHistoryEventSource.close();
+    };
   }, []);
 
   return (

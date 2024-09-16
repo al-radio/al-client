@@ -162,7 +162,7 @@ export default function Home() {
   useEffect(() => {
     const checkServer = async () => {
       try {
-        await fetchCurrentSong();
+        // await fetchCurrentSong();
         setIsServerRunning(true);
       } catch (error) {
         setIsServerRunning(false);

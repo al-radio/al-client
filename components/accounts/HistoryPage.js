@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ScrollView } from "react95";
-import { fetchSongHistory } from "@/services/api";
+import { fetchUserSongHistory } from "@/services/api";
 import SongHistoryTable from "../foundational/SongHistoryTable";
 
 const HistoryPage = ({ handle }) => {
@@ -17,7 +17,7 @@ const HistoryPage = ({ handle }) => {
   ]);
 
   useEffect(() => {
-    fetchSongHistory(handle).then((historyData) => {
+    fetchUserSongHistory(handle).then((historyData) => {
       setSongHistory(historyData);
     });
   }, [handle]);
