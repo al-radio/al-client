@@ -203,7 +203,7 @@ const AudioPlayer = () => {
               />
               <Button
                 onClick={handleGetSongClick}
-                disabled={!currentSong}
+                disabled={!currentSong?.title}
                 style={{ whiteSpace: "nowrap" }}
               >
                 Get Song
