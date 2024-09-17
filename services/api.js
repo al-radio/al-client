@@ -24,8 +24,8 @@ export const fetchUserSongHistory = async (handle) => {
   return response.json();
 };
 
-export const fetchGlobalSongHistory = () => {
-  return new EventSource(`${API_URL}/song/history`);
+export const fetchGlobalSongHistory = (page) => {
+  return new EventSource(`${API_URL}/song/history/${page}`);
 };
 
 export const submitSongRequest = async (query) => {
