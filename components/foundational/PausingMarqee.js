@@ -5,7 +5,13 @@ const PausingMarquee = ({ text, sizeLimit = 20 }) => {
   const [isMoving, setIsMoving] = useState(true);
 
   if (!text) return null;
-  if (text.length <= sizeLimit) return text;
+  if (text.length <= sizeLimit)
+    return (
+      <>
+        {text}
+        <br />
+      </>
+    );
   const paddedText = `${text}${"\u00A0".repeat(sizeLimit)}`;
 
   // Stop on cycle finish, then resume

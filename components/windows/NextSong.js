@@ -58,9 +58,7 @@ const NextSong = () => {
             <StyledAvatar square src={nextSong.artUrl} />
             <SongDetails>
               <PausingMarquee text={nextSong.title} sizeLimit={30} />
-              <br />
               <PausingMarquee text={nextSong.artist} sizeLimit={30} />
-              <br />
               <PausingMarquee text={nextSong.album} sizeLimit={30} />
               <p>
                 Requested by:{" "}

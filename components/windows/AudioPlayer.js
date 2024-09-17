@@ -164,9 +164,7 @@ const AudioPlayer = () => {
               {currentSong?.title ? (
                 <>
                   <PausingMarquee text={currentSong.title} sizeLimit={30} />
-                  <br />
                   <PausingMarquee text={currentSong.artist} sizeLimit={30} />
-                  <br />
                   <PausingMarquee text={currentSong.album} sizeLimit={30} />
                   <p>
                     Requested by:{" "}
