@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { WindowContent, ScrollView, Button as React95Button } from "react95";
 import styled from "styled-components";
-import { fetchGlobalSongHistory } from "../../services/api";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import SongHistoryTable from "../foundational/SongHistoryTable";
+import { useLiveData } from "@/contexts/LiveDataContext";
 
 // Styled Components
 const ButtonContainer = styled.div`
@@ -21,33 +21,20 @@ const Button = styled(React95Button)`
 const windowId = "songHistory";
 
 const SongHistory = () => {
-  const [songHistory, setSongHistory] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLastPage, setIsLastPage] = useState(false);
-
-  useEffect(() => {
-    const songHistoryEventSource = fetchGlobalSongHistory(currentPage);
-
-    songHistoryEventSource.onmessage = (event) => {
-      const { tracks, isLastPage } = JSON.parse(event.data);
-      setSongHistory(tracks);
-      setIsLastPage(isLastPage);
-    };
-
-    return () => {
-      songHistoryEventSource.close();
-    };
-  }, [currentPage]);
+  const { liveData, setHistoryPage } = useLiveData();
+  const { songHistory, currentPage, isLastPage } = liveData;
 
   const handleNextPage = () => {
     if (!isLastPage) {
-      setCurrentPage((prevPage) => prevPage + 1);
+      const nextPage = currentPage + 1;
+      setHistoryPage(nextPage);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+      const nextPage = Math.max(currentPage - 1, 1);
+      setHistoryPage(nextPage);
     }
   };
 

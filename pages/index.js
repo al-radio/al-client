@@ -21,6 +21,7 @@ import TopBar from "@/components/foundational/TopBar";
 import Account from "@/components/windows/Account";
 import Customize from "@/components/windows/Customize";
 import RadioOffline from "@/components/modals/RadioOffline";
+import { LiveDataProvider } from "@/contexts/LiveDataContext";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -209,15 +210,17 @@ export default function Home() {
         <IsMobileProvider>
           <ZIndexProvider>
             <AuthProvider>
-              {isMobile ? (
-                <Window>
-                  <MobileScrollView>
-                    <Content />
-                  </MobileScrollView>
-                </Window>
-              ) : (
-                <Content />
-              )}
+              <LiveDataProvider>
+                {isMobile ? (
+                  <Window>
+                    <MobileScrollView>
+                      <Content />
+                    </MobileScrollView>
+                  </Window>
+                ) : (
+                  <Content />
+                )}
+              </LiveDataProvider>
             </AuthProvider>
           </ZIndexProvider>
         </IsMobileProvider>

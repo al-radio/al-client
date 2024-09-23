@@ -6,26 +6,19 @@ export const fetchServerStatus = async () => {
 };
 
 // Stream Routes
-export const fetchListenerCount = () => {
-  return new EventSource(`${API_URL}/listeners`);
+export const fetchLiveData = () => {
+  return new EventSource(`${API_URL}/data`);
 };
 
 // Song Routes
-export const fetchCurrentSong = () => {
-  return new EventSource(`${API_URL}/song/current`);
-};
-
-export const fetchNextSong = () => {
-  return new EventSource(`${API_URL}/song/next`);
-};
-
 export const fetchUserSongHistory = async (handle) => {
   const response = await fetch(`${API_URL}/accounts/${handle}/history`);
   return response.json();
 };
 
-export const fetchGlobalSongHistory = (page) => {
-  return new EventSource(`${API_URL}/song/history/${page}`);
+export const fetchGlobalSongHistory = async (page) => {
+  const response = await fetch(`${API_URL}/history/${page}`);
+  return response.json();
 };
 
 export const submitSongRequest = async (query) => {

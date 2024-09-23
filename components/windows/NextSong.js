@@ -5,6 +5,7 @@ import { fetchNextSong } from "../../services/api";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfileAnchor from "../foundational/ProfileAnchor";
 import PausingMarquee from "../foundational/PausingMarqee";
+import { useLiveData } from "@/contexts/LiveDataContext";
 
 const StyledWindowContent = styled(WindowContent)`
   display: flex;
@@ -30,21 +31,8 @@ const SongDetails = styled.div`
 const windowId = "nextSong";
 
 const NextSong = () => {
-  const [nextSong, setNextSong] = useState(null);
-
-  useEffect(() => {
-    const nextSongEventSource = fetchNextSong();
-    nextSongEventSource.onmessage = (event) => {
-      const songData = JSON.parse(event.data);
-      if (songData.title !== nextSong?.title) {
-        setNextSong(songData);
-      }
-    };
-
-    return () => {
-      nextSongEventSource.close();
-    };
-  }, [nextSong]);
+  const { liveData } = useLiveData();
+  const { nextSong } = liveData;
 
   return (
     <ResponsiveWindowBase

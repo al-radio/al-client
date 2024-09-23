@@ -13,6 +13,7 @@ import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfileAnchor from "../foundational/ProfileAnchor";
 import GetSong from "../modals/GetSong";
 import PausingMarquee from "../foundational/PausingMarqee";
+import { useLiveData } from "@/contexts/LiveDataContext";
 
 // Function to detect iOS or iPadOS
 const isIOSOrIPadOS = () => {
@@ -26,7 +27,7 @@ const windowId = "audioPlayer";
 const audioUrl = `${API_URL}/stream`;
 
 const AudioPlayer = () => {
-  const [currentSong, setCurrentSong] = useState(null);
+  const { currentSong } = useLiveData().liveData;
   const [isBuffering, setIsBuffering] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(isIOSOrIPadOS());
   const [streamUrl, setStreamUrl] = useState(null);
@@ -58,21 +59,6 @@ const AudioPlayer = () => {
     // detect iOS/iPadOS
     setIsIOSDevice(isIOSOrIPadOS());
   }, []);
-
-  // Fetch current song every 10 seconds
-  useEffect(() => {
-    const currentSongEventSource = fetchCurrentSong();
-    currentSongEventSource.onmessage = (event) => {
-      const songData = JSON.parse(event.data);
-      if (!currentSong || songData.title !== currentSong.title) {
-        setCurrentSong(songData);
-      }
-    };
-
-    return () => {
-      currentSongEventSource.close();
-    };
-  }, [currentSong]);
 
   // Update media session metadata when current song changes
   useEffect(() => {

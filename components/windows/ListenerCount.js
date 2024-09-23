@@ -1,27 +1,13 @@
-import { useEffect, useState } from "react";
-import { fetchListenerCount } from "../../services/api";
 import { WindowContent, Counter } from "react95";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import Marquee from "react-fast-marquee";
+import { useLiveData } from "@/contexts/LiveDataContext";
 
 const windowId = "listeners";
 
 const ListenerCount = () => {
-  const [listenerCount, setListenerCount] = useState(0);
-  const [listenerList, setListenerList] = useState([]);
-
-  useEffect(() => {
-    const listenersEventSource = fetchListenerCount();
-    listenersEventSource.onmessage = (event) => {
-      const listeners = JSON.parse(event.data);
-      setListenerCount(listeners.count.total);
-      setListenerList(listeners.list);
-    };
-
-    return () => {
-      listenersEventSource.close();
-    };
-  }, []);
+  const { liveData } = useLiveData();
+  const { listenerCount, listenerList } = liveData;
 
   return (
     <ResponsiveWindowBase
