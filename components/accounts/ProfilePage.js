@@ -1,7 +1,12 @@
 import React from "react";
 import { Anchor, Avatar, Button } from "react95";
 import styled from "styled-components";
-import { authorizeSpotify, authorizeLastFM } from "../../services/api";
+import {
+  authorizeSpotify,
+  authorizeLastFM,
+  authorizeAppleMusic,
+} from "../../services/api";
+import { useMusicKit } from "@/contexts/MusicKitContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,7 +19,7 @@ const Offline = styled.div`
 `;
 
 const ProfilePage = ({ profile }) => {
-  if (!profile) return null;
+  const musicKitInstance = useMusicKit();
 
   const openSpotifyProfile = () => {
     const spotifyProfileUrl = `https://open.spotify.com/user/${profile.spotifyUserId}`;
@@ -24,6 +29,26 @@ const ProfilePage = ({ profile }) => {
   const openLastFMProfile = () => {
     const lastFMProfileUrl = `https://www.last.fm/user/${profile.lastFMUsername}`;
     window.open(lastFMProfileUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleMusicAuthorization = async () => {
+    if (!musicKitInstance) {
+      console.error("MusicKit instance is not available.");
+      return;
+    }
+
+    try {
+      const musicUserToken = await musicKitInstance.authorize();
+      const response = await authorizeAppleMusic(musicUserToken);
+
+      if (response.ok) {
+        console.log("Music User Token sent successfully!");
+      } else {
+        console.error("Failed to send Music User Token:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error during MusicKit authorization:", error);
+    }
   };
 
   let content;
@@ -75,6 +100,14 @@ const ProfilePage = ({ profile }) => {
         ) : (
           <Button onClick={authorizeLastFM}>Connect LastFM</Button>
         )}
+        <br />
+        {profile.appleMusicIsConnected ? (
+          "Apple Music connected"
+        ) : (
+          <Button onClick={handleMusicAuthorization}>
+            Connect Apple Music
+          </Button>
+        )}
       </div>
     );
   } else {
@@ -120,6 +153,8 @@ const ProfilePage = ({ profile }) => {
             </Anchor>
           </>
         )}
+        <br />
+        <Button onClick={handleMusicAuthorization}>Connect Apple Music</Button>
       </div>
     );
   }

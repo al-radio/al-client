@@ -121,6 +121,35 @@ export const authorizeLastFM = () => {
   )}`;
 };
 
+export const fetchAppleMusicDeveloperToken = async () => {
+  const response = await fetch(`${API_URL}/auth/applemusic/developerToken`);
+  return response.json();
+};
+
+export const authorizeAppleMusic = async (musicUserToken) => {
+  const response = await fetch(`${API_URL}/auth/applemusic/callback`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ musicUserToken }),
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const addSongToAppleMusicPlaylist = async (trackId) => {
+  const response = await fetch(`${API_URL}/auth/applemusic/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ trackId }),
+    credentials: "include",
+  });
+  return response.json();
+};
+
 // Admin Queue Routes
 export const fetchQueue = async (type) => {
   const urlMap = {

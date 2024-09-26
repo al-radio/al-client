@@ -9,7 +9,10 @@ import {
   Hourglass,
 } from "react95";
 import { useAuth } from "@/contexts/AuthContext";
-import { addSongToSpotifyPlaylist } from "../../services/api";
+import {
+  addSongToAppleMusicPlaylist,
+  addSongToSpotifyPlaylist,
+} from "../../services/api";
 import styled from "styled-components";
 
 const NotificationMessage = styled.div`
@@ -47,11 +50,16 @@ const GetSong = ({ isOpen, onClose, urlForPlatform, trackId }) => {
 
   const handleAddSong = async () => {
     if (activePlatform && authState.linkedServices?.[activePlatform]) {
+      const addSongFunction = {
+        spotify: addSongToSpotifyPlaylist,
+        appleMusic: addSongToAppleMusicPlaylist,
+      }[activePlatform];
+
       setLoading(true);
       setMessage("");
 
       try {
-        const response = await addSongToSpotifyPlaylist(trackId);
+        const response = await addSongFunction(trackId);
         setMessage(response.message);
         setTimeout(onClose, 3000);
       } catch (error) {

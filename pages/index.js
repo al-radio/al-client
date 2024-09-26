@@ -22,6 +22,7 @@ import Account from "@/components/windows/Account";
 import Customize from "@/components/windows/Customize";
 import RadioOffline from "@/components/modals/RadioOffline";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
+import { MusicKitProvider } from "@/contexts/MusicKitContext";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -209,19 +210,21 @@ export default function Home() {
         <GlobalStyles />
         <IsMobileProvider>
           <ZIndexProvider>
-            <AuthProvider>
-              <LiveDataProvider>
-                {isMobile ? (
-                  <Window>
-                    <MobileScrollView>
-                      <Content />
-                    </MobileScrollView>
-                  </Window>
-                ) : (
-                  <Content />
-                )}
-              </LiveDataProvider>
-            </AuthProvider>
+            <MusicKitProvider>
+              <AuthProvider>
+                <LiveDataProvider>
+                  {isMobile ? (
+                    <Window>
+                      <MobileScrollView>
+                        <Content />
+                      </MobileScrollView>
+                    </Window>
+                  ) : (
+                    <Content />
+                  )}
+                </LiveDataProvider>
+              </AuthProvider>
+            </MusicKitProvider>
           </ZIndexProvider>
         </IsMobileProvider>
       </ThemeProvider>

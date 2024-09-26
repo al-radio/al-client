@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
       linkedServices: {
         spotify: profileData.spotifyUserId,
         lastFM: profileData.lastFMUsername,
+        appleMusic: profileData.appleMusicIsConnected,
       },
     });
   };
