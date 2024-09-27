@@ -1,6 +1,7 @@
 // MusicKitContext.js
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { fetchAppleMusicDeveloperToken } from "@/services/api";
+import LoadingScreen from "@/components/modals/LoadingScreen";
 
 const MusicKitContext = createContext(null);
 
@@ -27,7 +28,7 @@ export const MusicKitProvider = ({ children }) => {
     const loadMusicKitScript = () => {
       return new Promise((resolve, reject) => {
         if (existingScript) {
-          resolve(); // Script already loaded
+          resolve();
           return;
         }
 
@@ -63,7 +64,6 @@ export const MusicKitProvider = ({ children }) => {
 
     initializeMusicKit();
 
-    // Cleanup function to remove the script if unmounted
     return () => {
       const script = document.getElementById("musicKitScript");
       if (script) {
@@ -73,7 +73,7 @@ export const MusicKitProvider = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <div>Loading MusicKit...</div>;
+    return <LoadingScreen />;
   }
 
   return (
