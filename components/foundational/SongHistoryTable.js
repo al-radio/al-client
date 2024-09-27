@@ -7,10 +7,22 @@ import {
   TableHeadCell,
   TableRow,
   Avatar,
+  ScrollView,
 } from "react95";
+import styled from "styled-components";
 import ProfileAnchor from "./ProfileAnchor";
 import GetSong from "../modals/GetSong";
 import PausingMarquee from "./PausingMarqee";
+
+const StyledTableDataCell = styled(TableDataCell)`
+  border-bottom: 1px dashed ${({ theme }) => theme.canvasTextDisabled};
+  padding-left: 5px;
+  vertical-align: middle;
+`;
+
+const StyledTableRow = styled(TableRow)`
+  cursor: pointer;
+`;
 
 const SongHistoryTable = ({ songHistory, fields }) => {
   const [selectedSong, setSelectedSong] = useState(null);
@@ -40,36 +52,33 @@ const SongHistoryTable = ({ songHistory, fields }) => {
         </TableHead>
         <TableBody>
           {songHistory.map((song, index) => (
-            <TableRow key={index} onClick={() => handleRowClick(song)}>
-              <TableDataCell>
+            <StyledTableRow key={index} onClick={() => handleRowClick(song)}>
+              <StyledTableDataCell>
                 <Avatar
                   square
-                  size={80}
+                  size={60}
                   src={song.artUrl}
                   style={{ marginTop: 10 }}
                 />
-              </TableDataCell>
+              </StyledTableDataCell>
               {fields.title && (
-                <TableDataCell style={{ verticalAlign: "top" }}>
+                <StyledTableDataCell style={{ lineHeight: "1.4" }}>
                   <PausingMarquee text={song.title} />
                   <PausingMarquee text={song.artist} />
                   <PausingMarquee text={song.album} />
-                </TableDataCell>
+                </StyledTableDataCell>
               )}
               {fields.userSubmittedId && (
-                <TableDataCell
-                  style={{ verticalAlign: "middle" }}
-                  onClick={(e) => e.stopPropagation()} // Prevents row click when clicking on ProfileAnchor
-                >
+                <StyledTableDataCell onClick={(e) => e.stopPropagation()}>
                   {song.userSubmittedId ? (
                     <ProfileAnchor handle={song.userSubmittedId} />
                   ) : (
                     "AL"
                   )}
-                </TableDataCell>
+                </StyledTableDataCell>
               )}
               {fields.datePlayed && (
-                <TableDataCell style={{ verticalAlign: "middle" }}>
+                <StyledTableDataCell>
                   <PausingMarquee
                     text={new Date(song.datePlayed).toDateString()}
                   />
@@ -77,14 +86,12 @@ const SongHistoryTable = ({ songHistory, fields }) => {
                     text={new Date(song.datePlayed).toLocaleTimeString()}
                     sizeLimit={15}
                   />
-                </TableDataCell>
+                </StyledTableDataCell>
               )}
               {fields.likes && (
-                <TableDataCell style={{ verticalAlign: "middle" }}>
-                  {song.likes}
-                </TableDataCell>
+                <StyledTableDataCell>{song.likes}</StyledTableDataCell>
               )}
-            </TableRow>
+            </StyledTableRow>
           ))}
         </TableBody>
       </Table>
