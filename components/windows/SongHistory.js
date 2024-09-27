@@ -1,40 +1,83 @@
 import React from "react";
-import { WindowContent, ScrollView, Button as React95Button } from "react95";
+import { WindowContent, ScrollView, Anchor } from "react95";
 import styled from "styled-components";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import SongHistoryTable from "../foundational/SongHistoryTable";
 import { useLiveData } from "@/contexts/LiveDataContext";
 
 // Styled Components
-const ButtonContainer = styled.div`
+// Styled Components
+const PaginationContainer = styled.div`
   display: flex;
-  justify-content: left;
-  align-items: center;
+  justify-content: center;
   margin-top: 10px;
 `;
 
-const Button = styled(React95Button)`
-  width: 150px;
-  margin: 0 10px;
+const PageAnchor = styled(Anchor)`
+  margin: 0;
+  width: 25px; /* Ensures consistent width for all page numbers */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: ${({ theme }) => theme.progress};
+  ${({ isActive, theme }) =>
+    isActive &&
+    `
+    font-weight: bold;
+    text-decoration: underline;
+    color: ${theme.hover}; /* Active page color */
+  `}
 `;
 
 const windowId = "songHistory";
 
 const SongHistory = () => {
   const { liveData, setHistoryPage } = useLiveData();
-  const { songHistory, currentPage, isLastPage } = liveData;
+  const { songHistory, currentPage, isLastPage, numberOfPages } = liveData;
 
-  const handleNextPage = () => {
-    if (!isLastPage) {
-      const nextPage = currentPage + 1;
-      setHistoryPage(nextPage);
+  const generatePageNumbers = () => {
+    const pageNumbers = [];
+    const totalPages = 10;
+
+    // if there are less than totalPages pages, show all pages
+    if (numberOfPages <= totalPages) {
+      for (let i = 1; i <= numberOfPages; i++) {
+        pageNumbers.push(i);
+      }
+      return pageNumbers;
     }
+
+    // if the current page is less than totalPages / 2, show the first totalPages pages
+    if (currentPage <= totalPages / 2) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+      return pageNumbers;
+    }
+
+    // if the current page is greater than numberOfPages - totalPages / 2, show the last totalPages pages
+    if (currentPage > numberOfPages - totalPages / 2) {
+      for (let i = numberOfPages - totalPages + 1; i <= numberOfPages; i++) {
+        pageNumbers.push(i);
+      }
+      return pageNumbers;
+    }
+
+    // show totalPages pages centered around the current page
+    for (
+      let i = currentPage - Math.floor(totalPages / 2);
+      i < currentPage + Math.floor(totalPages / 2);
+      i++
+    ) {
+      pageNumbers.push(i);
+    }
+
+    return pageNumbers;
   };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      const nextPage = Math.max(currentPage - 1, 1);
-      setHistoryPage(nextPage);
+  const handlePageClick = (page) => {
+    if (page !== currentPage) {
+      setHistoryPage(page);
     }
   };
 
@@ -57,14 +100,52 @@ const SongHistory = () => {
             }}
           />
         </ScrollView>
-        <ButtonContainer>
-          <Button onClick={handlePrevPage} disabled={currentPage === 1}>
-            Previous Page
-          </Button>
-          <Button onClick={handleNextPage} disabled={isLastPage}>
-            Next Page
-          </Button>
-        </ButtonContainer>
+        <PaginationContainer>
+          {/* << First Page */}
+          <PageAnchor
+            onClick={() => setHistoryPage(1)}
+            disabled={currentPage === 1}
+          >
+            {"<<"}
+          </PageAnchor>
+
+          {/* < Previous Page */}
+          <PageAnchor
+            onClick={() => setHistoryPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          >
+            {"<"}
+          </PageAnchor>
+
+          {/* Dynamic page numbers */}
+          {generatePageNumbers().map((page, index) => (
+            <PageAnchor
+              key={index}
+              onClick={() => handlePageClick(page)}
+              isActive={page === currentPage}
+            >
+              {page}
+            </PageAnchor>
+          ))}
+
+          {/* > Next Page */}
+          <PageAnchor
+            onClick={() =>
+              setHistoryPage(Math.min(numberOfPages, currentPage + 1))
+            }
+            disabled={currentPage === numberOfPages}
+          >
+            {">"}
+          </PageAnchor>
+
+          {/* >> Last Page */}
+          <PageAnchor
+            onClick={() => setHistoryPage(numberOfPages)}
+            disabled={currentPage === numberOfPages}
+          >
+            {">>"}
+          </PageAnchor>
+        </PaginationContainer>
       </WindowContent>
     </ResponsiveWindowBase>
   );

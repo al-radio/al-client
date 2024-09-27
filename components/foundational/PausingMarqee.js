@@ -7,10 +7,10 @@ const PausingMarquee = ({ text, sizeLimit = 30 }) => {
   if (!text) return null;
   if (text.length <= sizeLimit)
     return (
-      <>
+      <div style={{ width: `${sizeLimit - sizeLimit / 4}ch` }}>
         {text}
         <br />
-      </>
+      </div>
     );
   const paddedText = `${text}${"\u00A0".repeat(sizeLimit)}`;
 

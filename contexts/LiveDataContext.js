@@ -12,6 +12,7 @@ export const LiveDataProvider = ({ children }) => {
     songHistory: [],
     currentPage: 1,
     isLastPage: false,
+    numberOfPages: 1,
   });
 
   const updateLiveData = (eventCategory, data) => {
@@ -34,6 +35,7 @@ export const LiveDataProvider = ({ children }) => {
       const response = await fetchGlobalSongHistory(liveData.currentPage);
       updateLiveData("songHistory", response.tracks);
       updateLiveData("isLastPage", response.isLastPage);
+      updateLiveData("numberOfPages", response.numberOfPages);
     };
 
     fetchHistoryData();
