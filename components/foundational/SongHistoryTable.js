@@ -32,9 +32,7 @@ const SongHistoryTable = ({ songHistory, fields }) => {
         <TableHead>
           <TableRow>
             <TableHeadCell></TableHeadCell>
-            {fields.title && <TableHeadCell>Title</TableHeadCell>}
-            {fields.artist && <TableHeadCell>Artist</TableHeadCell>}
-            {fields.album && <TableHeadCell>Album</TableHeadCell>}
+            {fields.title && <TableHeadCell>Title/Artist/Album</TableHeadCell>}
             {fields.userSubmittedId && <TableHeadCell>Requested</TableHeadCell>}
             {fields.datePlayed && <TableHeadCell>Time Played</TableHeadCell>}
             {fields.likes && <TableHeadCell>Likes</TableHeadCell>}
@@ -46,28 +44,21 @@ const SongHistoryTable = ({ songHistory, fields }) => {
               <TableDataCell>
                 <Avatar
                   square
-                  size={50}
+                  size={80}
                   src={song.artUrl}
                   style={{ marginTop: 10 }}
                 />
               </TableDataCell>
               {fields.title && (
-                <TableDataCell>
+                <TableDataCell style={{ verticalAlign: "top" }}>
                   <PausingMarquee text={song.title} />
-                </TableDataCell>
-              )}
-              {fields.artist && (
-                <TableDataCell>
                   <PausingMarquee text={song.artist} />
-                </TableDataCell>
-              )}
-              {fields.album && (
-                <TableDataCell>
                   <PausingMarquee text={song.album} />
                 </TableDataCell>
               )}
               {fields.userSubmittedId && (
                 <TableDataCell
+                  style={{ verticalAlign: "middle" }}
                   onClick={(e) => e.stopPropagation()} // Prevents row click when clicking on ProfileAnchor
                 >
                   {song.userSubmittedId ? (
@@ -78,19 +69,21 @@ const SongHistoryTable = ({ songHistory, fields }) => {
                 </TableDataCell>
               )}
               {fields.datePlayed && (
-                <TableDataCell>
+                <TableDataCell style={{ verticalAlign: "middle" }}>
                   <PausingMarquee
-                    text={
-                      new Date(song.datePlayed).toDateString() +
-                      ", " +
-                      new Date(song.datePlayed).toLocaleTimeString() +
-                      " EST"
-                    }
+                    text={new Date(song.datePlayed).toDateString()}
+                  />
+                  <PausingMarquee
+                    text={new Date(song.datePlayed).toLocaleTimeString()}
                     sizeLimit={15}
                   />
                 </TableDataCell>
               )}
-              {fields.likes && <TableDataCell>{song.likes}</TableDataCell>}
+              {fields.likes && (
+                <TableDataCell style={{ verticalAlign: "middle" }}>
+                  {song.likes}
+                </TableDataCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

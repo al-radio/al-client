@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Marquee from "react-fast-marquee";
 
-const PausingMarquee = ({ text, sizeLimit = 20 }) => {
+const PausingMarquee = ({ text, sizeLimit = 30 }) => {
   const [isMoving, setIsMoving] = useState(true);
 
   if (!text) return null;
@@ -28,7 +28,7 @@ const PausingMarquee = ({ text, sizeLimit = 20 }) => {
       onCycleComplete={handleCycleComplete}
       speed={50}
       gradient={false}
-      style={{ width: `${Math.min(text.length, sizeLimit) + 1}ch` }}
+      style={{ width: `${sizeLimit - sizeLimit / 4}ch` }}
     >
       {paddedText}
     </Marquee>
