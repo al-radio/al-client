@@ -112,6 +112,14 @@ export const addSongToSpotifyPlaylist = async (trackId) => {
   return response.json();
 };
 
+export const unauthorizeSpotify = async () => {
+  const response = await fetch(`${API_URL}/auth/spotify/unlink`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return response.json();
+};
+
 export const authorizeLastFM = () => {
   const apiKey = process.env.NEXT_PUBLIC_LASTFM_API_KEY;
   const redirectUri = `${API_URL}/auth/lastfm/callback`;
@@ -119,6 +127,14 @@ export const authorizeLastFM = () => {
   window.location.href = `https://www.last.fm/api/auth/?api_key=${apiKey}&cb=${encodeURIComponent(
     redirectUri,
   )}`;
+};
+
+export const unauthorizeLastFM = async () => {
+  const response = await fetch(`${API_URL}/auth/lastfm/unlink`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return response.json();
 };
 
 export const fetchAppleMusicDeveloperToken = async () => {
@@ -145,6 +161,14 @@ export const addSongToAppleMusicPlaylist = async (trackId) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ trackId }),
+    credentials: "include",
+  });
+  return response.json();
+};
+
+export const unauthorizeAppleMusic = async () => {
+  const response = await fetch(`${API_URL}/auth/applemusic/unlink`, {
+    method: "POST",
     credentials: "include",
   });
   return response.json();

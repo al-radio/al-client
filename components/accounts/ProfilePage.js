@@ -1,10 +1,13 @@
 import React from "react";
-import { Anchor, Avatar, Button } from "react95";
+import { Anchor, Avatar, Counter, GroupBox, Tooltip } from "react95";
 import styled from "styled-components";
 import {
   authorizeSpotify,
   authorizeLastFM,
   authorizeAppleMusic,
+  unauthorizeAppleMusic,
+  unauthorizeLastFM,
+  unauthorizeSpotify,
 } from "../../services/api";
 import { useMusicKit } from "@/contexts/MusicKitContext";
 
@@ -12,10 +15,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const Online = styled.div`
   color: ${({ theme }) => theme.hoverBackground};
+  display: inline-block;
+  margin-left: 5px;
 `;
 
 const Offline = styled.div`
   color: ${({ theme }) => theme.canvasTextDisabled};
+  display: inline-block;
+  margin-left: 5px;
+`;
+
+const ServiceLinkContainer = styled.div`
+  margin: 5px 0;
 `;
 
 const ProfilePage = ({ profile }) => {
@@ -51,115 +62,137 @@ const ProfilePage = ({ profile }) => {
     }
   };
 
-  let content;
-
-  if (profile.isPrivate) {
-    // Render for private profiles
-    content = (
-      <div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Avatar
-            size={50}
-            src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
-          />
-          <div style={{ marginLeft: "10px" }}>
-            <h2>{profile.handle}</h2>
-            <p>{profile.bio}</p>
-          </div>
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <Avatar
+          size={50}
+          src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
+        />
+        <div style={{ marginLeft: "10px" }}>
+          <h2 style={{ display: "inline" }}>{profile.handle}</h2>
+          {profile.isOnline ? (
+            <Online>Tuned in</Online>
+          ) : (
+            <Tooltip
+              text={"Since: " + new Date(profile.lastOnline).toLocaleString()}
+            >
+              <Offline>Tuned Out</Offline>
+            </Tooltip>
+          )}
         </div>
-
-        {profile.isOnline ? (
-          <Online>Tuned in</Online>
-        ) : (
-          <Offline>
-            Tuned out since {new Date(profile.lastOnline).toLocaleString()}
-          </Offline>
-        )}
-
-        <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
-        <p>Listens: {profile.numberOfSongsListened}</p>
-
-        {profile.spotifyUserId ? (
-          <>
-            Spotify:{" "}
-            <Anchor onClick={openSpotifyProfile}>
-              {profile.spotifyUserId}
-            </Anchor>
-          </>
-        ) : (
-          <Button onClick={authorizeSpotify}>Connect Spotify</Button>
-        )}
-        <br />
-        {profile.lastFMUsername ? (
-          <>
-            LastFM:{" "}
-            <Anchor onClick={openLastFMProfile}>
-              {profile.lastFMUsername}
-            </Anchor>
-          </>
-        ) : (
-          <Button onClick={authorizeLastFM}>Connect LastFM</Button>
-        )}
-        <br />
-        {profile.appleMusicIsConnected ? (
-          "Apple Music connected"
-        ) : (
-          <Button onClick={handleMusicAuthorization}>
-            Connect Apple Music
-          </Button>
-        )}
       </div>
-    );
-  } else {
-    // Render for public profiles
-    content = (
-      <div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Avatar
-            size={50}
-            src={profile.avatarUrl || `${API_URL}/avatars/default.png`}
-          />
-          <div style={{ marginLeft: "10px" }}>
-            <h2>{profile.handle}</h2>
-            <p>{profile.bio}</p>
-          </div>
-        </div>
 
-        {profile.isOnline ? (
-          <Online>Tuned in</Online>
+      <GroupBox label="Joined">
+        {new Date(profile.createdDate).toLocaleDateString()}
+      </GroupBox>
+
+      <GroupBox label="Listens">
+        <Counter
+          size="sm"
+          value={profile.numberOfSongsListened}
+          minLength={20}
+        />
+      </GroupBox>
+
+      {/* GroupBox for Services */}
+      <GroupBox label="Services">
+        {/* Apple Music Section */}
+        {profile.isPrivate ? (
+          <ServiceLinkContainer>
+            <span>Apple Music </span>
+            {profile.appleMusicIsConnected ? (
+              <>
+                <Anchor onClick={() => console.log("Open Apple Music profile")}>
+                  Open
+                </Anchor>
+                {" | "}
+                <Anchor
+                  onClick={async () => {
+                    await unauthorizeAppleMusic();
+                    window.location.reload();
+                  }}
+                >
+                  Disconnect
+                </Anchor>
+              </>
+            ) : (
+              <Anchor onClick={handleMusicAuthorization}>Connect</Anchor>
+            )}
+          </ServiceLinkContainer>
         ) : (
-          <Offline>
-            Tuned out since {new Date(profile.lastOnline).toLocaleString()}
-          </Offline>
+          profile.appleMusicIsConnected && (
+            <ServiceLinkContainer>
+              <span>Apple Music </span>
+              <Anchor onClick={() => console.log("Open Apple Music profile")}>
+                Open
+              </Anchor>
+            </ServiceLinkContainer>
+          )
         )}
 
-        <p>Joined: {new Date(profile.createdDate).toLocaleDateString()}</p>
-        <p>Listens: {profile.numberOfSongsListened}</p>
-
-        {profile.spotifyUserId && (
-          <>
-            Spotify:{" "}
-            <Anchor onClick={openSpotifyProfile}>
-              {profile.spotifyDisplayName || profile.spotifyUserId}
-            </Anchor>
-          </>
+        {/* Spotify Section */}
+        {profile.isPrivate ? (
+          <ServiceLinkContainer>
+            <span>Spotify </span>
+            {profile.spotifyUserId ? (
+              <>
+                <Anchor onClick={openSpotifyProfile}>Open</Anchor>
+                {" | "}
+                <Anchor
+                  onClick={async () => {
+                    await unauthorizeSpotify();
+                    window.location.reload();
+                  }}
+                >
+                  Disconnect
+                </Anchor>
+              </>
+            ) : (
+              <Anchor onClick={authorizeSpotify}>Connect</Anchor>
+            )}
+          </ServiceLinkContainer>
+        ) : (
+          profile.spotifyUserId && (
+            <ServiceLinkContainer>
+              <span>Spotify </span>
+              <Anchor onClick={openSpotifyProfile}>Open</Anchor>
+            </ServiceLinkContainer>
+          )
         )}
-        <br />
-        {profile.lastFMUsername && (
-          <>
-            LastFM:{" "}
-            <Anchor onClick={openLastFMProfile}>
-              {profile.lastFMUsername}
-            </Anchor>
-          </>
-        )}
-        <br />
-        <Button onClick={handleMusicAuthorization}>Connect Apple Music</Button>
-      </div>
-    );
-  }
 
-  return content;
+        {/* Last.FM Section */}
+        {profile.isPrivate ? (
+          <ServiceLinkContainer>
+            <span>Last.FM </span>
+            {profile.lastFMUsername ? (
+              <>
+                <Anchor onClick={openLastFMProfile}>Open</Anchor>
+                {" | "}
+                <Anchor
+                  onClick={async () => {
+                    await unauthorizeLastFM();
+                    window.location.reload();
+                  }}
+                >
+                  Disconnect
+                </Anchor>
+              </>
+            ) : (
+              <Anchor onClick={authorizeLastFM}>Connect</Anchor>
+            )}
+          </ServiceLinkContainer>
+        ) : (
+          profile.lastFMUsername && (
+            <ServiceLinkContainer>
+              <span>Last.FM </span>
+              <Anchor onClick={openLastFMProfile}>Open</Anchor>
+            </ServiceLinkContainer>
+          )
+        )}
+      </GroupBox>
+    </div>
+  );
 };
 
 export default ProfilePage;
