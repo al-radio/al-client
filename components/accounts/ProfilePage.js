@@ -87,11 +87,11 @@ const ProfilePage = ({ profile }) => {
         {new Date(profile.createdDate).toLocaleDateString()}
       </GroupBox>
 
-      <GroupBox label="Listens">
+      <GroupBox label="Listens" style={{ textAlign: "center" }}>
         <Counter
           size="sm"
           value={profile.numberOfSongsListened}
-          minLength={20}
+          minLength={15}
         />
       </GroupBox>
 
