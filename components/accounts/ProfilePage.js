@@ -83,7 +83,7 @@ const ProfilePage = ({ profile }) => {
         </div>
       </div>
 
-      <GroupBox label="Joined">
+      <GroupBox label="Joined" style={{ marginTop: "20px" }}>
         {new Date(profile.createdDate).toLocaleDateString()}
       </GroupBox>
 
@@ -95,9 +95,7 @@ const ProfilePage = ({ profile }) => {
         />
       </GroupBox>
 
-      {/* GroupBox for Services */}
       <GroupBox label="Services">
-        {/* Apple Music Section */}
         {profile.isPrivate ? (
           <ServiceLinkContainer>
             <span>Apple Music </span>
@@ -131,7 +129,6 @@ const ProfilePage = ({ profile }) => {
           )
         )}
 
-        {/* Spotify Section */}
         {profile.isPrivate ? (
           <ServiceLinkContainer>
             <span>Spotify </span>
@@ -161,7 +158,6 @@ const ProfilePage = ({ profile }) => {
           )
         )}
 
-        {/* Last.FM Section */}
         {profile.isPrivate ? (
           <ServiceLinkContainer>
             <span>Last.FM </span>
