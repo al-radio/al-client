@@ -13,6 +13,7 @@ export const VisibilityProvider = ({ children }) => {
     listeners: true,
     account: false,
     customize: false,
+    social: false,
   };
 
   // Function to load visibility state from localStorage

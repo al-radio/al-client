@@ -23,17 +23,12 @@ const HistoryPage = ({ handle }) => {
   }, [handle]);
 
   return (
-    <ScrollView
-      scrollable
-      style={{ maxHeight: "400px", maxWidth: "500px", overflow: "auto" }}
-    >
+    <ScrollView scrollable style={{ height: "200px", maxWidth: "74vw" }}>
       <SongHistoryTable
         songHistory={songHistory}
         fields={{
           title: true,
-          artist: true,
-          album: true,
-          likes: true,
+          likes: false,
           datePlayed: true,
         }}
       />

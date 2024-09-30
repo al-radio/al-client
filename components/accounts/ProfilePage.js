@@ -1,6 +1,7 @@
-import React from "react";
-import { Anchor, Avatar, Counter, GroupBox, Tooltip } from "react95";
+import React, { useState } from "react";
+import { Anchor, Avatar, Counter, GroupBox, Tooltip, Button } from "react95";
 import styled from "styled-components";
+import HistoryPage from "../accounts/HistoryPage"; // Import the HistoryPage component
 import {
   authorizeSpotify,
   authorizeLastFM,
@@ -10,6 +11,7 @@ import {
   unauthorizeSpotify,
 } from "../../services/api";
 import { useMusicKit } from "@/contexts/MusicKitContext";
+import { skipCurrentSong } from "../../services/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -29,7 +31,29 @@ const ServiceLinkContainer = styled.div`
   margin: 5px 0;
 `;
 
+// Styling for the container that holds the GroupBoxes in two columns
+const GroupBoxContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  max-width: 100%;
+`;
+
+const Column = styled.div`
+  flex: ${({ size }) => size}; // Use size prop to control column width
+  margin-right: 10px;
+
+  &:last-child {
+    margin-right: 0; // No margin on the last column
+  }
+
+  > div {
+    margin-bottom: 20px; // Space between GroupBoxes in the same column
+  }
+`;
+
 const ProfilePage = ({ profile }) => {
+  const [queueData, setQueueData] = useState("");
   const musicKitInstance = useMusicKit();
 
   const openSpotifyProfile = () => {
@@ -83,110 +107,130 @@ const ProfilePage = ({ profile }) => {
         </div>
       </div>
 
-      <GroupBox label="Joined" style={{ marginTop: "20px" }}>
-        {new Date(profile.createdDate).toLocaleDateString()}
+      {/* Container for two-column layout */}
+      <GroupBoxContainer>
+        <Column size={2}>
+          <GroupBox label="Joined">
+            {new Date(profile.createdDate).toLocaleDateString()}
+          </GroupBox>
+          <GroupBox label="Listens" style={{ textAlign: "center" }}>
+            <Counter
+              size="sm"
+              value={profile.numberOfSongsListened}
+              minLength={9}
+            />
+          </GroupBox>
+        </Column>
+
+        <Column size={3}>
+          <GroupBox label="Services">
+            {profile.isPrivate ? (
+              <ServiceLinkContainer>
+                <span>Apple Music </span>
+                {profile.appleMusicIsConnected ? (
+                  <>
+                    <Anchor
+                      onClick={() => console.log("Open Apple Music profile")}
+                    >
+                      Open
+                    </Anchor>
+                    {" | "}
+                    <Anchor
+                      onClick={async () => {
+                        await unauthorizeAppleMusic();
+                        window.location.reload();
+                      }}
+                    >
+                      Disconnect
+                    </Anchor>
+                  </>
+                ) : (
+                  <Anchor onClick={handleMusicAuthorization}>Connect</Anchor>
+                )}
+              </ServiceLinkContainer>
+            ) : (
+              profile.appleMusicIsConnected && (
+                <ServiceLinkContainer>
+                  <span>Apple Music </span>
+                  <Anchor
+                    onClick={() => console.log("Open Apple Music profile")}
+                  >
+                    Open
+                  </Anchor>
+                </ServiceLinkContainer>
+              )
+            )}
+
+            {profile.isPrivate ? (
+              <ServiceLinkContainer>
+                <span>Spotify </span>
+                {profile.spotifyUserId ? (
+                  <>
+                    <Anchor onClick={openSpotifyProfile}>Open</Anchor>
+                    {" | "}
+                    <Anchor
+                      onClick={async () => {
+                        await unauthorizeSpotify();
+                        window.location.reload();
+                      }}
+                    >
+                      Disconnect
+                    </Anchor>
+                  </>
+                ) : (
+                  <Anchor onClick={authorizeSpotify}>Connect</Anchor>
+                )}
+              </ServiceLinkContainer>
+            ) : (
+              profile.spotifyUserId && (
+                <ServiceLinkContainer>
+                  <span>Spotify </span>
+                  <Anchor onClick={openSpotifyProfile}>Open</Anchor>
+                </ServiceLinkContainer>
+              )
+            )}
+
+            {profile.isPrivate ? (
+              <ServiceLinkContainer>
+                <span>Last.FM </span>
+                {profile.lastFMUsername ? (
+                  <>
+                    <Anchor onClick={openLastFMProfile}>Open</Anchor>
+                    {" | "}
+                    <Anchor
+                      onClick={async () => {
+                        await unauthorizeLastFM();
+                        window.location.reload();
+                      }}
+                    >
+                      Disconnect
+                    </Anchor>
+                  </>
+                ) : (
+                  <Anchor onClick={authorizeLastFM}>Connect</Anchor>
+                )}
+              </ServiceLinkContainer>
+            ) : (
+              profile.lastFMUsername && (
+                <ServiceLinkContainer>
+                  <span>Last.FM </span>
+                  <Anchor onClick={openLastFMProfile}>Open</Anchor>
+                </ServiceLinkContainer>
+              )
+            )}
+          </GroupBox>
+        </Column>
+      </GroupBoxContainer>
+
+      <GroupBox label="Request History">
+        <HistoryPage handle={profile.handle} />
       </GroupBox>
 
-      <GroupBox label="Listens" style={{ textAlign: "center" }}>
-        <Counter
-          size="sm"
-          value={profile.numberOfSongsListened}
-          minLength={15}
-        />
-      </GroupBox>
-
-      <GroupBox label="Services">
-        {profile.isPrivate ? (
-          <ServiceLinkContainer>
-            <span>Apple Music </span>
-            {profile.appleMusicIsConnected ? (
-              <>
-                <Anchor onClick={() => console.log("Open Apple Music profile")}>
-                  Open
-                </Anchor>
-                {" | "}
-                <Anchor
-                  onClick={async () => {
-                    await unauthorizeAppleMusic();
-                    window.location.reload();
-                  }}
-                >
-                  Disconnect
-                </Anchor>
-              </>
-            ) : (
-              <Anchor onClick={handleMusicAuthorization}>Connect</Anchor>
-            )}
-          </ServiceLinkContainer>
-        ) : (
-          profile.appleMusicIsConnected && (
-            <ServiceLinkContainer>
-              <span>Apple Music </span>
-              <Anchor onClick={() => console.log("Open Apple Music profile")}>
-                Open
-              </Anchor>
-            </ServiceLinkContainer>
-          )
-        )}
-
-        {profile.isPrivate ? (
-          <ServiceLinkContainer>
-            <span>Spotify </span>
-            {profile.spotifyUserId ? (
-              <>
-                <Anchor onClick={openSpotifyProfile}>Open</Anchor>
-                {" | "}
-                <Anchor
-                  onClick={async () => {
-                    await unauthorizeSpotify();
-                    window.location.reload();
-                  }}
-                >
-                  Disconnect
-                </Anchor>
-              </>
-            ) : (
-              <Anchor onClick={authorizeSpotify}>Connect</Anchor>
-            )}
-          </ServiceLinkContainer>
-        ) : (
-          profile.spotifyUserId && (
-            <ServiceLinkContainer>
-              <span>Spotify </span>
-              <Anchor onClick={openSpotifyProfile}>Open</Anchor>
-            </ServiceLinkContainer>
-          )
-        )}
-
-        {profile.isPrivate ? (
-          <ServiceLinkContainer>
-            <span>Last.FM </span>
-            {profile.lastFMUsername ? (
-              <>
-                <Anchor onClick={openLastFMProfile}>Open</Anchor>
-                {" | "}
-                <Anchor
-                  onClick={async () => {
-                    await unauthorizeLastFM();
-                    window.location.reload();
-                  }}
-                >
-                  Disconnect
-                </Anchor>
-              </>
-            ) : (
-              <Anchor onClick={authorizeLastFM}>Connect</Anchor>
-            )}
-          </ServiceLinkContainer>
-        ) : (
-          profile.lastFMUsername && (
-            <ServiceLinkContainer>
-              <span>Last.FM </span>
-              <Anchor onClick={openLastFMProfile}>Open</Anchor>
-            </ServiceLinkContainer>
-          )
-        )}
-      </GroupBox>
+      {profile?.role === "admin" && (
+        <GroupBox label="Developer">
+          <Button onClick={skipCurrentSong}>Skip Current Song</Button>
+        </GroupBox>
+      )}
     </div>
   );
 };

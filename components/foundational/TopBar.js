@@ -51,6 +51,12 @@ const TopBar = () => {
               {handle || "Account"}
             </Button>
             <Button
+              active={visibility.social}
+              onClick={() => handleToggleComponent("social")}
+            >
+              Social
+            </Button>
+            <Button
               active={visibility.customize}
               onClick={() => handleToggleComponent("customize")}
             >

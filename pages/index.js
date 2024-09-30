@@ -21,6 +21,7 @@ import TopBar from "@/components/foundational/TopBar";
 import Account from "@/components/windows/Account";
 import Customize from "@/components/windows/Customize";
 import RadioOffline from "@/components/modals/RadioOffline";
+import Social from "@/components/windows/Social";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
 import { MusicKitProvider } from "@/contexts/MusicKitContext";
 
@@ -198,6 +199,7 @@ export default function Home() {
             <NextSong />
             <SubmitSong />
             <SongHistory />
+            <Social />
           </ContentContainer>
         </VisibilityProvider>
       )}

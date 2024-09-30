@@ -7,7 +7,6 @@ import {
   TableHeadCell,
   TableRow,
   Avatar,
-  ScrollView,
 } from "react95";
 import styled from "styled-components";
 import ProfileAnchor from "./ProfileAnchor";
@@ -18,6 +17,11 @@ const StyledTableDataCell = styled(TableDataCell)`
   border-bottom: 1px dashed ${({ theme }) => theme.canvasTextDisabled};
   padding-left: 5px;
   vertical-align: middle;
+`;
+
+const StyledTableHeadCell = styled(TableHeadCell)`
+  // fit text to cell width
+  white-space: nowrap;
 `;
 
 const StyledTableRow = styled(TableRow)`
@@ -38,16 +42,49 @@ const SongHistoryTable = ({ songHistory, fields }) => {
     setSelectedSong(null);
   };
 
+  const timeAgo = (date) => {
+    const now = new Date();
+    const seconds = Math.floor((now - new Date(date)) / 1000);
+    let interval = Math.floor(seconds / 31536000); // Years
+
+    if (interval >= 1) {
+      return `${interval}y ago`;
+    }
+    interval = Math.floor(seconds / 2592000); // Months
+    if (interval >= 1) {
+      return `${interval}M ago`;
+    }
+    interval = Math.floor(seconds / 86400); // Days
+    if (interval >= 1) {
+      return `${interval}d ago`;
+    }
+    interval = Math.floor(seconds / 3600); // Hours
+    if (interval >= 1) {
+      return `${interval}h ago`;
+    }
+    interval = Math.floor(seconds / 60); // Minutes
+    if (interval >= 1) {
+      return `${interval}m ago`;
+    }
+    return `${seconds}s ago`; // Seconds
+  };
+
   return (
     <>
       <Table>
         <TableHead>
           <TableRow>
             <TableHeadCell></TableHeadCell>
-            {fields.title && <TableHeadCell>Title/Artist/Album</TableHeadCell>}
-            {fields.userSubmittedId && <TableHeadCell>Requested</TableHeadCell>}
-            {fields.datePlayed && <TableHeadCell>Time Played</TableHeadCell>}
-            {fields.likes && <TableHeadCell>Likes</TableHeadCell>}
+            {fields.title && (
+              <StyledTableHeadCell>Title/Artist/Album</StyledTableHeadCell>
+            )}
+            {fields.userSubmittedId && (
+              <StyledTableHeadCell>Requested</StyledTableHeadCell>
+            )}
+            {fields.datePlayed && (
+              <StyledTableHeadCell>Time Played</StyledTableHeadCell>
+            )}
+            {fields.likes && <StyledTableHeadCell>Likes</StyledTableHeadCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -79,13 +116,7 @@ const SongHistoryTable = ({ songHistory, fields }) => {
               )}
               {fields.datePlayed && (
                 <StyledTableDataCell>
-                  <PausingMarquee
-                    text={new Date(song.datePlayed).toDateString()}
-                  />
-                  <PausingMarquee
-                    text={new Date(song.datePlayed).toLocaleTimeString()}
-                    sizeLimit={15}
-                  />
+                  {timeAgo(song.datePlayed)}
                 </StyledTableDataCell>
               )}
               {fields.likes && (
