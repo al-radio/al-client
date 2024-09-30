@@ -12,10 +12,16 @@ import {
 } from "react95";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
 import ProfilePage from "../accounts/ProfilePage";
-import HistoryPage from "../accounts/HistoryPage";
 import styled from "styled-components";
-import { fetchProfile, login, register, logout } from "../../services/api";
+import {
+  fetchProfile,
+  login,
+  register,
+  logout,
+  fetchPublicProfile,
+} from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfiles } from "@/contexts/ProfilesContext";
 
 const ErrorMessage = styled.div`
   color: ${({ theme }) => theme.progress};
@@ -26,23 +32,42 @@ const ErrorMessage = styled.div`
 
 const Social = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
-  const [profile, setProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLoginView, setIsLoginView] = useState(true);
-  const [openedProfiles, setOpenedProfiles] = useState([]);
   const [formData, setFormData] = useState({
     handle: "",
     password: "",
     email: "",
   });
   const { setAuthStateFromProfile, resetAuthState } = useAuth();
+  const { profiles, removeProfile, addProfile } = useProfiles();
+  const [selectedProfileData, setSelectedProfileData] = useState(null);
+
+  useEffect(() => {
+    // fetch the selected profile
+    if (
+      selectedTab !== "Profile" &&
+      selectedTab !== "Search" &&
+      selectedTab !== "Friends" &&
+      selectedTab !== "Chat"
+    ) {
+      fetchPublicProfile(selectedTab)
+        .then((profileData) => {
+          setSelectedProfileData(profileData);
+        })
+        .catch(() => {
+          setSelectedProfileData(null);
+        });
+    }
+  }, [selectedTab]);
 
   // Fetch the profile on mount
   useEffect(() => {
     fetchProfile()
-      .then((profileData) => setProfile(profileData))
-      .catch(() => setProfile(null))
+      .then((profileData) => setUserProfile(profileData))
+      .catch(() => setUserProfile(null))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -54,7 +79,7 @@ const Social = () => {
           return;
         }
         fetchProfile().then((profileData) => {
-          setProfile(profileData);
+          setUserProfile(profileData);
           setAuthStateFromProfile(profileData);
         });
       })
@@ -81,20 +106,10 @@ const Social = () => {
   const handleLogout = () => {
     logout().then(() => {
       resetAuthState();
-      setProfile(null);
+      setUserProfile(null);
       setError(null);
       setIsLoginView(true);
     });
-  };
-
-  const openUserProfile = (userProfile) => {
-    setOpenedProfiles((prevProfiles) => [...prevProfiles, userProfile]);
-  };
-
-  const closeUserProfile = (handle) => {
-    setOpenedProfiles((prevProfiles) =>
-      prevProfiles.filter((profile) => profile.handle !== handle),
-    );
   };
 
   const renderProfileContent = () => {
@@ -102,10 +117,10 @@ const Social = () => {
       return <Hourglass size={32} />;
     }
 
-    if (profile?.handle) {
+    if (userProfile?.handle) {
       return (
         <>
-          <ProfilePage profile={profile} />
+          <ProfilePage profile={userProfile} />
           <Button onClick={handleLogout} style={{ marginTop: "10px" }}>
             Logout
           </Button>
@@ -187,14 +202,7 @@ const Social = () => {
   };
 
   const renderSearchTab = () => {
-    return (
-      <div>
-        <TextInput placeholder="Search for a user..." />
-        <Button onClick={() => openUserProfile({ handle: "searchedUser" })}>
-          Search
-        </Button>
-      </div>
-    );
+    return <div>Coming Soon</div>;
   };
 
   const renderFriendsTab = () => {
@@ -206,11 +214,37 @@ const Social = () => {
   };
 
   const renderUserProfileTabs = () => {
-    return openedProfiles.map((profile) => (
+    return profiles.map((profile) => (
       <Tab key={profile.handle} value={profile.handle}>
         {profile.handle}
-        <Button onClick={() => closeUserProfile(profile.handle)}>X</Button>
       </Tab>
+    ));
+  };
+
+  const renderProfileTabContent = () => {
+    return profiles.map((profile) => (
+      <div key={profile.handle}>
+        {/* Fetch the profile data for the selected profile */}
+        {selectedProfileData &&
+          selectedProfileData.handle === profile.handle && (
+            <div>
+              <ProfilePage profile={selectedProfileData} />
+              <Button
+                onClick={() => {
+                  removeProfile(profile.handle);
+                  const currentIndex = profiles.findIndex(
+                    (p) => p.handle === profile.handle,
+                  );
+                  const nextIndex = currentIndex === 0 ? 0 : currentIndex - 1;
+                  setSelectedTab(profiles[nextIndex]?.handle || "Profile");
+                }}
+                style={{ marginTop: "10px" }}
+              >
+                Close Profile
+              </Button>
+            </div>
+          )}
+      </div>
     ));
   };
 
@@ -222,14 +256,10 @@ const Social = () => {
         return renderSearchTab();
       case "Friends":
         return renderFriendsTab();
-      case "Global Chat":
+      case "Chat":
         return renderGlobalChatTab();
       default:
-        return (
-          <ProfilePage
-            profile={openedProfiles.find((p) => p.handle === selectedTab)}
-          />
-        );
+        return renderProfileTabContent();
     }
   };
 
@@ -244,7 +274,7 @@ const Social = () => {
           <Tab value="Profile">Profile</Tab>
           <Tab value="Search">Search</Tab>
           <Tab value="Friends">Friends</Tab>
-          <Tab value="Global Chat">Global Chat</Tab>
+          <Tab value="Chat">Chat</Tab>
           {renderUserProfileTabs()}
         </Tabs>
         <TabBody>{renderContent()}</TabBody>

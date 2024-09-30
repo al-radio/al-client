@@ -53,7 +53,6 @@ const Column = styled.div`
 `;
 
 const ProfilePage = ({ profile }) => {
-  const [queueData, setQueueData] = useState("");
   const musicKitInstance = useMusicKit();
 
   const openSpotifyProfile = () => {
@@ -226,7 +225,7 @@ const ProfilePage = ({ profile }) => {
         <HistoryPage handle={profile.handle} />
       </GroupBox>
 
-      {profile?.role === "admin" && (
+      {profile?.isPrivate && profile?.role === "admin" && (
         <GroupBox label="Developer">
           <Button onClick={skipCurrentSong}>Skip Current Song</Button>
         </GroupBox>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { styled } from "styled-components";
 import { Button, AppBar, Toolbar, Avatar } from "react95";
 import { useVisibility } from "@/contexts/VisibilityContext";
-import { fetchProfile } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ScrollableToolbar = styled.div`
@@ -42,19 +41,13 @@ const TopBar = () => {
         >
           <ScrollableToolbar>
             <Button
-              active={visibility.account}
-              onClick={() => handleToggleComponent("account")}
+              active={visibility.social}
+              onClick={() => handleToggleComponent("social")}
             >
               {handle && (
                 <Avatar size={24} src={avatarUrl} style={{ marginRight: 8 }} />
               )}
-              {handle || "Account"}
-            </Button>
-            <Button
-              active={visibility.social}
-              onClick={() => handleToggleComponent("social")}
-            >
-              Social
+              {handle || "Social"}
             </Button>
             <Button
               active={visibility.customize}

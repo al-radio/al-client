@@ -18,12 +18,12 @@ import NextSong from "@/components/windows/NextSong";
 import ListenerCount from "@/components/windows/ListenerCount";
 import SubmitSong from "@/components/windows/SubmitSong";
 import TopBar from "@/components/foundational/TopBar";
-import Account from "@/components/windows/Account";
 import Customize from "@/components/windows/Customize";
 import RadioOffline from "@/components/modals/RadioOffline";
 import Social from "@/components/windows/Social";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
 import { MusicKitProvider } from "@/contexts/MusicKitContext";
+import { ProfileProvider } from "@/contexts/ProfilesContext";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -192,14 +192,13 @@ export default function Home() {
           </TopBarContainer>
           <ContentContainer>
             <RadioTitle>AL Radio</RadioTitle>
+            <Social />
             <Customize />
             <ListenerCount />
             <AudioPlayer />
-            <Account />
             <NextSong />
             <SubmitSong />
             <SongHistory />
-            <Social />
           </ContentContainer>
         </VisibilityProvider>
       )}
@@ -214,17 +213,19 @@ export default function Home() {
           <ZIndexProvider>
             <MusicKitProvider>
               <AuthProvider>
-                <LiveDataProvider>
-                  {isMobile ? (
-                    <Window>
-                      <MobileScrollView>
-                        <Content />
-                      </MobileScrollView>
-                    </Window>
-                  ) : (
-                    <Content />
-                  )}
-                </LiveDataProvider>
+                <ProfileProvider>
+                  <LiveDataProvider>
+                    {isMobile ? (
+                      <Window>
+                        <MobileScrollView>
+                          <Content />
+                        </MobileScrollView>
+                      </Window>
+                    ) : (
+                      <Content />
+                    )}
+                  </LiveDataProvider>
+                </ProfileProvider>
               </AuthProvider>
             </MusicKitProvider>
           </ZIndexProvider>

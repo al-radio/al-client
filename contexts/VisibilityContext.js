@@ -11,7 +11,6 @@ export const VisibilityProvider = ({ children }) => {
     nextSong: true,
     submitSong: true,
     listeners: true,
-    account: false,
     customize: false,
     social: false,
   };

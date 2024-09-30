@@ -1,22 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Anchor } from "react95";
-import ProfileModal from "../modals/ProfileModal";
+import { useProfiles } from "@/contexts/ProfilesContext";
 
 const ProfileAnchor = ({ handle }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addProfile } = useProfiles();
 
   const handleClick = async () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
+    await addProfile(handle);
   };
 
   return (
     <>
       <Anchor onClick={handleClick}>{handle}</Anchor>
-      <ProfileModal isOpen={isModalOpen} onClose={closeModal} handle={handle} />
     </>
   );
 };
