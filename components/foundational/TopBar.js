@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { styled } from "styled-components";
 import { Button, AppBar, Toolbar, Avatar } from "react95";
-import { useVisibility } from "@/contexts/VisibilityContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCustomization } from "@/contexts/CustomizationContext";
 
 const ScrollableToolbar = styled.div`
   display: flex;
@@ -19,7 +19,7 @@ const ScrollableToolbar = styled.div`
 `;
 
 const TopBar = () => {
-  const { visibility, toggleVisibility } = useVisibility();
+  const { customization, toggleVisibility } = useCustomization();
   const { authState } = useAuth();
   const [handle, setHandle] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -41,7 +41,7 @@ const TopBar = () => {
         >
           <ScrollableToolbar>
             <Button
-              active={visibility.social}
+              active={customization.social?.isVisible}
               onClick={() => handleToggleComponent("social")}
             >
               {handle && (
@@ -50,37 +50,37 @@ const TopBar = () => {
               {handle || "Social"}
             </Button>
             <Button
-              active={visibility.customize}
+              active={customization.customize?.isVisible}
               onClick={() => handleToggleComponent("customize")}
             >
               Customize
             </Button>
             <Button
-              active={visibility.audioPlayer}
+              active={customization.audioPlayer?.isVisible}
               onClick={() => handleToggleComponent("audioPlayer")}
             >
               Player
             </Button>
             <Button
-              active={visibility.songHistory}
+              active={customization.songHistory?.isVisible}
               onClick={() => handleToggleComponent("songHistory")}
             >
               History
             </Button>
             <Button
-              active={visibility.nextSong}
+              active={customization.nextSong?.isVisible}
               onClick={() => handleToggleComponent("nextSong")}
             >
               Up Next
             </Button>
             <Button
-              active={visibility.submitSong}
+              active={customization.submitSong?.isVisible}
               onClick={() => handleToggleComponent("submitSong")}
             >
               Request Song
             </Button>
             <Button
-              active={visibility.listeners}
+              active={customization.listeners?.isVisible}
               onClick={() => handleToggleComponent("listeners")}
             >
               Listeners

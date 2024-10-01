@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { createGlobalStyle } from "styled-components";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { styleReset } from "react95";
-import { ZIndexProvider } from "../contexts/ZIndexContext";
 import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
 import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 import styled from "styled-components";
 import { ScrollView, Window } from "react95";
 import { IsMobileProvider, useIsMobile } from "@/contexts/isMobileContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { VisibilityProvider } from "@/contexts/VisibilityContext";
 import { fetchServerStatus } from "@/services/api";
 import { AuthProvider } from "@/contexts/AuthContext";
 
@@ -24,6 +22,7 @@ import Social from "@/components/windows/Social";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
 import { MusicKitProvider } from "@/contexts/MusicKitContext";
 import { ProfileProvider } from "@/contexts/ProfilesContext";
+import { CustomizationProvider } from "@/contexts/CustomizationContext";
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -186,7 +185,7 @@ export default function Home() {
       {!isServerRunning ? (
         <RadioOffline />
       ) : (
-        <VisibilityProvider>
+        <>
           <TopBarContainer>
             <TopBar />
           </TopBarContainer>
@@ -200,7 +199,7 @@ export default function Home() {
             <SubmitSong />
             <SongHistory />
           </ContentContainer>
-        </VisibilityProvider>
+        </>
       )}
     </>
   );
@@ -210,9 +209,9 @@ export default function Home() {
       <ThemeProvider>
         <GlobalStyles />
         <IsMobileProvider>
-          <ZIndexProvider>
-            <MusicKitProvider>
-              <AuthProvider>
+          <MusicKitProvider>
+            <AuthProvider>
+              <CustomizationProvider>
                 <ProfileProvider>
                   <LiveDataProvider>
                     {isMobile ? (
@@ -226,9 +225,9 @@ export default function Home() {
                     )}
                   </LiveDataProvider>
                 </ProfileProvider>
-              </AuthProvider>
-            </MusicKitProvider>
-          </ZIndexProvider>
+              </CustomizationProvider>
+            </AuthProvider>
+          </MusicKitProvider>
         </IsMobileProvider>
       </ThemeProvider>
     </>

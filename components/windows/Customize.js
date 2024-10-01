@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { WindowContent, Radio, GroupBox, Avatar, ScrollView } from "react95";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useCustomization } from "@/contexts/CustomizationContext";
 
 import original from "react95/dist/themes/original";
 import spruce from "react95/dist/themes/spruce";
@@ -13,6 +13,7 @@ import pamelaAnderson from "react95/dist/themes/pamelaAnderson";
 import theSixtiesUSA from "react95/dist/themes/theSixtiesUSA";
 import violetDark from "react95/dist/themes/violetDark";
 import candy from "react95/dist/themes/candy";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const themeMap = {
   Original: original,

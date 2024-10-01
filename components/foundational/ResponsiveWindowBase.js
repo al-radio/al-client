@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { Rnd } from "react-rnd";
 import styled from "styled-components";
-import { useZIndex } from "@/contexts/ZIndexContext";
-import { useIsMobile } from "@/contexts/isMobileContext";
-import { useVisibility } from "@/contexts/VisibilityContext";
 import { Button, Window, WindowHeader } from "react95";
+import { useIsMobile } from "@/contexts/isMobileContext";
+import { useCustomization } from "@/contexts/CustomizationContext";
 
 // Style for mobile layout
 const MobileWindow = styled.div`
@@ -14,54 +13,39 @@ const MobileWindow = styled.div`
   }
 `;
 
-const getLocalStorageKey = (windowId) => `responsiveLayoutPosition_${windowId}`;
-
 const ResponsiveWindowBase = ({
   children,
   windowId,
   defaultPosition,
   windowHeaderTitle,
 }) => {
-  const [zIndex, setZIndex] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const { visibility } = useVisibility();
-  const bringToFront = useZIndex();
   const isMobile = useIsMobile();
   const childRef = useRef(null);
-  const { toggleVisibility } = useVisibility();
+  const { customization, bringToFront, toggleVisibility, updatePosition } =
+    useCustomization();
+
+  const { isVisible, position, zIndex } = customization[windowId] || {};
 
   const handleCloseButton = () => {
     toggleVisibility(windowId);
   };
 
-  // Load saved position and size from local storage
+  // Set default position if no position is stored in the context
   useEffect(() => {
-    const savedPosition = localStorage.getItem(getLocalStorageKey(windowId));
-    if (savedPosition) {
-      setPosition(JSON.parse(savedPosition));
-    } else {
-      setPosition(defaultPosition);
+    if (!position) {
+      updatePosition(windowId, defaultPosition);
     }
-  }, [defaultPosition, windowId]);
-
-  // Save position and size to local storage
-  useEffect(() => {
-    localStorage.setItem(
-      getLocalStorageKey(windowId),
-      JSON.stringify(position),
-    );
-  }, [position, windowId]);
+  }, [defaultPosition, position, updatePosition, windowId]);
 
   // Handle bringing the window to the front
   const handleInteraction = () => {
-    setZIndex(bringToFront());
+    bringToFront(windowId);
   };
 
-  // Handle window resizing
+  // Handle window resizing (keep the window in view)
   const handleResize = useCallback(() => {
-    if (!childRef.current) {
-      return;
-    }
+    if (!childRef.current || !position) return;
+
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     const { x, y } = position;
@@ -71,35 +55,21 @@ const ResponsiveWindowBase = ({
     let newX = x;
     let newY = y;
 
-    // Adjust x position if out of bounds
-    if (x + width > windowWidth) {
-      newX = windowWidth - width;
-    }
-    if (newX < 0) {
-      newX = 0;
-    }
-
-    // Adjust y position if out of bounds
-    if (y + height > windowHeight) {
-      newY = windowHeight - height;
-    }
-    if (newY < 0) {
-      newY = 0;
-    }
+    // Adjust x and y position if out of bounds
+    if (x + width > windowWidth) newX = windowWidth - width;
+    if (newX < 0) newX = 0;
+    if (y + height > windowHeight) newY = windowHeight - height;
+    if (newY < 0) newY = 0;
 
     // Update the position only if it has changed
     if (newX !== x || newY !== y) {
-      setPosition((prev) => ({
-        ...prev,
-        x: newX,
-        y: newY,
-      }));
+      updatePosition(windowId, { x: newX, y: newY });
     }
-  }, [position]);
+  }, [position, updatePosition, windowId]);
 
   useEffect(() => {
     window.addEventListener("resize", handleResize);
-    handleResize();
+    handleResize(); // Ensure window is resized on load
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -108,7 +78,7 @@ const ResponsiveWindowBase = ({
   // Common Content Component
   const Content = (
     <>
-      {visibility[windowId] && (
+      {isVisible && (
         <Window>
           <WindowHeader
             className="window-header"
@@ -125,25 +95,21 @@ const ResponsiveWindowBase = ({
     </>
   );
 
+  // Handle mobile layout
   if (isMobile) {
     return <MobileWindow>{Content}</MobileWindow>;
   }
 
+  // Handle desktop layout with resizable and draggable windows
   return (
     <Rnd
       bounds="parent"
       enableResizing={false}
       dragHandleClassName="window-header"
       style={{ zIndex }}
-      position={{ x: position.x, y: position.y }}
+      position={position || defaultPosition} // Use context position or default
       onDragStop={(e, data) => {
-        setPosition({ x: data.x, y: data.y });
-      }}
-      onResizeStop={(e, direction, ref, delta, position) => {
-        setPosition({
-          x: position.x,
-          y: position.y,
-        });
+        updatePosition(windowId, { x: data.x, y: data.y });
       }}
       onDragStart={handleInteraction}
       onResizeStart={handleInteraction}

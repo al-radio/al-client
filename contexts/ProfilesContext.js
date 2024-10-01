@@ -2,12 +2,14 @@
 import React, { createContext, useState, useContext } from "react";
 import { fetchPublicProfile } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCustomization } from "./CustomizationContext";
 
 const ProfileContext = createContext();
 
 export const ProfileProvider = ({ children }) => {
   const [profiles, setProfiles] = useState([]);
   const { authState } = useAuth();
+  const { setVisibility, bringToFront } = useCustomization();
 
   const addProfile = async (handle) => {
     try {
@@ -26,8 +28,14 @@ export const ProfileProvider = ({ children }) => {
             { handle: profile.handle, avatarUrl: profile.avatarUrl },
           ];
         }
-        return prevProfiles;
+
+        return prevProfiles
+          .filter((p) => p.handle !== profile.handle)
+          .concat({ handle: profile.handle, avatarUrl: profile.avatarUrl });
       });
+
+      bringToFront("social");
+      setVisibility("social", true);
     } catch (error) {
       console.error(error);
     }

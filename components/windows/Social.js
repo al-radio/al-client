@@ -63,6 +63,12 @@ const Social = () => {
     }
   }, [selectedTab]);
 
+  useEffect(() => {
+    if (profiles.length > 0) {
+      setSelectedTab(profiles[profiles.length - 1].handle);
+    }
+  }, [profiles]);
+
   // Fetch the profile on mount
   useEffect(() => {
     fetchProfile()
