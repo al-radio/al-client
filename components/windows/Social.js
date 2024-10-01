@@ -241,8 +241,11 @@ const Social = () => {
                   const currentIndex = profiles.findIndex(
                     (p) => p.handle === profile.handle,
                   );
-                  const nextIndex = currentIndex === 0 ? 0 : currentIndex - 1;
-                  setSelectedTab(profiles[nextIndex]?.handle || "Profile");
+                  const nextTab =
+                    currentIndex === 0
+                      ? "Profile"
+                      : profiles[currentIndex - 1].handle;
+                  setSelectedTab(nextTab);
                 }}
                 style={{ marginTop: "10px" }}
               >

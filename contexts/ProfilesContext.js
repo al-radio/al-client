@@ -42,11 +42,9 @@ export const ProfileProvider = ({ children }) => {
   };
 
   const removeProfile = (handle) => {
-    console.log("Removing profile", handle);
     setProfiles((prevProfiles) =>
       prevProfiles.filter((p) => p.handle !== handle),
     );
-    console.log("Profile removed", profiles);
   };
 
   return (
