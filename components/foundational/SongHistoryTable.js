@@ -46,13 +46,8 @@ const SongHistoryTable = ({ songHistory, fields }) => {
     const now = new Date();
     const seconds = Math.floor((now - new Date(date)) / 1000);
     let interval = Math.floor(seconds / 31536000); // Years
-
     if (interval >= 1) {
       return `${interval}y ago`;
-    }
-    interval = Math.floor(seconds / 2592000); // Months
-    if (interval >= 1) {
-      return `${interval}M ago`;
     }
     interval = Math.floor(seconds / 86400); // Days
     if (interval >= 1) {
