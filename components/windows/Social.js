@@ -272,7 +272,11 @@ const Social = () => {
   return (
     <ResponsiveWindowBase windowId={"social"} windowHeaderTitle="Social">
       <WindowContent>
-        <Tabs value={selectedTab} onChange={(tab) => setSelectedTab(tab)}>
+        <Tabs
+          value={selectedTab}
+          rows={Math.floor((4 + profiles.length) / 6) + 1}
+          onChange={(tab) => setSelectedTab(tab)}
+        >
           <Tab value="Profile">Profile</Tab>
           <Tab value="Search">Search</Tab>
           <Tab value="Friends">Friends</Tab>

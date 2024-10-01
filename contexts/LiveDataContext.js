@@ -1,4 +1,4 @@
-import { fetchGlobalSongHistory, fetchLiveData } from "@/services/api";
+import { fetchLiveData } from "@/services/api";
 import React, { createContext, useState, useContext, useEffect } from "react";
 
 const LiveDataContext = createContext(null);
@@ -9,10 +9,6 @@ export const LiveDataProvider = ({ children }) => {
     nextSong: {},
     listenerCount: 0,
     listenerList: [],
-    songHistory: [],
-    currentPage: 1,
-    isLastPage: false,
-    numberOfPages: 1,
   });
 
   const updateLiveData = (eventCategory, data) => {
@@ -21,25 +17,6 @@ export const LiveDataProvider = ({ children }) => {
       [eventCategory]: data,
     }));
   };
-
-  const setHistoryPage = (pageNumber) => {
-    setLiveData((prevState) => ({
-      ...prevState,
-      currentPage: pageNumber,
-    }));
-  };
-
-  // on history page change or song change, fetch new data
-  useEffect(() => {
-    const fetchHistoryData = async () => {
-      const response = await fetchGlobalSongHistory(liveData.currentPage);
-      updateLiveData("songHistory", response.tracks);
-      updateLiveData("isLastPage", response.isLastPage);
-      updateLiveData("numberOfPages", response.numberOfPages);
-    };
-
-    fetchHistoryData();
-  }, [liveData.currentPage, liveData.currentSong]);
 
   useEffect(() => {
     const eventSource = fetchLiveData();
@@ -69,7 +46,6 @@ export const LiveDataProvider = ({ children }) => {
     <LiveDataContext.Provider
       value={{
         liveData,
-        setHistoryPage, // Expose the setHistoryPage function
       }}
     >
       {children}

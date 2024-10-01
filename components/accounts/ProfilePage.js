@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Anchor, Avatar, Counter, GroupBox, Tooltip, Button } from "react95";
 import styled from "styled-components";
-import HistoryPage from "../accounts/HistoryPage"; // Import the HistoryPage component
+import SongHistoryTable from "../foundational/SongHistoryTable";
 import {
   authorizeSpotify,
   authorizeLastFM,
@@ -222,7 +222,15 @@ const ProfilePage = ({ profile }) => {
       </GroupBoxContainer>
 
       <GroupBox label="Request History">
-        <HistoryPage handle={profile.handle} />
+        <SongHistoryTable
+          handle={profile.handle}
+          numVisibleEntries={2}
+          fields={{
+            title: true,
+            likes: false,
+            datePlayed: true,
+          }}
+        />
       </GroupBox>
 
       {profile?.isPrivate && profile?.role === "admin" && (

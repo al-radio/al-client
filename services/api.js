@@ -11,8 +11,8 @@ export const fetchLiveData = () => {
 };
 
 // Song Routes
-export const fetchUserSongHistory = async (handle) => {
-  const response = await fetch(`${API_URL}/accounts/${handle}/history`);
+export const fetchUserSongHistory = async (handle, page) => {
+  const response = await fetch(`${API_URL}/accounts/${handle}/history/${page}`);
   return response.json();
 };
 
