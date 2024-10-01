@@ -5,11 +5,11 @@ import debounce from "lodash.debounce";
 const CustomizationContext = createContext();
 
 const initialPreferences = {
-  audioPlayer: { isVisible: true, zIndex: 10, position: { x: 0, y: 0 } },
-  songHistory: { isVisible: true, zIndex: 11, position: { x: 0, y: 0 } },
-  nextSong: { isVisible: true, zIndex: 12, position: { x: 0, y: 0 } },
-  submitSong: { isVisible: true, zIndex: 13, position: { x: 0, y: 0 } },
-  listeners: { isVisible: true, zIndex: 14, position: { x: 0, y: 0 } },
+  audioPlayer: { isVisible: true, zIndex: 10, position: { x: 300, y: 300 } },
+  songHistory: { isVisible: false, zIndex: 11, position: { x: 0, y: 0 } },
+  nextSong: { isVisible: false, zIndex: 12, position: { x: 0, y: 0 } },
+  submitSong: { isVisible: false, zIndex: 13, position: { x: 0, y: 0 } },
+  listeners: { isVisible: false, zIndex: 14, position: { x: 0, y: 0 } },
   customize: { isVisible: false, zIndex: 15, position: { x: 0, y: 0 } },
   social: { isVisible: false, zIndex: 16, position: { x: 0, y: 0 } },
 };

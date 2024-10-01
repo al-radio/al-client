@@ -270,11 +270,7 @@ const Social = () => {
   };
 
   return (
-    <ResponsiveWindowBase
-      windowId={"social"}
-      windowHeaderTitle="Social"
-      defaultPosition={{ x: 200, y: 200 }}
-    >
+    <ResponsiveWindowBase windowId={"social"} windowHeaderTitle="Social">
       <WindowContent>
         <Tabs value={selectedTab} onChange={(tab) => setSelectedTab(tab)}>
           <Tab value="Profile">Profile</Tab>

@@ -13,12 +13,7 @@ const MobileWindow = styled.div`
   }
 `;
 
-const ResponsiveWindowBase = ({
-  children,
-  windowId,
-  defaultPosition,
-  windowHeaderTitle,
-}) => {
+const ResponsiveWindowBase = ({ children, windowId, windowHeaderTitle }) => {
   const isMobile = useIsMobile();
   const childRef = useRef(null);
   const { customization, bringToFront, toggleVisibility, updatePosition } =
@@ -29,13 +24,6 @@ const ResponsiveWindowBase = ({
   const handleCloseButton = () => {
     toggleVisibility(windowId);
   };
-
-  // Set default position if no position is stored in the context
-  useEffect(() => {
-    if (!position) {
-      updatePosition(windowId, defaultPosition);
-    }
-  }, [defaultPosition, position, updatePosition, windowId]);
 
   // Handle bringing the window to the front
   const handleInteraction = () => {
@@ -107,7 +95,7 @@ const ResponsiveWindowBase = ({
       enableResizing={false}
       dragHandleClassName="window-header"
       style={{ zIndex }}
-      position={position || defaultPosition} // Use context position or default
+      position={position}
       onDragStop={(e, data) => {
         updatePosition(windowId, { x: data.x, y: data.y });
       }}

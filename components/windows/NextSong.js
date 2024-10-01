@@ -35,11 +35,7 @@ const NextSong = () => {
   const { nextSong } = liveData;
 
   return (
-    <ResponsiveWindowBase
-      windowId={windowId}
-      windowHeaderTitle="Up Next"
-      defaultPosition={{ x: 440, y: 115 }}
-    >
+    <ResponsiveWindowBase windowId={windowId} windowHeaderTitle="Up Next">
       <StyledWindowContent>
         {nextSong?.title ? (
           <>

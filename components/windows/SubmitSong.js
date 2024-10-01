@@ -114,11 +114,7 @@ const SubmitSong = () => {
   };
 
   return (
-    <ResponsiveWindowBase
-      windowId={windowId}
-      windowHeaderTitle="Request Song"
-      defaultPosition={{ x: 1200, y: 170 }}
-    >
+    <ResponsiveWindowBase windowId={windowId} windowHeaderTitle="Request Song">
       <WindowContent>
         <div style={{ display: "flex" }}>
           <TextInput

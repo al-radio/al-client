@@ -60,11 +60,7 @@ const Customize = () => {
   }, [toggleTheme]);
 
   return (
-    <ResponsiveWindowBase
-      windowId={windowId}
-      windowHeaderTitle="Customize"
-      defaultPosition={{ x: 200, y: 600 }}
-    >
+    <ResponsiveWindowBase windowId={windowId} windowHeaderTitle="Customize">
       <WindowContent>
         <GroupBox label="Choose a Theme">
           {Object.keys(themeMap).map((themeName) => {

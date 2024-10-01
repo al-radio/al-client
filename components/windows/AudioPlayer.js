@@ -105,11 +105,7 @@ const AudioPlayer = () => {
   };
 
   return (
-    <ResponsiveWindowBase
-      windowId={windowId}
-      windowHeaderTitle="Now Playing"
-      defaultPosition={{ x: 840, y: 400 }}
-    >
+    <ResponsiveWindowBase windowId={windowId} windowHeaderTitle="Now Playing">
       <WindowContent
         style={{ display: "flex", flexDirection: "column", height: "100%" }}
       >

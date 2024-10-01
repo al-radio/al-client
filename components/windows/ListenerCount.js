@@ -10,11 +10,7 @@ const ListenerCount = () => {
   const { listenerCount, listenerList } = liveData;
 
   return (
-    <ResponsiveWindowBase
-      windowId={windowId}
-      windowHeaderTitle="Listeners"
-      defaultPosition={{ x: 200, y: 600 }}
-    >
+    <ResponsiveWindowBase windowId={windowId} windowHeaderTitle="Listeners">
       <WindowContent
         style={{
           display: "flex",

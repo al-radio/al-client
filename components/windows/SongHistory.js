@@ -82,11 +82,7 @@ const SongHistory = () => {
   };
 
   return (
-    <ResponsiveWindowBase
-      windowId={windowId}
-      windowHeaderTitle="History"
-      defaultPosition={{ x: 1500, y: 550 }}
-    >
+    <ResponsiveWindowBase windowId={windowId} windowHeaderTitle="History">
       <WindowContent>
         <ScrollView scrollable style={{ height: "400px", maxWidth: "95vw" }}>
           <SongHistoryTable
