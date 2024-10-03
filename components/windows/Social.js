@@ -22,6 +22,7 @@ import {
 } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/contexts/ProfilesContext";
+import SearchPage from "../accounts/SearchPage";
 
 const ErrorMessage = styled.div`
   color: ${({ theme }) => theme.progress};
@@ -208,7 +209,7 @@ const Social = () => {
   };
 
   const renderSearchTab = () => {
-    return <div>Coming Soon</div>;
+    return <SearchPage />;
   };
 
   const renderFriendsTab = () => {
