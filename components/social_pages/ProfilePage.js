@@ -76,7 +76,7 @@ const ProfilePage = ({ profile }) => {
       const response = await authorizeAppleMusic(musicUserToken);
 
       if (response.ok) {
-        console.log("Music User Token sent successfully!");
+        window.location.reload();
       } else {
         console.error("Failed to send Music User Token:", response.statusText);
       }

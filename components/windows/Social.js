@@ -6,48 +6,25 @@ import {
   Button,
   Hourglass,
   Anchor,
-  TextInput,
   TabBody,
-  GroupBox,
 } from "react95";
 import ResponsiveWindowBase from "../foundational/ResponsiveWindowBase";
-import ProfilePage from "../accounts/ProfilePage";
-import styled from "styled-components";
-import {
-  fetchProfile,
-  login,
-  register,
-  logout,
-  fetchPublicProfile,
-} from "../../services/api";
+import ProfilePage from "../social_pages/ProfilePage";
+import { fetchProfile, logout, fetchPublicProfile } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/contexts/ProfilesContext";
-import SearchPage from "../accounts/SearchPage";
-
-const ErrorMessage = styled.div`
-  color: ${({ theme }) => theme.progress};
-  max-width: 100%;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-`;
+import SearchPage from "../social_pages/SearchPage";
+import AuthPage from "../social_pages/AuthPage"; // Import the new AuthPage component
 
 const Social = () => {
   const [selectedTab, setSelectedTab] = useState("Profile");
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isLoginView, setIsLoginView] = useState(true);
-  const [formData, setFormData] = useState({
-    handle: "",
-    password: "",
-    email: "",
-  });
-  const { setAuthStateFromProfile, resetAuthState } = useAuth();
-  const { profiles, removeProfile, addProfile } = useProfiles();
+  const { authState, resetAuthState } = useAuth();
+  const { profiles, removeProfile } = useProfiles();
   const [selectedProfileData, setSelectedProfileData] = useState(null);
 
   useEffect(() => {
-    // fetch the selected profile
     if (
       selectedTab !== "Profile" &&
       selectedTab !== "Search" &&
@@ -76,46 +53,12 @@ const Social = () => {
       .then((profileData) => setUserProfile(profileData))
       .catch(() => setUserProfile(null))
       .finally(() => setIsLoading(false));
-  }, []);
-
-  const handleLogin = () => {
-    login(formData.handle, formData.password)
-      .then((response) => {
-        if (response.message) {
-          setError(response.message);
-          return;
-        }
-        fetchProfile().then((profileData) => {
-          setUserProfile(profileData);
-          setAuthStateFromProfile(profileData);
-        });
-      })
-      .catch(() =>
-        setError("An error occurred during login. Please try again."),
-      );
-  };
-
-  const handleRegister = () => {
-    register(formData.email, formData.handle, formData.password)
-      .then((response) => {
-        if (response.message) {
-          setError(response.message);
-          return;
-        }
-        setIsLoginView(true);
-        setError(null);
-      })
-      .catch(() =>
-        setError("An error occurred during registration. Please try again."),
-      );
-  };
+  }, [authState]);
 
   const handleLogout = () => {
     logout().then(() => {
       resetAuthState();
       setUserProfile(null);
-      setError(null);
-      setIsLoginView(true);
     });
   };
 
@@ -135,77 +78,7 @@ const Social = () => {
       );
     }
 
-    return (
-      <>
-        {error && (
-          <ErrorMessage>
-            <p>{error}</p>
-          </ErrorMessage>
-        )}
-        {isLoginView ? (
-          <>
-            <TextInput
-              value={formData.handle}
-              onChange={(e) =>
-                setFormData({ ...formData, handle: e.target.value })
-              }
-              placeholder="Handle"
-            />
-            <TextInput
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              placeholder="Password"
-            />
-            <Button onClick={handleLogin}>Login</Button>
-            <p
-              onClick={() => {
-                setError(null);
-                setIsLoginView(false);
-              }}
-            >
-              Need an account? <Anchor>Register here</Anchor>
-            </p>
-          </>
-        ) : (
-          <>
-            <TextInput
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              placeholder="Email"
-            />
-            <TextInput
-              value={formData.handle}
-              onChange={(e) =>
-                setFormData({ ...formData, handle: e.target.value })
-              }
-              placeholder="Handle"
-            />
-            <TextInput
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              placeholder="Password"
-            />
-            <Button onClick={handleRegister}>Register</Button>
-            <p
-              onClick={() => {
-                setError(null);
-                setIsLoginView(true);
-              }}
-            >
-              Already have an account? <Anchor>Login here</Anchor>
-            </p>
-          </>
-        )}
-      </>
-    );
+    return <AuthPage />;
   };
 
   const renderSearchTab = () => {

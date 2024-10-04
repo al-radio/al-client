@@ -167,7 +167,6 @@ export default function Home() {
         await fetchServerStatus();
         setIsServerRunning(true);
       } catch (error) {
-        console.log(error);
         setIsServerRunning(false);
       }
     };

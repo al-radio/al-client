@@ -65,6 +65,28 @@ export const logout = async () => {
   return response.json();
 };
 
+export const sendPasswordResetEmail = async (email) => {
+  const response = await fetch(`${API_URL}/forgot`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+  return response.json();
+};
+
+export const resetPassword = async (email, password, code) => {
+  const response = await fetch(`${API_URL}/reset`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password, code }),
+  });
+  return response.json();
+};
+
 export const fetchProfile = async () => {
   const response = await fetch(`${API_URL}/accounts`, {
     credentials: "include",
